@@ -1,17 +1,21 @@
 # 第4回：はじめてのRとRCT
 
-計量経済学の講義で使用するブラウザ実習教材です。RやRStudioをインストールせず、ブラウザ上で18個のコードを一文ずつ実行できます。
+計量経済学の講義で使用するブラウザ実習教材です。RやRStudioをインストールせず、ブラウザ上でコードを一文ずつ実行できます。
 
 ## 実習ページ
 
-https://jungoto01.github.io/econometrics-2026-summer-lab/
+- 講義版 v2（全23セル）：https://jungoto01.github.io/econometrics-2026-summer-lab/v2/
+- 予習版（旧18セル）：https://jungoto01.github.io/econometrics-2026-summer-lab/
 
 初回はブラウザ内で動くR本体を読み込むため、30秒から1分程度かかることがあります。
+
+予習時に案内した旧18セル版はルートに残し、講義版 v2とは別ページとして維持します。
 
 ## 公開ファイル
 
 - `index.html`：実習ページ
 - `styles.css`：画面表示
 - `app.js`：webRの初期化とコード実行
+- `v2/`：講義版 v2（全23セル）
 
 学生が入力したコードはブラウザ内のwebRで実行されます。この教材は入力内容を収集・保存しません。
