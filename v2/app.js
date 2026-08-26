@@ -11,7 +11,15 @@ const statusDetail = document.getElementById("status-detail");
 const completedCount = document.getElementById("completed-count");
 const totalCount = document.getElementById("total-count");
 const progressFill = document.getElementById("progress-fill");
+const progressTrack = document.getElementById("progress-track");
 const restartButton = document.getElementById("restart-button");
+const canonicalWorldSetup = document
+  .getElementById("canonical-world-setup")
+  ?.textContent.trim() ?? "";
+const flowSections = [...document.querySelectorAll("[data-flow-section]")];
+const flowItems = [...document.querySelectorAll("[data-flow-item]")];
+const flowList = document.getElementById("flow-list");
+const flowMobileCurrent = document.getElementById("flow-mobile-current");
 
 let webR = null;
 let runtimeReady = false;
@@ -36,11 +44,6 @@ for (const cell of cells) {
       event.preventDefault();
       if (runtimeReady && !runtimeBusy) runCell(cell);
     }
-
-    if (event.key === "Tab") {
-      event.preventDefault();
-      insertAtCursor(textarea, "  ");
-    }
   });
 
   runButton.addEventListener("click", () => runCell(cell));
@@ -52,6 +55,7 @@ restartButton.addEventListener("click", () => {
   if (confirmed) window.location.reload();
 });
 
+initializeFlowRail();
 initializeWebR();
 
 async function initializeWebR() {
@@ -94,6 +98,9 @@ async function runCell(cell) {
   const checkOutput = cell.querySelector(".check-output");
   const button = cell.querySelector(".run-button");
   const code = textarea.value.trim();
+  const worldSetupCode = cell.hasAttribute("data-use-world")
+    ? canonicalWorldSetup
+    : "";
   const setupCode = cell.querySelector(".r-setup")?.textContent.trim() ?? "";
   const checkCode = cell.querySelector(".r-check")?.textContent.trim() ?? "";
 
@@ -124,7 +131,9 @@ async function runCell(cell) {
     const checkCommand = checkCode
       ? `cat("\\n${CHECK_MARKER}:", if (isTRUE({${checkCode}})) "PASS" else "FAIL", "\\n")`
       : "";
-    const executableCode = [setupCode, code, checkCommand].filter(Boolean).join("\n");
+    const executableCode = [worldSetupCode, setupCode, code, checkCommand]
+      .filter(Boolean)
+      .join("\n");
     const capture = await shelter.captureR(executableCode, {
       withAutoprint: true,
       captureStreams: true,
@@ -299,6 +308,90 @@ function updateProgress() {
   const total = cells.length;
   completedCount.textContent = String(completed);
   progressFill.style.width = `${(completed / total) * 100}%`;
+  progressTrack?.setAttribute("aria-valuenow", String(completed));
+}
+
+function initializeFlowRail() {
+  if (flowSections.length === 0 || flowItems.length === 0) return;
+
+  let updateQueued = false;
+  const scheduleFlowUpdate = () => {
+    if (updateQueued) return;
+    updateQueued = true;
+    window.requestAnimationFrame(() => {
+      updateQueued = false;
+      updateCurrentFlow();
+    });
+  };
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(scheduleFlowUpdate, {
+      rootMargin: "-22% 0px -66% 0px",
+      threshold: [0, 0.01, 1]
+    });
+
+    for (const section of flowSections) observer.observe(section);
+  }
+
+  window.addEventListener("scroll", scheduleFlowUpdate, { passive: true });
+  window.addEventListener("resize", scheduleFlowUpdate, { passive: true });
+  updateCurrentFlow();
+}
+
+function updateCurrentFlow() {
+  const activationLine = Math.min(window.innerHeight * 0.3, 260);
+  let currentSection = flowSections[0];
+
+  for (const section of flowSections) {
+    if (section.getBoundingClientRect().top <= activationLine) {
+      currentSection = section;
+    } else {
+      break;
+    }
+  }
+
+  const documentBottom = document.documentElement.scrollHeight - 4;
+  if (window.scrollY + window.innerHeight >= documentBottom) {
+    currentSection = flowSections.at(-1);
+  }
+
+  setCurrentFlow(currentSection.dataset.flowSection);
+}
+
+function setCurrentFlow(flowId) {
+  const currentIndex = flowItems.findIndex(
+    (item) => item.dataset.flowItem === flowId
+  );
+
+  if (currentIndex < 0) return;
+
+  for (const [index, item] of flowItems.entries()) {
+    const link = item.querySelector("a");
+    const isCurrent = index === currentIndex;
+    item.classList.toggle("is-current", isCurrent);
+    item.classList.toggle("is-past", index < currentIndex);
+
+    if (isCurrent) {
+      link?.setAttribute("aria-current", "step");
+    } else {
+      link?.removeAttribute("aria-current");
+    }
+  }
+
+  const currentItem = flowItems[currentIndex];
+  const currentLabel = currentItem.querySelector(".flow-rail__text")?.textContent;
+  if (flowMobileCurrent && currentLabel) {
+    flowMobileCurrent.textContent = currentLabel;
+  }
+
+  if (window.innerWidth <= 1180 && flowList) {
+    const left = Math.max(
+      0,
+      currentItem.offsetLeft - (flowList.clientWidth - currentItem.offsetWidth) / 2
+    );
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    flowList.scrollTo({ left, behavior: reduceMotion ? "auto" : "smooth" });
+  }
 }
 
 function setRuntimeLoading(title, detail) {
@@ -326,11 +419,4 @@ function resizeTextarea(textarea) {
   const minimumHeight = isSingleLine ? 74 : 120;
   textarea.style.height = "auto";
   textarea.style.height = `${Math.min(Math.max(textarea.scrollHeight + 2, minimumHeight), 720)}px`;
-}
-
-function insertAtCursor(textarea, text) {
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  textarea.setRangeText(text, start, end, "end");
-  textarea.dispatchEvent(new Event("input", { bubbles: true }));
 }
