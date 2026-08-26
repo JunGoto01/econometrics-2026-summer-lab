@@ -13,8 +13,8 @@ const totalCount = document.getElementById("total-count");
 const progressFill = document.getElementById("progress-fill");
 const progressTrack = document.getElementById("progress-track");
 const restartButton = document.getElementById("restart-button");
-const canonicalWorldSetup = document
-  .getElementById("canonical-world-setup")
+const canonicalDataSetup = document
+  .getElementById("canonical-data-setup")
   ?.textContent.trim() ?? "";
 const flowSections = [...document.querySelectorAll("[data-flow-section]")];
 const flowItems = [...document.querySelectorAll("[data-flow-item]")];
@@ -27,6 +27,7 @@ let runtimeBusy = false;
 const completedCells = new Set();
 
 totalCount.textContent = String(cells.length);
+progressTrack?.setAttribute("aria-valuemax", String(cells.length));
 
 for (const cell of cells) {
   const textarea = cell.querySelector("textarea");
@@ -51,7 +52,7 @@ for (const cell of cells) {
 }
 
 restartButton.addEventListener("click", () => {
-  const confirmed = window.confirm("入力したコードと実行結果を消して、最初からやり直すか。\n（このページ以外には影響しない）");
+  const confirmed = window.confirm("入力したコード、実行結果、Rが覚えた値や関数を消して、最初からやり直すか。\n（このページ以外には影響しない）");
   if (confirmed) window.location.reload();
 });
 
@@ -98,8 +99,8 @@ async function runCell(cell) {
   const checkOutput = cell.querySelector(".check-output");
   const button = cell.querySelector(".run-button");
   const code = textarea.value.trim();
-  const worldSetupCode = cell.hasAttribute("data-use-world")
-    ? canonicalWorldSetup
+  const dataSetupCode = cell.hasAttribute("data-use-data")
+    ? canonicalDataSetup
     : "";
   const setupCode = cell.querySelector(".r-setup")?.textContent.trim() ?? "";
   const checkCode = cell.querySelector(".r-check")?.textContent.trim() ?? "";
@@ -131,7 +132,7 @@ async function runCell(cell) {
     const checkCommand = checkCode
       ? `cat("\\n${CHECK_MARKER}:", if (isTRUE({${checkCode}})) "PASS" else "FAIL", "\\n")`
       : "";
-    const executableCode = [worldSetupCode, setupCode, code, checkCommand]
+    const executableCode = [dataSetupCode, setupCode, code, checkCommand]
       .filter(Boolean)
       .join("\n");
     const capture = await shelter.captureR(executableCode, {
@@ -416,7 +417,12 @@ function setRuntimeError(title, detail) {
 
 function resizeTextarea(textarea) {
   const isSingleLine = textarea.closest(".r-cell")?.classList.contains("r-cell--single");
+  const isLongSource = textarea.closest(".r-cell")?.classList.contains("r-cell--long");
   const minimumHeight = isSingleLine ? 74 : 120;
+  const maximumHeight = isLongSource ? 1800 : 720;
   textarea.style.height = "auto";
-  textarea.style.height = `${Math.min(Math.max(textarea.scrollHeight + 2, minimumHeight), 720)}px`;
+  textarea.style.height = `${Math.min(
+    Math.max(textarea.scrollHeight + 2, minimumHeight),
+    maximumHeight
+  )}px`;
 }

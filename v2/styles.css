@@ -800,6 +800,10 @@ a {
   margin: 22px 0;
 }
 
+.rct-diagnostics--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .rct-diagnostics span {
   padding: 13px 10px;
   background: var(--white);
@@ -1122,7 +1126,7 @@ a {
 
 .part-roadmap {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 9px;
   margin-top: 18px;
 }
@@ -1272,6 +1276,267 @@ a {
   color: var(--blue);
   font-size: 0.68rem;
   letter-spacing: 0.05em;
+}
+
+.definition-call-grid,
+.object-function-contrast,
+.function-anatomy,
+.potential-outcome-build,
+.plot-command-map,
+.function-source-guide,
+.default-arguments {
+  display: grid;
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.definition-call-grid,
+.potential-outcome-build,
+.plot-command-map {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.object-function-contrast,
+.function-anatomy,
+.default-arguments {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.function-source-guide {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.definition-call-grid article,
+.object-function-contrast article,
+.potential-outcome-build article,
+.plot-command-map article,
+.function-source-guide article {
+  min-width: 0;
+  padding: 18px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+
+.definition-call-grid article:first-child,
+.function-source-guide article:not(:last-child) {
+  border-top: 4px solid var(--blue);
+}
+
+.definition-call-grid article:last-child,
+.function-source-guide article:last-child {
+  border-top: 4px solid var(--orange);
+}
+
+.definition-call-grid span,
+.definition-call-grid code,
+.definition-call-grid strong,
+.object-function-contrast span,
+.object-function-contrast code,
+.potential-outcome-build span,
+.potential-outcome-build strong,
+.potential-outcome-build small,
+.function-source-guide span,
+.function-source-guide code,
+.default-arguments code,
+.default-arguments b {
+  display: block;
+}
+
+.definition-call-grid span,
+.object-function-contrast span,
+.potential-outcome-build span,
+.function-source-guide span {
+  color: var(--blue);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.definition-call-grid code,
+.object-function-contrast code,
+.function-source-guide code {
+  width: fit-content;
+  max-width: 100%;
+  margin: 9px 0;
+  overflow-wrap: anywhere;
+}
+
+.definition-call-grid strong,
+.potential-outcome-build strong {
+  color: var(--navy);
+}
+
+.definition-call-grid p,
+.object-function-contrast p,
+.potential-outcome-build small,
+.plot-command-map span,
+.function-source-guide p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 0.87rem;
+}
+
+.function-anatomy span,
+.default-arguments span {
+  min-width: 0;
+  padding: 14px;
+  background: var(--pale);
+  border: 1px solid #cfe2ea;
+  border-radius: 9px;
+}
+
+.function-anatomy code,
+.function-anatomy b,
+.default-arguments code,
+.default-arguments b {
+  max-width: 100%;
+}
+
+.function-anatomy code,
+.default-arguments code {
+  display: inline-block;
+  margin-bottom: 7px;
+  overflow-wrap: anywhere;
+}
+
+.function-anatomy b,
+.default-arguments b {
+  display: block;
+  color: var(--navy);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.sequence-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 20px 0;
+  padding: 14px 17px;
+  background: #fff8e7;
+  border-left: 4px solid #d99a20;
+  border-radius: 10px;
+}
+
+.sequence-notice strong {
+  flex: 0 0 120px;
+  color: #7a4c00;
+}
+
+.line-explanation {
+  margin: 22px 0;
+  padding: 18px 22px 18px 46px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--green);
+  border-radius: 11px;
+}
+
+.line-explanation li + li {
+  margin-top: 9px;
+}
+
+.function-trace,
+.construction-sequence,
+.function-stack,
+.loop-anatomy {
+  display: grid;
+  align-items: stretch;
+  gap: 9px;
+  margin: 22px 0;
+}
+
+.function-trace {
+  grid-template-columns: 1fr auto 1.35fr auto 1fr;
+}
+
+.construction-sequence {
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+}
+
+.function-stack {
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+}
+
+.loop-anatomy {
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+}
+
+.function-trace span,
+.construction-sequence span,
+.function-stack article,
+.loop-anatomy article {
+  min-width: 0;
+  padding: 14px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  text-align: center;
+}
+
+.function-trace code,
+.function-trace small,
+.construction-sequence b,
+.function-stack span,
+.function-stack code,
+.loop-anatomy code,
+.loop-anatomy p {
+  display: block;
+}
+
+.function-trace code,
+.function-stack code,
+.loop-anatomy code {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+}
+
+.function-trace small,
+.function-stack p,
+.loop-anatomy p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.construction-sequence b,
+.function-stack span {
+  color: var(--blue);
+  font-size: 0.72rem;
+}
+
+.function-trace i,
+.construction-sequence i,
+.function-stack > i,
+.loop-anatomy > i {
+  align-self: center;
+  color: var(--orange);
+  font-style: normal;
+  font-weight: 900;
+}
+
+.potential-outcome-build article {
+  border-top: 4px solid var(--green);
+}
+
+.plot-command-map article {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.55fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.plot-command-map code {
+  width: fit-content;
+  font-weight: 900;
+}
+
+.plot-command-map span {
+  margin: 0;
 }
 
 .data-structure-table {
@@ -1841,10 +2106,6 @@ a {
   font-size: 0.88rem;
 }
 
-.causal-world-table > div {
-  grid-template-columns: 0.85fr 1.45fr 0.75fr 0.75fr 1fr;
-}
-
 .causal-rule-map,
 .assignment-contrast {
   display: grid;
@@ -2166,7 +2427,14 @@ section[id],
   .chapter-nav,
   .summary-grid,
   .causal-rule-map,
-  .assignment-contrast {
+  .assignment-contrast,
+  .definition-call-grid,
+  .object-function-contrast,
+  .function-anatomy,
+  .potential-outcome-build,
+  .plot-command-map,
+  .function-source-guide,
+  .default-arguments {
     grid-template-columns: 1fr;
   }
 
@@ -2182,6 +2450,20 @@ section[id],
   .rule-swap > i,
   .causal-arrows > b,
   .object-lineage > i {
+    justify-self: center;
+  }
+
+  .function-trace,
+  .construction-sequence,
+  .function-stack,
+  .loop-anatomy {
+    grid-template-columns: 1fr;
+  }
+
+  .function-trace > i,
+  .construction-sequence > i,
+  .function-stack > i,
+  .loop-anatomy > i {
     justify-self: center;
   }
 
@@ -2210,10 +2492,6 @@ section[id],
     font-size: 0.82rem;
   }
 
-  .causal-world-table > div {
-    grid-template-columns: 0.85fr 1.35fr 0.7fr 0.7fr 0.95fr;
-  }
-
   .bias-equation {
     flex-wrap: wrap;
   }
@@ -2237,6 +2515,15 @@ section[id],
   .takeaway,
   .syntax-card {
     display: block;
+  }
+
+  .sequence-notice {
+    display: block;
+  }
+
+  .sequence-notice strong {
+    display: block;
+    margin-bottom: 4px;
   }
 
   .predict strong,
@@ -2475,6 +2762,14 @@ section[id],
     grid-template-columns: 1fr;
   }
 
+  .plot-command-map article {
+    grid-template-columns: 1fr;
+  }
+
+  .line-explanation {
+    padding: 15px 15px 15px 35px;
+  }
+
   .footer__inner {
     display: block;
   }
@@ -2504,7 +2799,16 @@ section[id],
   .reading-order code,
   .syntax-card code,
   .code-map code,
-  .request-card code {
+  .request-card code,
+  .definition-call-grid code,
+  .object-function-contrast code,
+  .function-anatomy code,
+  .function-trace code,
+  .function-stack code,
+  .loop-anatomy code,
+  .function-source-guide code,
+  .default-arguments code,
+  .plot-command-map code {
     width: auto;
     max-width: 100%;
     white-space: normal;
