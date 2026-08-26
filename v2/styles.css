@@ -2377,13 +2377,13 @@ section[id],
   }
 
   .bias-equation--large span {
-    flex: 1 1 0;
     min-width: 0;
   }
 
   .bias-equation--large {
-    flex-wrap: nowrap;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 5px;
     padding: 14px 8px;
   }
 
@@ -2392,10 +2392,36 @@ section[id],
   }
 
   .bias-equation--large b {
-    font-size: 1.5rem;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    white-space: nowrap;
   }
 
   .bias-equation--large i {
+    font-size: 1rem;
+  }
+
+  .bias-equation:not(.bias-equation--large) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 5px;
+    padding: 16px 8px;
+  }
+
+  .bias-equation:not(.bias-equation--large) span {
+    min-width: 0;
+  }
+
+  .bias-equation:not(.bias-equation--large) small {
+    font-size: 0.65rem;
+    line-height: 1.3;
+  }
+
+  .bias-equation:not(.bias-equation--large) b {
+    font-size: 1.35rem;
+  }
+
+  .bias-equation:not(.bias-equation--large) i {
     font-size: 1rem;
   }
 
@@ -2455,6 +2481,68 @@ section[id],
 
   .footer__inner span {
     display: block;
+  }
+}
+
+@media (max-width: 300px) {
+  code {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .column-syntax article,
+  .assignment-contrast article,
+  .reading-order {
+    min-width: 0;
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  .column-syntax code,
+  .assignment-contrast code,
+  .reading-order code,
+  .syntax-card code,
+  .code-map code,
+  .request-card code {
+    width: auto;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .reading-order {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+    gap: 5px;
+  }
+
+  .reading-order span {
+    min-width: 0;
+    max-width: 100%;
+    padding: 6px;
+    overflow-wrap: anywhere;
+  }
+
+  .reading-order b {
+    justify-self: center;
+  }
+
+  .assignment-contrast code {
+    display: block;
+    padding: 7px 8px;
+  }
+
+  .bias-equation--large,
+  .bias-equation:not(.bias-equation--large) {
+    grid-template-columns: 1fr;
+  }
+
+  .bias-equation--large i,
+  .bias-equation:not(.bias-equation--large) i {
+    justify-self: center;
   }
 }
 

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="同じ人々から自己選択とRCTの差を組み立てる、プログラミング未経験者向けのブラウザR演習">
-  <title>第4回 講義版 v2｜職業訓練の効果をRで見分ける</title>
+  <meta name="description" content="Rの基本的な文法とデータ構造から、職業訓練の単純比較とRCTによる効果推定までを学ぶ、プログラミング未経験者向けのブラウザR演習">
+  <title>第4回 講義版 v2｜はじめてのRとRCT</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,8 +13,8 @@
   <header class="hero">
     <div class="hero__inner">
       <p class="eyebrow">計量経済学の応用と実践 · 2026 Summer</p>
-      <h1>職業訓練の効果を<br>Rで見分ける</h1>
-      <p class="hero__lead">神が作った同じ2,000人を、自己選択と抽選という二つの参加規則で観察する。最初に世界の設計図を読み、その後でRを使って「6＝4＋2」を一段ずつ再現する。</p>
+      <h1>はじめてのRとRCT</h1>
+      <p class="hero__lead">この回では、Rの基本的な文法とデータ構造を一つずつ学ぶ。後半では職業訓練への参加と就職を題材に、参加者と不参加者の単純比較が研修そのものの効果を表すとは限らない理由と、ランダム化比較実験（RCT）の考え方をRで確かめる。</p>
       <div class="hero__meta">
         <span>第4回</span>
         <span>講義版 v2・見本23＋課題10</span>
@@ -40,26 +40,26 @@
 
   <main id="main">
     <div class="course-layout">
-      <nav class="flow-rail" id="flow-rail" aria-label="今日の因果推論の地図">
-        <p class="flow-rail__eyebrow">今日の地図</p>
-        <p class="flow-rail__mobile" aria-live="polite"><span>現在地</span><strong id="flow-mobile-current">何を知りたいか</strong></p>
+      <nav class="flow-rail" id="flow-rail" aria-label="この回の学習内容">
+        <p class="flow-rail__eyebrow">この回の流れ</p>
+        <p class="flow-rail__mobile" aria-live="polite"><span>現在地</span><strong id="flow-mobile-current">この回の目標</strong></p>
         <ol id="flow-list">
-          <li data-flow-item="goal"><a href="#flow-goal"><span class="flow-rail__number">1</span><span class="flow-rail__text">何を知りたいか</span><small class="flow-rail__current">現在地</small></a></li>
-          <li data-flow-item="syntax"><a href="#part-1"><span class="flow-rail__number">2</span><span class="flow-rail__text">Rの道具を準備</span><small class="flow-rail__current">現在地</small></a></li>
-          <li data-flow-item="people"><a href="#part-2"><span class="flow-rail__number">3</span><span class="flow-rail__text">同じpeopleを読む</span><small class="flow-rail__current">現在地</small></a></li>
-          <li data-flow-item="selection"><a href="#part-3"><span class="flow-rail__number">4</span><span class="flow-rail__text">自己選択で観察</span><small class="flow-rail__current">現在地</small></a></li>
-          <li data-flow-item="decompose"><a href="#decomposition"><span class="flow-rail__number">5</span><span class="flow-rail__text">効果とbiasを分解</span><small class="flow-rail__current">現在地</small></a></li>
-          <li data-flow-item="lottery"><a href="#part-4"><span class="flow-rail__number">6</span><span class="flow-rail__text">割付だけ抽選へ</span><small class="flow-rail__current">現在地</small></a></li>
-          <li data-flow-item="estimate"><a href="#rct-estimation"><span class="flow-rail__number">7</span><span class="flow-rail__text">RCTで効果を推定</span><small class="flow-rail__current">現在地</small></a></li>
+          <li data-flow-item="goal"><a href="#flow-goal"><span class="flow-rail__number">1</span><span class="flow-rail__text">この回の目標</span><small class="flow-rail__current">現在地</small></a></li>
+          <li data-flow-item="syntax"><a href="#part-1"><span class="flow-rail__number">2</span><span class="flow-rail__text">Rの基礎</span><small class="flow-rail__current">現在地</small></a></li>
+          <li data-flow-item="people"><a href="#part-2"><span class="flow-rail__number">3</span><span class="flow-rail__text">データを読む</span><small class="flow-rail__current">現在地</small></a></li>
+          <li data-flow-item="selection"><a href="#simple-comparison"><span class="flow-rail__number">4</span><span class="flow-rail__text">単純比較</span><small class="flow-rail__current">現在地</small></a></li>
+          <li data-flow-item="decompose"><a href="#decomposition"><span class="flow-rail__number">5</span><span class="flow-rail__text">差の要因</span><small class="flow-rail__current">現在地</small></a></li>
+          <li data-flow-item="lottery"><a href="#part-4"><span class="flow-rail__number">6</span><span class="flow-rail__text">ランダム割付</span><small class="flow-rail__current">現在地</small></a></li>
+          <li data-flow-item="estimate"><a href="#rct-estimation"><span class="flow-rail__number">7</span><span class="flow-rail__text">効果を推定</span><small class="flow-rail__current">現在地</small></a></li>
         </ol>
-        <a class="flow-rail__object" href="#object-dictionary"><span>最後まで同じ</span><strong>people</strong></a>
+        <a class="flow-rail__object" href="#object-dictionary"><span>PART 2から使う表</span><strong>people</strong></a>
       </nav>
 
       <div class="course-main">
     <section class="construction content-width" id="flow-goal" data-flow-section="goal" aria-labelledby="construction-title">
       <p class="section-label">コードを書く前の設計図</p>
-      <h2 id="construction-title">最初に、これから作る世界を全部見る</h2>
-      <p class="construction__lead">ここではまだRを使わない。神の視点で二つの潜在的結果を決め、自己選択がどこへbiasを入れ、抽選が何を変えるのかを先に確認する。</p>
+      <h2 id="construction-title">Rの基礎からランダム化比較実験まで</h2>
+      <p class="construction__lead">前半ではRの文法とデータ構造を学ぶ。後半では職業訓練の仮想データを分析し、自己選択による比較とランダム割付による比較の違いを考える。まず、分析で扱う問いと用語を順に確認しよう。</p>
 
       <article class="story-slide story-slide--question" aria-labelledby="story-question-title">
         <div class="story-slide__number" aria-hidden="true">1</div>
@@ -71,18 +71,19 @@
             <b aria-hidden="true">同じ人</b>
             <div><span>同じ人が研修を受ける</span><strong>就職する？</strong></div>
           </div>
-          <p>現実には、同じ人の二つの結果を同時には見られない。そこで教材では、両方を知る「神」を置いて答えを確認できる世界を作る。</p>
+          <p>ある人について、「研修を受けた場合の結果」と「研修を受けなかった場合の結果」という二つの可能な結果を考える。これらを<strong>潜在的結果</strong>と呼び、同じ人について両者の差を取ったものが研修の<strong>因果効果</strong>である。現実に観察できるのは、そのうち一方だけである。</p>
         </div>
       </article>
 
       <article class="story-slide story-slide--world" aria-labelledby="story-world-title">
         <div class="story-slide__number" aria-hidden="true">2</div>
         <div class="story-slide__body">
-          <p class="story-slide__label">神が潜在的結果を決める</p>
-          <h3 id="story-world-title">低意欲1,000人と高意欲1,000人に、二つの結果を用意する</h3>
+          <p class="story-slide__label">分析に使う仮想データ</p>
+          <h3 id="story-world-title">二つの潜在的結果を設定し、比較の仕組みを確かめる</h3>
+          <p>この実習では、仕組みを確認できるように、2,000人について二つの潜在的結果を設定した仮想データを使う。意欲スコアが0より大きい1,000人を「高意欲」、0以下の1,000人を「低意欲」と分類する。これは分析上の便宜的な分類であり、人の価値を表すものではない。</p>
           <div class="native-table-wrap">
             <table class="world-table">
-              <caption>神が設定した意欲タイプ別の就職率</caption>
+              <caption>教材で設定した意欲タイプ別の就職率</caption>
               <thead><tr><th scope="col">意欲タイプ</th><th scope="col">研修なし</th><th scope="col">研修あり</th><th scope="col">研修の効果</th></tr></thead>
               <tbody>
                 <tr><th scope="row">低意欲</th><td>30%</td><td>34%</td><td class="world-table__effect">＋4ポイント</td></tr>
@@ -98,8 +99,9 @@
       <article class="story-slide story-slide--selection" aria-labelledby="story-selection-title">
         <div class="story-slide__number" aria-hidden="true">3</div>
         <div class="story-slide__body">
-          <p class="story-slide__label">自己選択の参加規則</p>
-          <h3 id="story-selection-title">高意欲者だけが参加すると、見えるのは36%と30%</h3>
+          <p class="story-slide__label">自己選択による参加</p>
+          <h3 id="story-selection-title">意欲と参加が関連すると、比較する二群の構成が異なる</h3>
+          <p>本人の希望や属性と研修参加が関連する状況を、ここでは<strong>自己選択</strong>と呼ぶ。この例では、高意欲者が参加し、低意欲者が参加しないと設定する。</p>
           <div class="selection-lanes" aria-label="自己選択で観察される二群">
             <div><span>高意欲</span><i aria-hidden="true">→</i><span>参加</span><i aria-hidden="true">→</i><strong>研修あり 36%</strong></div>
             <div><span>低意欲</span><i aria-hidden="true">→</i><span>不参加</span><i aria-hidden="true">→</i><strong>研修なし 30%</strong></div>
@@ -111,34 +113,34 @@
       <article class="story-slide story-slide--bias" aria-labelledby="story-bias-title">
         <div class="story-slide__number" aria-hidden="true">4</div>
         <div class="story-slide__body">
-          <p class="story-slide__label">biasが生まれる場所</p>
-          <h3 id="story-bias-title">観察差6には、効果4ともともとの差2が入る</h3>
-          <div class="bias-equation bias-equation--large" aria-label="観察された差6ポイントは、研修の効果4ポイントとselection bias 2ポイントの合計">
-            <span><small>観察された差</small><b>6</b></span><i aria-hidden="true">=</i><span><small>研修の効果</small><b>4</b></span><i aria-hidden="true">+</i><span><small>selection bias</small><b>2</b></span>
+          <p class="story-slide__label">選択バイアス</p>
+          <h3 id="story-bias-title">単純比較には、研修前から存在する群間差が含まれうる</h3>
+          <div class="bias-equation bias-equation--large" aria-label="観察された差は、研修の効果と研修前から存在する群間差を含む">
+            <span><small>観察された差</small><b>単純比較</b></span><i aria-hidden="true">=</i><span><small>研修による変化</small><b>因果効果</b></span><i aria-hidden="true">+</i><span><small>研修前からの違い</small><b>群間差</b></span>
           </div>
-          <div class="causal-arrows" aria-label="意欲が就職しやすさと研修参加の両方を決めるためselection biasが生まれる">
+          <div class="causal-arrows" aria-label="意欲が就職しやすさと研修参加の両方に関連するため選択バイアスが生じる">
             <span>意欲は、研修なしの就職しやすさを変える</span><b aria-hidden="true">＋</b><span>同じ意欲が、研修へ参加するかも決める</span><b aria-hidden="true">→</b><strong>参加群と不参加群は研修前から違う</strong>
           </div>
-          <p>神がbiasという数字を後から足したのではない。この二本の結び付きから、2ポイントのbiasが生まれる。</p>
+          <p>参加者と不参加者が研修を受ける前から異なるために単純比較へ含まれる差を、<strong>選択バイアス（selection bias）</strong>と呼ぶ。</p>
         </div>
       </article>
 
       <article class="story-slide story-slide--rct" aria-labelledby="story-rct-title">
         <div class="story-slide__number" aria-hidden="true">5</div>
         <div class="story-slide__body">
-          <p class="story-slide__label">変えるのは参加規則だけ</p>
-          <h3 id="story-rct-title">同じ2,000人を、今度は意欲を見ずに抽選する</h3>
+          <p class="story-slide__label">ランダム化比較実験（RCT）</p>
+          <h3 id="story-rct-title">参加前の特徴にかかわらず、対象者を無作為に割り付ける</h3>
           <div class="rule-swap" aria-label="自己選択とRCTの参加規則の比較">
             <div><span>自己選択</span><strong>意欲が参加を決める</strong><small>参加と意欲が結び付く</small></div>
-            <i aria-hidden="true">規則だけ交換</i>
+            <i aria-hidden="true">割付方法を変更</i>
             <div><span>RCT</span><strong>抽選が参加を決める</strong><small>両群に二つの意欲タイプが混ざる</small></div>
           </div>
-          <p>人々、意欲、二つの潜在的結果はそのまま。抽選を繰り返すと、研修前からある二群の差は平均0になり、推定値は真の効果4を中心にする。</p>
+          <p>RCTでは、参加希望や意欲にかかわらず、対象者を研修を受ける<strong>研修群</strong>と、研修を受けない<strong>比較群</strong>へ無作為に割り付ける。これにより、参加前の属性は平均的に両群で釣り合い、就職率の差から研修の効果を推定できる。</p>
         </div>
       </article>
 
       <div class="construction-map" aria-label="このページの学習順序">
-        <span>問い</span><i aria-hidden="true">→</i><span>Rの文法</span><i aria-hidden="true">→</i><span>同じ人々</span><i aria-hidden="true">→</i><span>自己選択</span><i aria-hidden="true">→</i><span>4＋2＝6</span><i aria-hidden="true">→</i><span>抽選</span><i aria-hidden="true">→</i><span>4を推定</span>
+        <span>この回の目標</span><i aria-hidden="true">→</i><span>Rの基礎</span><i aria-hidden="true">→</i><span>データを読む</span><i aria-hidden="true">→</i><span>単純比較</span><i aria-hidden="true">→</i><span>差の要因</span><i aria-hidden="true">→</i><span>ランダム割付</span><i aria-hidden="true">→</i><span>効果を推定</span>
       </div>
     </section>
 
@@ -179,19 +181,19 @@
     </section>
 
     <nav class="chapter-nav content-width" aria-label="章の一覧">
-      <a href="#part-1"><span>PART 1</span> 文法の練習室</a>
-      <a href="#part-2"><span>PART 2</span> 同じpeople</a>
-      <a href="#part-3"><span>PART 3</span> 自己選択と分解</a>
-      <a href="#part-4"><span>PART 4</span> 抽選と推定</a>
+      <a href="#part-1"><span>PART 1</span> Rの基礎</a>
+      <a href="#part-2"><span>PART 2</span> データを読む</a>
+      <a href="#part-3"><span>PART 3</span> 単純比較</a>
+      <a href="#part-4"><span>PART 4</span> RCTによる推定</a>
     </nav>
 
     <section class="part-heading" id="part-1" data-flow-section="syntax">
-      <div class="content-width"><p>PART 1</p><h2>因果世界へ入る前の文法練習</h2><span>小さなtoy exampleで、値、名前、ベクトル、関数を準備する</span></div>
+      <div class="content-width"><p>PART 1</p><h2>Rの基本的な文法とデータ構造</h2><span>簡単な数値例を使い、値、名前、ベクトル、関数を順に学ぶ</span></div>
     </section>
 
     <aside class="sandbox-notice content-width" aria-labelledby="sandbox-title">
-      <span aria-hidden="true">練習室</span>
-      <div><h2 id="sandbox-title">ここだけは、本編の2,000人とは別の小さな例</h2><p>文法だけに集中するため、計算やテスト得点を使う。ここではまだ職業訓練の参加者を作らない。PART 2から先は、冒頭で見た同じ<code>people</code>だけを最後まで使う。</p></div>
+      <span aria-hidden="true">基礎練習</span>
+      <div><h2 id="sandbox-title">まずは簡単な数値例でRの書き方を学ぶ</h2><p>文法だけに集中するため、計算やテスト得点を使う。職業訓練の仮想データはPART 2で導入する。</p></div>
     </aside>
 
     <section class="system-map content-width" aria-labelledby="system-map-title">
@@ -534,7 +536,7 @@
     </section>
 
     <section class="part-heading" id="part-2" data-flow-section="people">
-      <div class="content-width"><p>PART 2</p><h2>ここから最後まで、同じpeople</h2><span>神が作った2,000人を一つの表にし、参加規則の列だけを変える</span></div>
+      <div class="content-width"><p>PART 2</p><h2>職業訓練の仮想データを読む</h2><span><code>people</code>というデータフレームの行と列を確認する</span></div>
     </section>
 
     <script type="text/plain" id="canonical-world-setup">set.seed(3342)
@@ -618,30 +620,30 @@ rct_se <- 100 * sqrt(
 )</script>
 
     <section class="concept-section content-width object-dictionary" id="object-dictionary" aria-labelledby="object-dictionary-title">
-      <p class="section-label">本編のobject契約</p>
-      <h2 id="object-dictionary-title">一行は一人、列はその人について神が決めた値</h2>
-      <p>PART 1の<code>scores</code>はここで終了する。本編では、同じ2,000行を持つ<code>people</code>の列を段階ごとに読む。PARTが変わっても人を入れ替えない。</p>
+      <p class="section-label">分析データの構成</p>
+      <h2 id="object-dictionary-title"><code>people</code>は1行が1人、列が変数を表すデータフレーム</h2>
+      <p>PART 1の<code>scores</code>はここで終了する。ここから使う<code>people</code>は、職業訓練の対象者2,000人分の仮想データを保存した名前である。各PARTでは、この表から分析に必要な列を読み取る。</p>
       <div class="object-lineage" aria-label="peopleの列を読む順序">
-        <article><span>最初から固定</span><strong>意欲と二つの潜在的結果</strong><small>人々も結果も変更しない</small></article>
+        <article><span>基本情報</span><strong>意欲と二つの潜在的結果</strong><small>対象者ごとの値</small></article>
         <i aria-hidden="true">→</i>
-        <article><span>自己選択で読む</span><strong>参加と観察結果</strong><small>高意欲なら参加</small></article>
+        <article><span>自己選択の場合</span><strong>参加と観察結果</strong><small>高意欲なら参加</small></article>
         <i aria-hidden="true">→</i>
-        <article><span>RCTで読む</span><strong>抽選と観察結果</strong><small>参加規則だけ交換</small></article>
+        <article><span>RCTの場合</span><strong>割付と観察結果</strong><small>参加を無作為に決定</small></article>
       </div>
       <div class="native-table-wrap">
         <table class="object-table">
-          <caption>peopleで最後まで使う列</caption>
+          <caption>peopleの各列が表す内容</caption>
           <thead><tr><th scope="col">列名</th><th scope="col">一人について表すもの</th><th scope="col">登場する段階</th></tr></thead>
           <tbody>
-            <tr><th scope="row"><code>id</code></th><td>同じ2,000人を区別する番号</td><td>最初から</td></tr>
-            <tr><th scope="row"><code>motivation_score</code></th><td>神が与えた意欲スコア</td><td>最初から</td></tr>
+            <tr><th scope="row"><code>id</code></th><td>対象者2,000人を区別する番号</td><td>最初から</td></tr>
+            <tr><th scope="row"><code>motivation_score</code></th><td>教材で設定した意欲スコア</td><td>最初から</td></tr>
             <tr><th scope="row"><code>motivation_type</code></th><td>0以下なら低意欲、0より大きければ高意欲</td><td>最初から</td></tr>
             <tr><th scope="row"><code>employment_no_training</code></th><td>研修を受けない場合の潜在的就職結果（0か1）</td><td>最初から</td></tr>
             <tr><th scope="row"><code>employment_with_training</code></th><td>研修を受ける場合の潜在的就職結果（0か1）</td><td>最初から</td></tr>
             <tr><th scope="row"><code>training_self</code></th><td>自己選択で参加するか（TRUEかFALSE）</td><td>自己選択</td></tr>
-            <tr><th scope="row"><code>employment_self</code></th><td>自己選択の世界で実際に見える就職結果</td><td>自己選択</td></tr>
-            <tr><th scope="row"><code>training_rct</code></th><td>抽選で参加するか（TRUEかFALSE）</td><td>RCT</td></tr>
-            <tr><th scope="row"><code>employment_rct</code></th><td>RCTの世界で実際に見える就職結果</td><td>RCT</td></tr>
+            <tr><th scope="row"><code>employment_self</code></th><td>自己選択の場合に観察される就職結果</td><td>自己選択</td></tr>
+            <tr><th scope="row"><code>training_rct</code></th><td>無作為割付（TRUE＝研修群、FALSE＝比較群）</td><td>RCT</td></tr>
+            <tr><th scope="row"><code>employment_rct</code></th><td>RCTの場合に観察される就職結果</td><td>RCT</td></tr>
           </tbody>
         </table>
       </div>
@@ -650,31 +652,31 @@ rct_se <- 100 * sqrt(
         <article><code>値[条件]</code><strong>条件に合う人だけ残す</strong><p>角括弧の中が<code>TRUE</code>の人を使う。</p></article>
         <article><code>!</code><strong>TRUEとFALSEを反対にする</strong><p><code>!people$training_self</code>は不参加者を選ぶ。</p></article>
       </div>
-      <div class="takeaway"><strong>同じ人々を保つ理由</strong><span>自己選択とRCTで人々まで変えると、何が差を生んだのか分からない。ここでは潜在的結果を固定し、参加を決める列だけを比較する。</span></div>
+      <div class="takeaway"><strong>同一のデータで比較する理由</strong><span>対象者や潜在的結果を一定にして割付方法だけを変えると、自己選択とランダム割付の違いを明確に確認できる。</span></div>
     </section>
 
     <section class="lesson content-width" aria-labelledby="lesson-11-title">
       <div class="lesson__number">11</div>
       <div class="lesson__body">
-        <h2 id="lesson-11-title">同じpeopleの最初の8人を表示する</h2>
-        <p>冒頭の設計図どおりに、神が2,000人分の表を<code>people</code>として作っている。<code>head(people, 8)</code>は、その同じ表から先頭8行だけを表示する一文である。</p>
+        <h2 id="lesson-11-title"><code>people</code>の先頭8行を表示する</h2>
+        <p><code>people</code>には2,000人分の値が行ごとに保存されている。<code>head(people, 8)</code>は、このデータフレームから先頭8行だけを表示する一文である。</p>
         <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>関数呼び出し</span><span><b>材料</b>データフレーム</span><span><b>結果</b>先頭8人の表</span></div>
         <div class="r-cell r-cell--single" data-cell-id="11" data-use-world>
-          <div class="r-cell__head"><span>Rに伝える一文</span><span>同じpeopleを8行だけ見る</span></div>
+          <div class="r-cell__head"><span>Rに伝える一文</span><span>peopleを8行だけ見る</span></div>
           <textarea aria-label="peopleの先頭8人を表示するRコード" spellcheck="false">head(people, 8)</textarea>
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
-        <div class="explanation"><strong>なぜ出力が8行あるか</strong><span>8行のコードを実行したからではない。<code>head()</code>へ8と頼んだ一文が、同じpeopleの8人分を返したからである。出力は横へスクロールすると後で使う列まで確認できる。</span></div>
-        <div class="code-map"><span><code>id</code> 同じ人を追う番号</span><span><code>motivation_type</code> 低意欲か高意欲か</span><span><code>employment_no_training</code> 研修なしの潜在的結果</span><span><code>employment_with_training</code> 研修ありの潜在的結果</span></div>
+        <div class="explanation"><strong>なぜ出力が8行あるか</strong><span>8行のコードを実行したからではない。<code>head()</code>へ8と頼んだ一文が、8人分の行を返したからである。出力は横へスクロールすると後で使う列まで確認できる。</span></div>
+        <div class="code-map"><span><code>id</code> 一人を区別する番号</span><span><code>motivation_type</code> 低意欲か高意欲か</span><span><code>employment_no_training</code> 研修なしの潜在的結果</span><span><code>employment_with_training</code> 研修ありの潜在的結果</span></div>
       </div>
     </section>
 
-    <section class="lesson content-width" data-flow-section="selection" aria-labelledby="lesson-12-title">
+    <section class="lesson content-width" id="simple-comparison" data-flow-section="selection" aria-labelledby="lesson-12-title">
       <div class="lesson__number">12</div>
       <div class="lesson__body">
         <h2 id="lesson-12-title">自己選択で参加した人の就職率</h2>
-        <p><code>people$training_self</code>が<code>TRUE</code>の人だけを角括弧で残し、その人たちに実際に見える就職結果の平均を求める。高意欲者だけが参加するため36%になる。</p>
+        <p><code>people$training_self</code>が<code>TRUE</code>の人だけを角括弧で残し、その人たちに実際に見える就職結果の平均を求める。</p>
         <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>算術＋関数</span><span><b>材料</b>数値ベクトル</span><span><b>結果</b>就職率という数値1個</span></div>
         <div class="r-cell r-cell--single" data-cell-id="12" data-use-world>
           <div class="r-cell__head"><span>Rに伝える一文</span><span>自己選択の参加者</span></div>
@@ -689,7 +691,7 @@ rct_se <- 100 * sqrt(
       <div class="lesson__number">13</div>
       <div class="lesson__body">
         <h2 id="lesson-13-title">自己選択で参加しなかった人の就職率</h2>
-        <p><code>!</code>はTRUEとFALSEを反対にする。したがって<code>!people$training_self</code>は不参加者を選ぶ。同じpeopleの低意欲者だけになり、就職率は30%である。</p>
+        <p><code>!</code>はTRUEとFALSEを反対にする。したがって<code>!people$training_self</code>は、<code>people</code>から自己選択で参加しなかった人を選ぶ。</p>
         <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>算術＋関数</span><span><b>材料</b>数値ベクトル</span><span><b>結果</b>就職率という数値1個</span></div>
         <div class="r-cell r-cell--single" data-cell-id="13" data-use-world>
           <div class="r-cell__head"><span>Rに伝える一文</span><span>自己選択の不参加者</span></div>
@@ -703,9 +705,9 @@ rct_se <- 100 * sqrt(
     <section class="lesson content-width" aria-labelledby="lesson-14-title">
       <div class="lesson__number">14</div>
       <div class="lesson__body">
-        <h2 id="lesson-14-title">参加36%から不参加30%を引く</h2>
+        <h2 id="lesson-14-title">参加者と不参加者の就職率の差を計算する</h2>
         <p>セル12と13で確認した率には、教材が<code>self_participant_rate</code>と<code>self_nonparticipant_rate</code>という明示的な名前を付けている。その差が、自己選択データから見える単純比較である。</p>
-        <div class="reading-order"><span><code>self_participant_rate</code> 36</span><b>−</b><span><code>self_nonparticipant_rate</code> 30</span><b>→</b><span>観察差6ポイント</span></div>
+        <div class="reading-order"><span><code>self_participant_rate</code> 参加者率</span><b>−</b><span><code>self_nonparticipant_rate</code> 不参加者率</span><b>→</b><span>観察された差</span></div>
         <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>算術演算</span><span><b>材料</b>就職率という数値2個</span><span><b>結果</b>率の差という数値1個</span></div>
         <div class="r-cell r-cell--single" data-cell-id="14" data-use-world>
           <div class="r-cell__head"><span>Rに伝える一文</span><span>二群の平均差</span></div>
@@ -713,15 +715,15 @@ rct_se <- 100 * sqrt(
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
-        <div class="warning-card"><strong>6ポイントはまだ効果ではない</strong><span>この一文が計算したのは観察された二群の差。参加群は高意欲、不参加群は低意欲なので、研修以外の差も含む。</span></div>
+        <div class="warning-card"><strong>観察された差は、まだ因果効果とは限らない</strong><span>この一文が計算したのは観察された二群の差である。参加群は高意欲、不参加群は低意欲なので、研修以外の差も含む。</span></div>
       </div>
     </section>
 
     <section class="practice-section content-width" aria-labelledby="practice-c-title">
       <div class="practice-intro">
-        <p class="section-label">UNIT C｜同じpeopleから条件で選ぶ</p>
-        <h2 id="practice-c-title">別のデータを作らず、神の潜在的結果を読む</h2>
-        <p>セル11〜14と同じ<code>people</code>を使う。今度は神の列から、高意欲者と低意欲者の「研修なし」を条件で選ぶ。</p>
+        <p class="section-label">UNIT C｜表から条件に合う人を選ぶ</p>
+        <h2 id="practice-c-title">潜在的な研修なし結果を意欲別に計算する</h2>
+        <p>セル11〜14で読んだ<code>people</code>を使い、<code>employment_no_training</code>列から高意欲者と低意欲者を条件で選ぶ。</p>
         <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル11〜14</span><i>→</i><span><b>第2段階</b>意欲タイプを穴埋め</span><i>→</i><span><b>第3段階</b>条件抽出を自力</span></div>
       </div>
       <div class="practice-grid">
@@ -729,8 +731,8 @@ rct_se <- 100 * sqrt(
           <span class="stage-badge">第2段階｜穴埋め</span>
           <h3 id="practice-c2-title">高意欲者の研修なし就職率</h3>
           <div class="request-card"><strong>依頼</strong><span>高意欲者が全員研修を受けなかった場合の就職率を、<code>high_no_training_rate</code>として保存してください。</span></div>
-          <p><code>__</code>を、object辞書にある意欲タイプの文字へ置き換える。</p>
-          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="C2" data-use-world data-empty-output="（表示なし：率を保存した。下の課題判定で値を確認する）" data-check-success="正解：同じpeopleの高意欲者について、研修なし就職率32%を取り出せた。" data-check-failure="motivation_typeが高意欲の人だけを角括弧で残す。">
+          <p><code>__</code>を、上のデータ辞書にある意欲タイプの文字へ置き換える。</p>
+          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="C2" data-use-world data-empty-output="（表示なし：率を保存した。下の課題判定で値を確認する）" data-check-success="正解：高意欲者について、研修なし就職率32%を取り出せた。" data-check-failure="motivation_typeが高意欲の人だけを角括弧で残す。">
             <script type="text/plain" class="r-setup">if (exists("high_no_training_rate", inherits = FALSE)) rm(high_no_training_rate)</script>
             <script type="text/plain" class="r-check">exists("high_no_training_rate", inherits = TRUE) && is.numeric(high_no_training_rate) && length(high_no_training_rate) == 1 && isTRUE(all.equal(as.numeric(high_no_training_rate), 32))</script>
             <div class="r-cell__head"><span>穴埋めする一文</span><span>意欲タイプを補う</span></div>
@@ -743,9 +745,9 @@ rct_se <- 100 * sqrt(
         <article class="practice-card practice-card--free" aria-labelledby="practice-c3-title">
           <span class="stage-badge">第3段階｜自力</span>
           <h3 id="practice-c3-title">低意欲者の研修なし就職率</h3>
-          <div class="request-card"><strong>依頼</strong><span>同じ<code>people</code>から、低意欲者が研修を受けなかった場合の就職率を計算し、<code>low_no_training_rate</code>として保存してください。</span></div>
+          <div class="request-card"><strong>依頼</strong><span><code>people</code>から、低意欲者が研修を受けなかった場合の就職率を計算し、<code>low_no_training_rate</code>として保存してください。</span></div>
           <p>列を取り出す<code>$</code>と、条件に合う人を残す角括弧を組み合わせる。</p>
-          <div class="r-cell r-cell--exercise" data-cell-id="C3" data-use-world data-empty-output="（表示なし：率を保存した。下の課題判定で値を確認する）" data-check-success="正解：同じpeopleの低意欲者について、研修なし就職率30%を取り出せた。" data-check-failure="employment_no_training列から、motivation_typeが低意欲の人を選んで平均する。">
+          <div class="r-cell r-cell--exercise" data-cell-id="C3" data-use-world data-empty-output="（表示なし：率を保存した。下の課題判定で値を確認する）" data-check-success="正解：低意欲者について、研修なし就職率30%を取り出せた。" data-check-failure="employment_no_training列から、motivation_typeが低意欲の人を選んで平均する。">
             <script type="text/plain" class="r-setup">if (exists("low_no_training_rate", inherits = FALSE)) rm(low_no_training_rate)</script>
             <script type="text/plain" class="r-check">exists("low_no_training_rate", inherits = TRUE) && is.numeric(low_no_training_rate) && length(low_no_training_rate) == 1 && isTRUE(all.equal(as.numeric(low_no_training_rate), 30))</script>
             <div class="r-cell__head"><span>自分で一文を書く</span><span>コメントの下に入力</span></div>
@@ -760,38 +762,38 @@ rct_se <- 100 * sqrt(
     </section>
 
     <section class="part-heading" id="part-3" data-flow-section="selection">
-      <div class="content-width"><p>PART 3</p><h2>自己選択で見えた6の中身</h2><span>高意欲者だけが参加すると、効果4に研修前からの差2が混ざる</span></div>
+      <div class="content-width"><p>PART 3</p><h2>自己選択による単純比較</h2><span>参加者と不参加者の構成を確認し、観察された差の要因を考える</span></div>
     </section>
 
     <section class="topic-heading content-width" id="selection-mechanism" aria-labelledby="selection-mechanism-title">
-      <span>4</span><div><p>自己選択の中身</p><h2 id="selection-mechanism-title">なぜ6ポイントが見えたのか</h2><small>神の規則と、参加群・不参加群の構成を同じpeopleで確認する</small></div>
+      <span>4</span><div><p>単純比較の中身</p><h2 id="selection-mechanism-title">参加群と不参加群は何が違うのか</h2><small>仮想データの条件と、二群の意欲構成を確認する</small></div>
     </section>
 
     <section class="concept-section content-width" aria-labelledby="causal-world-title">
-      <p class="section-label">冒頭の設計図へ戻る</p>
+      <p class="section-label">仮想データの条件を確認する</p>
       <h2 id="causal-world-title">意欲は、就職しやすさと参加の両方につながる</h2>
-      <p><code>people$motivation_score</code>が0より大きければ高意欲、0以下なら低意欲である。これは人の価値を表す名称ではなく、この教材でselection biasを観察するために神が決めた分類である。</p>
+      <p><code>people$motivation_score</code>が0より大きければ高意欲、0以下なら低意欲である。これは選択バイアスを説明するために教材で設定した分類であり、人の価値を表すものではない。</p>
       <div class="causal-rule-map">
         <article><strong>意欲 → 研修なしの就職</strong><span>高意欲者は、研修を受けなくても2ポイント就職しやすい。</span></article>
         <article><strong>研修 → 就職</strong><span>研修は、どちらのタイプにも4ポイントの効果を持つ。</span></article>
         <article><strong>意欲 → 研修参加</strong><span>自己選択では、高意欲者だけが研修へ参加する。</span></article>
       </div>
-      <div class="warning-card"><strong>バイアスの入口</strong><span>同じ意欲が「研修なしでも就職しやすいこと」と「研修へ参加すること」の両方を決める。そのため、参加群と不参加群は研修前から違う集団になる。</span></div>
+      <div class="warning-card"><strong>選択バイアスが生じる理由</strong><span>同じ意欲が「研修なしでも就職しやすいこと」と「研修へ参加すること」の両方に関連する。そのため、参加群と不参加群は研修前から異なり、その違いが単純比較に含まれる。</span></div>
     </section>
 
     <section class="lesson content-width" aria-labelledby="lesson-15-title">
       <div class="lesson__number">15</div>
       <div class="lesson__body">
-        <h2 id="lesson-15-title">神の規則を、公開された表で再確認する</h2>
-        <p><code>world_rules</code>は、別の世界ではない。同じ<code>people</code>を神がどう作ったかを、二つの意欲タイプに要約した公開表である。</p>
+        <h2 id="lesson-15-title">仮想データの設定条件を表で確認する</h2>
+        <p><code>world_rules</code>は、意欲タイプの定義、二つの潜在的就職率、自己選択による参加条件を2行にまとめた表である。</p>
         <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>名前の呼び出し</span><span><b>材料</b>保存済みの表</span><span><b>結果</b>2行のデータフレーム</span></div>
         <div class="r-cell r-cell--single" data-cell-id="15" data-use-world>
-          <div class="r-cell__head"><span>Rに伝える一文</span><span>世界の設定を表示する</span></div>
-          <textarea aria-label="神が公開した規則表を表示するRコード" spellcheck="false">world_rules</textarea>
+          <div class="r-cell__head"><span>Rに伝える一文</span><span>設定条件を表示する</span></div>
+          <textarea aria-label="仮想データの設定条件をまとめた表を表示するRコード" spellcheck="false">world_rules</textarea>
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
-        <div class="takeaway"><strong>神の視点</strong><span>研修なしと研修ありの就職率を両方知っているから、真の効果が4ポイントだと分かる。現実には同じ人の二つの結果を同時には観察できない。</span></div>
+        <div class="takeaway"><strong>仮想データを使う理由</strong><span>この実習では仕組みを確認するため、研修なしと研修ありの潜在的結果を両方設定している。現実には、同じ人について二つの結果を同時には観察できない。</span></div>
       </div>
     </section>
 
@@ -799,7 +801,7 @@ rct_se <- 100 * sqrt(
       <div class="lesson__number">16</div>
       <div class="lesson__body">
         <h2 id="lesson-16-title">自己選択で、誰と誰を比べることになるか</h2>
-        <p>自己選択の規則は<code>people$training_self &lt;- people$motivation_type == "高意欲"</code>、つまり「高意欲なら参加、低意欲なら不参加」である。<code>table()</code>で同じpeopleの二つの分類を数える。</p>
+        <p>自己選択の規則は<code>people$training_self &lt;- people$motivation_type == "高意欲"</code>、つまり「高意欲なら参加、低意欲なら不参加」である。<code>table()</code>で参加と意欲という二つの分類を数える。</p>
         <div class="syntax-card"><code>table(行, 列)</code><span>参加・不参加を行、低意欲・高意欲を列にして、同じ人がどこに入るか数える。</span></div>
         <div class="predict"><strong>実行前の予想</strong><span>参加群の「低意欲」と、不参加群の「高意欲」は何人になるだろうか。</span></div>
         <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>関数呼び出し</span><span><b>材料</b>分類ベクトル2本</span><span><b>結果</b>人数の表</span></div>
@@ -815,74 +817,74 @@ rct_se <- 100 * sqrt(
     </section>
 
     <section class="part-heading part-heading--accent" id="decomposition" data-flow-section="decompose">
-      <div class="content-width"><p>STEP 5</p><h2>神の視点で6を4と2へ分ける</h2><span>同じpeopleの二つの潜在的結果があるから、観察差の中身を確認できる</span></div>
+      <div class="content-width"><p>STEP 5</p><h2>単純比較に含まれる差を分解する</h2><span>二つの潜在的結果を使い、平均因果効果と選択バイアスを順に計算する</span></div>
     </section>
 
     <section class="lesson content-width" aria-labelledby="lesson-17-title">
       <div class="lesson__number">17</div>
       <div class="lesson__body">
-        <h2 id="lesson-17-title">同じ人の二つの潜在的結果から、真の効果を計算する</h2>
-        <p>神は全員について、研修ありと研修なしを両方知っている。一人ずつ「研修あり−研修なし」を作り、その2,000人平均をポイント表示する。</p>
-        <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>列同士の算術＋関数</span><span><b>材料</b>同じ2,000人の潜在的結果</span><span><b>結果</b>真の平均因果効果</span></div>
+        <h2 id="lesson-17-title">二つの潜在的結果から平均因果効果を計算する</h2>
+        <p>仮想データに設定した「研修あり」と「研修なし」の差を一人ずつ求め、その2,000人平均をポイントで表示する。</p>
+        <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>列同士の算術＋関数</span><span><b>材料</b>2,000人の潜在的結果</span><span><b>結果</b>平均因果効果</span></div>
         <div class="r-cell r-cell--single" data-cell-id="17" data-use-world>
-          <div class="r-cell__head"><span>Rに伝える一文</span><span>同じ人の研修あり − 研修なし</span></div>
-          <textarea aria-label="神が知る真の因果効果を求めるRコード" spellcheck="false">100 * mean(people$employment_with_training - people$employment_no_training)</textarea>
+          <div class="r-cell__head"><span>Rに伝える一文</span><span>各人の研修あり − 研修なし</span></div>
+          <textarea aria-label="平均因果効果を求めるRコード" spellcheck="false">100 * mean(people$employment_with_training - people$employment_no_training)</textarea>
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
-        <div class="explanation"><strong>答えの4</strong><span>研修によって増えた4ポイント。これが知りたい因果効果である。</span></div>
+        <div class="explanation"><strong>実行結果は4ポイント</strong><span>この仮想データに設定された、職業訓練による平均的な就職率の変化である。</span></div>
       </div>
     </section>
 
     <section class="lesson content-width" aria-labelledby="lesson-18-title">
       <div class="lesson__number">18</div>
       <div class="lesson__body">
-        <h2 id="lesson-18-title">研修を全員から取り去って、もともとの差を計算する</h2>
-        <p>参加者についても不参加者についても、神が知る<code>employment_no_training</code>だけを見る。研修が誰にもないのに残る二群の差がselection biasである。</p>
-        <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>条件抽出＋平均差</span><span><b>材料</b>研修なし潜在的結果</span><span><b>結果</b>selection bias</span></div>
+        <h2 id="lesson-18-title">全員が研修を受けなかった場合の群間差を計算する</h2>
+        <p>参加者についても不参加者についても、<code>employment_no_training</code>だけを見る。誰も研修を受けない場合にも残る二群の差が、選択バイアスである。</p>
+        <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>条件抽出＋平均差</span><span><b>材料</b>研修なし潜在的結果</span><span><b>結果</b>選択バイアス</span></div>
         <div class="r-cell r-cell--single" data-cell-id="18" data-use-world>
           <div class="r-cell__head"><span>Rに伝える一文</span><span>高意欲の研修なし − 低意欲の研修なし</span></div>
-          <textarea aria-label="同じpeopleのselection biasを求めるRコード" spellcheck="false">100 * (mean(people$employment_no_training[people$training_self]) - mean(people$employment_no_training[!people$training_self]))</textarea>
+          <textarea aria-label="選択バイアスを求めるRコード" spellcheck="false">100 * (mean(people$employment_no_training[people$training_self]) - mean(people$employment_no_training[!people$training_self]))</textarea>
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
-        <div class="takeaway"><strong>答えの2</strong><span>研修を誰も受けなくても存在する、参加群と不参加群の差。これがこの世界のselection biasである。</span></div>
+        <div class="takeaway"><strong>実行結果は2ポイント</strong><span>研修を誰も受けなくても存在する参加群と不参加群の差であり、この分析における選択バイアスである。</span></div>
       </div>
     </section>
 
     <section class="lesson content-width" aria-labelledby="lesson-19-title">
       <div class="lesson__number">19</div>
       <div class="lesson__body">
-        <h2 id="lesson-19-title">観察差6と、効果4＋bias 2が一致するか</h2>
-        <p>セル14で観察差、セル17で真の効果、セル18でselection biasの計算方法を見た。同じpeopleから付けた三つの名前を一つのベクトルとして並べる。</p>
-        <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>ベクトルを作る関数</span><span><b>材料</b>同じpeopleから得た数値</span><span><b>結果</b>6と4＋2の照合</span></div>
+        <h2 id="lesson-19-title">単純比較を平均因果効果と選択バイアスに分ける</h2>
+        <p>セル14の観察差、セル17の平均因果効果、セル18の選択バイアスに付けた三つの名前を、一つのベクトルとして並べる。</p>
+        <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>ベクトルを作る関数</span><span><b>材料</b>計算済みの数値</span><span><b>結果</b>観察差と分解後の値を照合</span></div>
         <div class="r-cell r-cell--single" data-cell-id="19" data-use-world>
           <div class="r-cell__head"><span>Rに伝える一文</span><span>観察差と分解後を並べる</span></div>
-          <textarea aria-label="観察差と因果効果とselection biasの和を照合するRコード" spellcheck="false">c(observed_gap = observed_gap, effect_plus_bias = causal_effect + selection_bias)</textarea>
+          <textarea aria-label="観察差と平均因果効果と選択バイアスの和を照合するRコード" spellcheck="false">c(observed_gap = observed_gap, effect_plus_bias = causal_effect + selection_bias)</textarea>
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
-        <div class="bias-equation" aria-label="観察された差の分解"><span><small>観察された差</small><b>6</b></span><i>=</i><span><small>研修の効果</small><b>4</b></span><i>+</i><span><small>もともとの差</small><b>2</b></span></div>
-        <div class="warning-card"><strong>2は通常の観察データには見えない</strong><span>参加した人の「もし研修を受けなかった場合」は反実仮想である。この教材は神が両方を保存したため分解できるが、現実には参加者の潜在的な研修なし結果を直接観察できない。</span></div>
+        <div class="bias-equation" aria-label="観察された差6ポイントは、平均因果効果4ポイントと選択バイアス2ポイントの合計"><span><small>観察された差</small><b>6</b></span><i>=</i><span><small>平均因果効果</small><b>4</b></span><i>+</i><span><small>選択バイアス</small><b>2</b></span></div>
+        <div class="warning-card"><strong>選択バイアスは通常の観察データから直接は見えない</strong><span>参加した人の「もし研修を受けなかった場合」は反実仮想である。この仮想データには二つの潜在的結果が設定されているため分解できるが、現実には参加者の潜在的な研修なし結果を直接観察できない。</span></div>
       </div>
     </section>
 
     <section class="practice-section content-width" aria-labelledby="practice-d-title">
       <div class="practice-intro">
-        <p class="section-label">UNIT D｜因果効果とselection bias</p>
-        <h2 id="practice-d-title">同じpeopleの4＋2＝6を自分で組み立てる</h2>
-        <p>別の数値や別の人々には移らない。セル15〜19で確認した<code>causal_effect</code>、<code>selection_bias</code>、二群の率を使う。</p>
-        <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル15〜19</span><i>→</i><span><b>第2段階</b>biasを穴埋め</span><i>→</i><span><b>第3段階</b>分解を自力</span></div>
+        <p class="section-label">UNIT D｜平均因果効果と選択バイアス</p>
+        <h2 id="practice-d-title">単純比較の内訳を自分で計算する</h2>
+        <p>セル15〜19で確認した<code>causal_effect</code>、<code>selection_bias</code>、二群の率を使う。</p>
+        <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル15〜19</span><i>→</i><span><b>第2段階</b>選択バイアスを穴埋め</span><i>→</i><span><b>第3段階</b>観察差を自力</span></div>
       </div>
       <div class="practice-grid">
         <article class="practice-card practice-card--fill" aria-labelledby="practice-d2-title">
           <span class="stage-badge">第2段階｜穴埋め</span>
-          <h3 id="practice-d2-title">効果にselection biasを足す</h3>
-          <div class="request-card"><strong>依頼</strong><span>同じpeopleの真の効果とselection biasを足し、<code>decomposed_gap</code>として保存してください。</span></div>
-          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="D2" data-use-world data-empty-output="（表示なし：分解後の差を保存した。下の課題判定で値を確認する）" data-check-success="正解：同じpeopleの効果4＋bias 2＝6を再現できた。" data-check-failure="causal_effectに、同じpeopleから求めたselection_biasを足す。">
+          <h3 id="practice-d2-title">平均因果効果に選択バイアスを足す</h3>
+          <div class="request-card"><strong>依頼</strong><span>平均因果効果と選択バイアスを足し、<code>decomposed_gap</code>として保存してください。</span></div>
+          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="D2" data-use-world data-empty-output="（表示なし：分解後の差を保存した。下の課題判定で値を確認する）" data-check-success="正解：平均因果効果4ポイントと選択バイアス2ポイントから、観察差6ポイントを再現できた。" data-check-failure="causal_effectにselection_biasを足す。">
             <script type="text/plain" class="r-setup">if (exists("decomposed_gap", inherits = FALSE)) rm(decomposed_gap)</script>
             <script type="text/plain" class="r-check">exists("decomposed_gap", inherits = TRUE) && is.numeric(decomposed_gap) && length(decomposed_gap) == 1 && isTRUE(all.equal(as.numeric(decomposed_gap), 6))</script>
-            <div class="r-cell__head"><span>穴埋めする一文</span><span>selection biasを補う</span></div>
+            <div class="r-cell__head"><span>穴埋めする一文</span><span>選択バイアスの名前を補う</span></div>
             <textarea aria-label="課題D2のRコード" spellcheck="false">decomposed_gap &lt;- causal_effect + __  # ヒント：もともとの差の名前</textarea>
             <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
             <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
@@ -892,9 +894,9 @@ rct_se <- 100 * sqrt(
         <article class="practice-card practice-card--free" aria-labelledby="practice-d3-title">
           <span class="stage-badge">第3段階｜自力</span>
           <h3 id="practice-d3-title">観察された二群の率から差を作る</h3>
-          <div class="request-card"><strong>依頼</strong><span>同じpeopleの自己選択参加者率から不参加者率を引き、<code>gap_from_rates</code>として保存してください。</span></div>
+          <div class="request-card"><strong>依頼</strong><span>自己選択による参加者の就職率から不参加者の就職率を引き、<code>gap_from_rates</code>として保存してください。</span></div>
           <p>新しい数字を直接書かず、セル12と13で意味を確認した名前を使う。</p>
-          <div class="r-cell r-cell--exercise" data-cell-id="D3" data-use-world data-empty-output="（表示なし：観察差を保存した。下の課題判定で値を確認する）" data-check-success="正解：同じpeopleの36−30＝6を名前から再現できた。" data-check-failure="self_participant_rateからself_nonparticipant_rateを引く。">
+          <div class="r-cell r-cell--exercise" data-cell-id="D3" data-use-world data-empty-output="（表示なし：観察差を保存した。下の課題判定で値を確認する）" data-check-success="正解：参加者率36%と不参加者率30%の差を、保存済みの名前から再現できた。" data-check-failure="self_participant_rateからself_nonparticipant_rateを引く。">
             <script type="text/plain" class="r-setup">if (exists("gap_from_rates", inherits = FALSE)) rm(gap_from_rates)</script>
             <script type="text/plain" class="r-check">exists("gap_from_rates", inherits = TRUE) && is.numeric(gap_from_rates) && length(gap_from_rates) == 1 && isTRUE(all.equal(as.numeric(gap_from_rates), 6))</script>
             <div class="r-cell__head"><span>自分で一文を書く</span><span>コメントの下に入力</span></div>
@@ -909,31 +911,31 @@ rct_se <- 100 * sqrt(
     </section>
 
     <section class="part-heading" id="part-4" data-flow-section="lottery">
-      <div class="content-width"><p>PART 4</p><h2>抽選が意欲との結び付きを切る</h2><span>意欲を事後的に補正するのではなく、参加の決定に意欲を使わない</span></div>
+      <div class="content-width"><p>PART 4</p><h2>ランダム割付による比較</h2><span>参加前の特徴にかかわらず研修群と比較群へ割り付ける</span></div>
     </section>
 
     <section class="concept-section content-width" aria-labelledby="randomization-rule-title">
-      <p class="section-label">参加規則だけを変える</p>
-      <h2 id="randomization-rule-title">RCTはバイアスを計算で引く方法ではない</h2>
-      <p>潜在的結果と意欲タイプはPART 3と同じまま、参加の決め方だけを変える。自己選択では意欲が参加を決めた。RCTでは意欲を見ずに二千人を千人ずつへシャッフルする。</p>
+      <p class="section-label">割付方法の違い</p>
+      <h2 id="randomization-rule-title">RCTでは参加前の特徴に関係なく割り付ける</h2>
+      <p>自己選択では意欲が参加を決めていた。RCTでは意欲を割付に使わず、2,000人を研修群と比較群へ1,000人ずつ無作為に分ける。</p>
       <div class="assignment-contrast">
         <article><span>自己選択</span><code>people$training_self &lt;- people$motivation_type == "高意欲"</code><p>右側に意欲がある。参加と意欲が完全に結び付く。</p></article>
         <article><span>RCT</span><code>people$training_rct &lt;- sample(...)</code><p>右側に意欲がない。抽選が参加を決める。</p></article>
       </div>
-      <div class="takeaway"><strong>ランダム化の役割</strong><span>高意欲者と低意欲者を両群へ混ぜ、研修なしでも存在する二群の差を、繰り返し平均でゼロにする。</span></div>
+      <div class="takeaway"><strong>ランダム化の役割</strong><span>意欲を割付に使わないため、高意欲者と低意欲者が研修群と比較群の両方に入る。無作為割付を繰り返したとき、参加前の群間差は平均的に0になる。</span></div>
     </section>
 
     <section class="lesson content-width" aria-labelledby="lesson-20-title">
       <div class="lesson__number">20</div>
       <div class="lesson__body">
         <h2 id="lesson-20-title">意欲を使わずに、千人ずつへ無作為に分ける</h2>
-        <p><code>FALSE</code>を不参加、<code>TRUE</code>を参加として千個ずつ作り、<code>sample()</code>で順番を無作為に並べ替える。右側に<code>motivation_type</code>が登場しない点が重要である。</p>
+        <p><code>FALSE</code>を比較群、<code>TRUE</code>を研修群として千個ずつ作り、<code>sample()</code>で順番を無作為に並べ替える。右側に<code>motivation_type</code>が登場しない点が重要である。</p>
         <div class="reading-order"><span><code>c(FALSE, TRUE)</code> 二つの割付</span><b>→</b><span><code>rep(...)</code> 千個ずつ作る</span><b>→</b><span><code>sample(...)</code> シャッフルする</span><b>→</b><span><code>&lt;-</code> 保存する</span></div>
         <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>関数＋代入</span><span><b>材料</b>論理値二種類</span><span><b>結果</b>無作為な割付を保存</span></div>
-        <div class="r-cell r-cell--single" data-cell-id="20" data-use-world data-empty-output="（表示なし：同じpeopleに、意欲を使わない二千人分の抽選結果をtraining_rct列として追加した）">
+        <div class="r-cell r-cell--single" data-cell-id="20" data-use-world data-empty-output="（表示なし：意欲を使わない2,000人分の無作為割付をtraining_rct列として追加した）">
           <script type="text/plain" class="r-setup">set.seed(3895)</script>
           <div class="r-cell__head"><span>Rに伝える一文</span><span>意欲が右側にないことを確認する</span></div>
-          <textarea aria-label="同じpeopleを千人ずつ無作為割付するRコード" spellcheck="false">people$training_rct <- sample(rep(c(FALSE, TRUE), each = n_people / 2))</textarea>
+          <textarea aria-label="peopleを千人ずつ無作為割付するRコード" spellcheck="false">people$training_rct <- sample(rep(c(FALSE, TRUE), each = n_people / 2))</textarea>
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
@@ -944,9 +946,9 @@ rct_se <- 100 * sqrt(
     <section class="lesson content-width" aria-labelledby="lesson-21-title">
       <div class="lesson__number">21</div>
       <div class="lesson__body">
-        <h2 id="lesson-21-title">抽選後の二群に、高意欲と低意欲が混ざったか</h2>
-        <p>セル16と同じ<code>table()</code>で、今度は抽選群と意欲タイプを組み合わせる。自己選択の表では二つの升目が0だったが、抽選後は四つの升目すべてに人が入る。</p>
-        <div class="predict"><strong>実行前の予想</strong><span>当選群と落選群には、高意欲者がそれぞれ何人くらい入るだろうか。</span></div>
+        <h2 id="lesson-21-title">ランダム割付後の二群に、高意欲と低意欲が混ざったか</h2>
+        <p>セル16と同じ<code>table()</code>で、今度は研修への割付と意欲タイプを組み合わせる。自己選択の表では二つの升目が0だったが、ランダム割付後は四つの升目すべてに人が入る。</p>
+        <div class="predict"><strong>実行前の予想</strong><span>研修群と比較群には、高意欲者がそれぞれ何人くらい入るだろうか。</span></div>
         <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>関数呼び出し</span><span><b>材料</b>分類ベクトル2本</span><span><b>結果</b>人数の表</span></div>
         <div class="r-cell r-cell--single" data-cell-id="21" data-use-world>
           <div class="r-cell__head"><span>Rに伝える一文</span><span>抽選と意欲の組み合わせを数える</span></div>
@@ -954,29 +956,29 @@ rct_se <- 100 * sqrt(
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
-        <div class="reading-order"><span>当選群：低意欲500人・高意欲500人</span><b>⇄</b><span>落選群：低意欲500人・高意欲500人</span></div>
+        <div class="reading-order"><span>研修群：低意欲500人・高意欲500人</span><b>⇄</b><span>比較群：低意欲500人・高意欲500人</span></div>
         <div class="warning-card"><strong>今回は、たまたま完全均衡</strong><span>抽選は毎回500対500を保証しない。この一回では偶然一致しただけで、RCTの保証は、意欲を使わない割付を繰り返したときに群間差が平均0になることである。</span></div>
       </div>
     </section>
 
     <section class="part-heading part-heading--accent" id="rct-estimation" data-flow-section="estimate">
-      <div class="content-width"><p>STEP 7</p><h2>同じpeopleからRCTの効果を推定する</h2><span>一回の推定値と、割付だけを500回変えた分布を分けて読む</span></div>
+      <div class="content-width"><p>STEP 7</p><h2>RCTによる効果推定</h2><span>一回の推定値と、無作為割付を500回繰り返した分布を分けて読む</span></div>
     </section>
 
     <section class="lesson content-width" aria-labelledby="lesson-22-title">
       <div class="lesson__number">22</div>
       <div class="lesson__body">
-        <h2 id="lesson-22-title">一回のRCTで、当選群と落選群の就職率を直接引く</h2>
-        <p><code>employment_rct</code>は、当選者なら研修あり、落選者なら研修なしの潜在的結果を選んだ観察列である。自己選択と同じ平均差の文法を、今度はRCT列へ使う。</p>
-        <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>条件抽出＋平均差</span><span><b>材料</b>同じpeopleのRCT観察結果</span><span><b>結果</b>一回のRCT推定値</span></div>
+        <h2 id="lesson-22-title">一回のRCTで、研修群と比較群の就職率を直接引く</h2>
+        <p><code>employment_rct</code>は、研修群なら研修あり、比較群なら研修なしの潜在的結果を選んだ観察列である。自己選択と同じ平均差の文法を、今度はRCT列へ使う。</p>
+        <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>条件抽出＋平均差</span><span><b>材料</b>RCTで観察された就職結果</span><span><b>結果</b>一回のRCT推定値</span></div>
         <div class="r-cell r-cell--single" data-cell-id="22" data-use-world>
-          <div class="r-cell__head"><span>Rに伝える一文</span><span>当選群 − 落選群</span></div>
+          <div class="r-cell__head"><span>Rに伝える一文</span><span>研修群 − 比較群</span></div>
           <textarea aria-label="一回のRCT推定値を直接計算するRコード" spellcheck="false">100 * (mean(people$employment_rct[people$training_rct]) - mean(people$employment_rct[!people$training_rct]))</textarea>
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
         <div class="rct-diagnostics" aria-label="この一回のRCTの確認値">
-          <span><small>意欲の構成</small><b>両群500・500</b></span><span><small>神が知る研修なし差</small><b>0.0ポイント</b></span><span><small>推定値</small><b>4.6ポイント</b></span><span><small>標準誤差</small><b>2.106</b></span><span><small>95%信頼区間</small><b>[0.47, 8.73]</b></span>
+          <span><small>意欲の構成</small><b>両群500・500</b></span><span><small>研修なし潜在結果の群間差</small><b>0.0ポイント</b></span><span><small>推定値</small><b>4.6ポイント</b></span><span><small>標準誤差</small><b>2.106</b></span><span><small>95%信頼区間</small><b>[0.47, 8.73]</b></span>
         </div>
         <div class="warning-card"><strong>完全均衡でも4.6になる</strong><span>この一回は意欲タイプも研修なし結果の平均も、たまたま完全に均衡した。それでも二値の就職結果と、誰が研修で就職へ変わるかの偶然により4.6になる。RCTは毎回4を返す装置ではない。</span></div>
       </div>
@@ -985,10 +987,10 @@ rct_se <- 100 * sqrt(
     <section class="lesson content-width" aria-labelledby="lesson-23-title">
       <div class="lesson__number">23</div>
       <div class="lesson__body">
-        <h2 id="lesson-23-title">同じpeopleの割付だけを500回引き直す</h2>
-        <p>人々、意欲、潜在的結果を固定し、セル20で理解した抽選だけを500回繰り返す。自己選択の比較は同じpeopleなら常に6なので橙の線、RCT推定値は分布として描く。</p>
-        <div class="code-map"><span><code>people</code> 500回とも固定</span><span><code>compare_designs()</code> 抽選の列だけを反復</span></div>
-        <div class="predict"><strong>実行前の予想</strong><span>青いRCTの山は、真の効果4と自己選択6のどちらを中心にするだろうか。</span></div>
+        <h2 id="lesson-23-title">ランダム割付を500回繰り返す</h2>
+        <p><code>people</code>の意欲と潜在的結果を一定にし、セル20で確認した無作為割付を500回繰り返す。自己選択による単純比較は橙の線、各回のRCT推定値は青い分布として描く。</p>
+        <div class="code-map"><span><code>people</code> 対象者と潜在的結果は一定</span><span><code>compare_designs()</code> 無作為割付を反復</span></div>
+        <div class="predict"><strong>実行前の予想</strong><span>青いRCTの山は、平均因果効果4ポイントと単純比較6ポイントのどちらを中心にするだろうか。</span></div>
         <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>関数呼び出し（教材で定義）</span><span><b>材料</b>引数なし</span><span><b>結果</b>グラフ1枚</span></div>
         <div class="r-cell r-cell--single" data-cell-id="23" data-use-world>
           <script type="text/plain" class="r-setup">compare_designs <- function() {
@@ -1003,11 +1005,12 @@ rct_se <- 100 * sqrt(
     100 * (mean(observed[assignment]) - mean(observed[!assignment]))
   })
   plot(density(rct_estimates), col = "#2A6F97", lwd = 3,
-       xlim = c(0, 8), main = "Same people, 500 lotteries",
-       xlab = "Estimated effect (points)")
+       xlim = c(0, 8), main = "RCT estimates from 500 random assignments",
+       xlab = "Estimated effect (percentage points)")
   abline(v = 4, col = "#2A9D8F", lwd = 3, lty = 2)
   abline(v = 6, col = "#EE6C4D", lwd = 3, lty = 3)
-  legend("topright", c("RCT", "True effect = 4", "Self-selection = 6"),
+  legend("topright", c("RCT estimates", "Average causal effect = 4",
+                       "Self-selection comparison = 6"),
          col = c("#2A6F97", "#2A9D8F", "#EE6C4D"),
          lwd = 3, lty = c(1, 2, 3), bty = "n")
   invisible(c(mean_RCT = mean(rct_estimates), true_effect = 4, self_selection = 6))
@@ -1017,24 +1020,24 @@ rct_se <- 100 * sqrt(
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
-        <div class="takeaway"><strong>グラフを読めなくても結論は同じ</strong><span>青い山は、固定したpeopleに抽選だけを500回行った推定値で、4を中心にする。橙の6は、同じpeopleを高意欲対低意欲で比べ続ける自己選択の値である。</span></div>
+        <div class="takeaway"><strong>反復結果の読み方</strong><span>青い山は、無作為割付を500回行ったRCT推定値の分布で、平均因果効果4ポイントを中心にする。橙の線は、高意欲の参加者と低意欲の不参加者を比べた単純比較6ポイントを示す。</span></div>
       </div>
     </section>
 
     <section class="practice-section content-width" aria-labelledby="practice-e-title">
       <div class="practice-intro">
         <p class="section-label">UNIT E｜意欲を使わない無作為割付</p>
-        <h2 id="practice-e-title">同じpeopleで、割付と推定を自分で書く</h2>
-        <p>別人数の練習用集団は作らない。これまでの2,000人について、意欲を使わない割付とRCTの平均差を再現する。</p>
+        <h2 id="practice-e-title">ランダム割付と効果推定を自分で書く</h2>
+        <p><code>people</code>の2,000人について、意欲を使わない割付とRCTの平均差を再現する。</p>
         <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル20〜23</span><i>→</i><span><b>第2段階</b>人数を穴埋め</span><i>→</i><span><b>第3段階</b>RCT差を自力</span></div>
       </div>
       <div class="practice-grid">
         <article class="practice-card practice-card--fill" aria-labelledby="practice-e2-title">
           <span class="stage-badge">第2段階｜穴埋め</span>
-          <h3 id="practice-e2-title">同じ2,000人を半数ずつ抽選する</h3>
-          <div class="request-card"><strong>依頼</strong><span>同じ<code>people</code>を1,000人ずつへ無作為に分け、割付を<code>training_rct_exercise</code>として保存してください。</span></div>
+          <h3 id="practice-e2-title">2,000人を半数ずつ無作為に割り付ける</h3>
+          <div class="request-card"><strong>依頼</strong><span><code>people</code>を1,000人ずつへ無作為に分け、割付を<code>training_rct_exercise</code>として保存してください。</span></div>
           <p><code>n_people</code>には2,000が保存済み。右辺には意欲を表す列を入れない。</p>
-          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="E2" data-use-world data-empty-output="（表示なし：同じpeopleに対応する練習用の抽選を保存した。下の課題判定で人数を確認する）" data-check-success="正解：同じ2,000人をFALSE 1,000人、TRUE 1,000人へ無作為に分けた。" data-check-failure="eachには同じpeopleの全人数n_peopleの半分を指定する。">
+          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="E2" data-use-world data-empty-output="（表示なし：練習用の無作為割付を保存した。下の課題判定で人数を確認する）" data-check-success="正解：2,000人をFALSE 1,000人、TRUE 1,000人へ無作為に分けた。" data-check-failure="eachには全人数n_peopleの半分を指定する。">
             <script type="text/plain" class="r-setup">set.seed(731)
 if (exists("training_rct_exercise", inherits = FALSE)) rm(training_rct_exercise)</script>
             <script type="text/plain" class="r-check">exists("training_rct_exercise", inherits = TRUE) && is.logical(training_rct_exercise) && length(training_rct_exercise) == n_people && sum(training_rct_exercise) == n_people / 2</script>
@@ -1048,13 +1051,13 @@ if (exists("training_rct_exercise", inherits = FALSE)) rm(training_rct_exercise)
         <article class="practice-card practice-card--free" aria-labelledby="practice-e3-title">
           <span class="stage-badge">第3段階｜自力</span>
           <h3 id="practice-e3-title">RCTの就職率差を一文で書く</h3>
-          <div class="request-card"><strong>依頼</strong><span>同じ<code>people</code>のRCT当選群と落選群の就職率差をポイントで計算し、<code>rct_estimate_answer</code>として保存してください。</span></div>
-          <p>セル22と同じ二つの列を使い、当選群から落選群を引く。</p>
-          <div class="r-cell r-cell--exercise" data-cell-id="E3" data-use-world data-empty-output="（表示なし：RCT推定値を保存した。下の課題判定で確認する）" data-check-success="正解：同じpeopleのこの一回のRCT推定値4.6ポイントを再現できた。" data-check-failure="employment_rctをtraining_rctで二群に分け、TRUE群の平均からFALSE群の平均を引く。">
+          <div class="request-card"><strong>依頼</strong><span><code>people</code>のRCT研修群と比較群の就職率差をポイントで計算し、<code>rct_estimate_answer</code>として保存してください。</span></div>
+          <p>セル22と同じ二つの列を使い、研修群から比較群を引く。</p>
+          <div class="r-cell r-cell--exercise" data-cell-id="E3" data-use-world data-empty-output="（表示なし：RCT推定値を保存した。下の課題判定で確認する）" data-check-success="正解：この一回のRCT推定値4.6ポイントを再現できた。" data-check-failure="employment_rctをtraining_rctで二群に分け、TRUE群の平均からFALSE群の平均を引く。">
             <script type="text/plain" class="r-setup">if (exists("rct_estimate_answer", inherits = FALSE)) rm(rct_estimate_answer)</script>
             <script type="text/plain" class="r-check">exists("rct_estimate_answer", inherits = TRUE) && is.numeric(rct_estimate_answer) && length(rct_estimate_answer) == 1 && isTRUE(all.equal(as.numeric(rct_estimate_answer), 4.6))</script>
             <div class="r-cell__head"><span>自分で一文を書く</span><span>コメントの下に入力</span></div>
-            <textarea aria-label="課題E3のRコード" spellcheck="false"># ヒント：100 * (当選群の平均 - 落選群の平均)
+            <textarea aria-label="課題E3のRコード" spellcheck="false"># ヒント：100 * (研修群の平均 - 比較群の平均)
 </textarea>
             <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
             <div class="r-output" hidden><div class="r-output__label">自分で書いた文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
@@ -1070,8 +1073,8 @@ if (exists("training_rct_exercise", inherits = FALSE)) rm(training_rct_exercise)
       <div class="summary-grid">
         <article><span>1</span><p>コードはRに伝える文であり、値、名前、演算子、関数、引数という部品と文法がある。</p></article>
         <article><span>2</span><p>同じ変数を一括計算するなら<code>c()</code>でベクトルを作り、種類や役割の違う要素を保つなら<code>list()</code>でリストを作る。</p></article>
-        <article><span>3</span><p>本編では同じ<code>people</code>を保ち、自己選択とRCTで参加を決める列だけを変えた。</p></article>
-        <article><span>4</span><p>自己選択の6は効果4＋bias 2。抽選はもともとの差を反復平均で0にし、推定値を4の周りへ分布させる。</p></article>
+        <article><span>3</span><p><code>people</code>データでは、自己選択による参加者と不参加者の構成を確認し、単純比較に選択バイアスが含まれる理由を調べた。</p></article>
+        <article><span>4</span><p>自己選択では参加前の群間差が単純比較に含まれうる。ランダム割付では、その差は繰り返し平均で0になり、就職率の差から平均因果効果を推定できる。</p></article>
       </div>
       <div class="system-reference" aria-labelledby="system-reference-title">
         <h3 id="system-reference-title">あとから見返す体系表</h3>
@@ -1082,7 +1085,7 @@ if (exists("training_rct_exercise", inherits = FALSE)) rm(training_rct_exercise)
           <article><span>表から選ぶ</span><p><code>people$列名</code>　<code>値[条件]</code>　<code>!</code>で条件を反転</p></article>
         </div>
       </div>
-      <div class="final-message">人々を変えず、参加規則だけを変える。その設計が、単純比較6と因果効果4を見分けられるようにする。</div>
+      <div class="final-message">参加者と不参加者を単純に比べる前に、参加がどのように決まったかを確認する。ランダム割付は、因果効果を推定できる比較可能な二群を作る。</div>
     </section>
       </div>
     </div>
