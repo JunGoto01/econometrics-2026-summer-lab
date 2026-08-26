@@ -1,6 +1,7 @@
 const WEBR_VERSION = "v0.6.0";
 const WEBR_BASE_URL = `https://webr.r-wasm.org/${WEBR_VERSION}/`;
 const WEBR_MODULE_URL = `${WEBR_BASE_URL}webr.mjs`;
+const CHECK_MARKER = "__LECTURE4_EXERCISE_CHECK__";
 
 const cells = [...document.querySelectorAll(".r-cell")];
 const runButtons = [...document.querySelectorAll(".run-button")];
@@ -25,6 +26,7 @@ for (const cell of cells) {
   const restoreButton = cell.querySelector(".restore-button");
 
   textarea.dataset.initialCode = textarea.value;
+  runButton.dataset.idleLabel = runButton.textContent;
   textarea.wrap = "off";
   resizeTextarea(textarea);
 
@@ -89,9 +91,11 @@ async function runCell(cell) {
   const outputBox = cell.querySelector(".r-output");
   const textOutput = cell.querySelector(".text-output");
   const plotOutput = cell.querySelector(".plot-output");
+  const checkOutput = cell.querySelector(".check-output");
   const button = cell.querySelector(".run-button");
   const code = textarea.value.trim();
   const setupCode = cell.querySelector(".r-setup")?.textContent.trim() ?? "";
+  const checkCode = cell.querySelector(".r-check")?.textContent.trim() ?? "";
 
   if (!code) {
     showCellError(cell, "コードが空欄になっている。「コードを元に戻す」を押す。");
@@ -101,18 +105,26 @@ async function runCell(cell) {
   runtimeBusy = true;
   setButtonsDisabled(true);
   cell.classList.remove("has-error");
+  cell.classList.remove("needs-revision");
   cell.classList.add("is-running");
   button.textContent = "実行中…";
   outputBox.hidden = false;
   textOutput.classList.remove("is-error");
   textOutput.textContent = "Rが計算している…";
   plotOutput.replaceChildren();
+  if (checkOutput) {
+    checkOutput.hidden = true;
+    checkOutput.textContent = "";
+  }
   setRuntimeLoading("コードを実行中", `演習 ${cell.dataset.cellId} を計算している`);
 
   let shelter = null;
   try {
     shelter = await new webR.Shelter();
-    const executableCode = setupCode ? `${setupCode}\n${code}` : code;
+    const checkCommand = checkCode
+      ? `cat("\\n${CHECK_MARKER}:", if (isTRUE({${checkCode}})) "PASS" else "FAIL", "\\n")`
+      : "";
+    const executableCode = [setupCode, code, checkCommand].filter(Boolean).join("\n");
     const capture = await shelter.captureR(executableCode, {
       withAutoprint: true,
       captureStreams: true,
@@ -129,8 +141,17 @@ async function runCell(cell) {
     const lines = capture.output
       .map((entry) => formatOutputEntry(entry))
       .filter(Boolean);
+    const joinedOutput = lines.join("\n");
+    const checkMatch = joinedOutput.match(
+      new RegExp(`${CHECK_MARKER}:\\s*(PASS|FAIL)`)
+    );
+    const visibleOutput = joinedOutput
+      .replace(new RegExp(`\\n?${CHECK_MARKER}:\\s*(?:PASS|FAIL)\\n?`, "g"), "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+    const exercisePassed = !checkCode || checkMatch?.[1] === "PASS";
 
-    textOutput.textContent = lines.join("\n");
+    textOutput.textContent = visibleOutput;
     textOutput.classList.toggle(
       "is-error",
       capture.output.some((entry) => entry.type === "stderr" || entry.type === "warning")
@@ -147,12 +168,23 @@ async function runCell(cell) {
       plotOutput.append(canvas);
     }
 
-    if (lines.length === 0 && capture.images.length === 0) {
+    if (!visibleOutput && capture.images.length === 0) {
       textOutput.textContent = cell.dataset.emptyOutput || "（表示される結果はない）";
     }
 
-    cell.classList.add("is-complete");
-    completedCells.add(cell.dataset.cellId);
+    if (checkCode) {
+      renderCheckResult(cell, exercisePassed);
+    }
+
+    if (exercisePassed) {
+      cell.classList.add("is-complete");
+      cell.classList.remove("needs-revision");
+      completedCells.add(cell.dataset.cellId);
+    } else {
+      cell.classList.remove("is-complete");
+      cell.classList.add("needs-revision");
+      completedCells.delete(cell.dataset.cellId);
+    }
     updateProgress();
   } catch (error) {
     console.error(error);
@@ -168,7 +200,7 @@ async function runCell(cell) {
 
     runtimeBusy = false;
     cell.classList.remove("is-running");
-    button.textContent = "実行";
+    button.textContent = button.dataset.idleLabel || "実行";
     setButtonsDisabled(false);
     setRuntimeReady();
   }
@@ -179,6 +211,7 @@ function restoreCell(cell) {
   const outputBox = cell.querySelector(".r-output");
   const textOutput = cell.querySelector(".text-output");
   const plotOutput = cell.querySelector(".plot-output");
+  const checkOutput = cell.querySelector(".check-output");
 
   textarea.value = textarea.dataset.initialCode;
   resizeTextarea(textarea);
@@ -187,7 +220,12 @@ function restoreCell(cell) {
   textOutput.classList.remove("is-error");
   plotOutput.replaceChildren();
   cell.classList.remove("has-error");
+  cell.classList.remove("needs-revision");
   cell.classList.remove("is-complete");
+  if (checkOutput) {
+    checkOutput.hidden = true;
+    checkOutput.textContent = "";
+  }
   completedCells.delete(cell.dataset.cellId);
   updateProgress();
   textarea.focus();
@@ -197,12 +235,34 @@ function showCellError(cell, message) {
   const outputBox = cell.querySelector(".r-output");
   const textOutput = cell.querySelector(".text-output");
   const plotOutput = cell.querySelector(".plot-output");
+  const checkOutput = cell.querySelector(".check-output");
 
   cell.classList.add("has-error");
+  cell.classList.remove("is-complete");
+  cell.classList.remove("needs-revision");
+  completedCells.delete(cell.dataset.cellId);
+  updateProgress();
   outputBox.hidden = false;
   textOutput.classList.add("is-error");
   textOutput.textContent = `エラー\n${message}`;
   plotOutput.replaceChildren();
+  if (checkOutput) {
+    checkOutput.hidden = true;
+    checkOutput.textContent = "";
+  }
+}
+
+function renderCheckResult(cell, passed) {
+  const checkOutput = cell.querySelector(".check-output");
+  if (!checkOutput) return;
+
+  const message = passed
+    ? cell.dataset.checkSuccess || "正解。"
+    : cell.dataset.checkFailure || "まだ正解ではない。依頼と作った値を確認する。";
+
+  checkOutput.hidden = false;
+  checkOutput.className = `check-output check-output--${passed ? "pass" : "retry"}`;
+  checkOutput.textContent = `${passed ? "課題の判定　正解" : "課題の判定　もう一度"}\n${message}`;
 }
 
 function friendlyError(error) {

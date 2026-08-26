@@ -4,7 +4,7 @@
 
 ## 実習ページ
 
-- 講義版 v2（全23セル）：https://jungoto01.github.io/econometrics-2026-summer-lab/v2/
+- 講義版 v2（見本23セル＋課題10セル）：https://jungoto01.github.io/econometrics-2026-summer-lab/v2/
 - 予習版（旧18セル）：https://jungoto01.github.io/econometrics-2026-summer-lab/
 
 初回はブラウザ内で動くR本体を読み込むため、30秒から1分程度かかることがあります。
@@ -16,6 +16,6 @@
 - `index.html`：実習ページ
 - `styles.css`：画面表示
 - `app.js`：webRの初期化とコード実行
-- `v2/`：講義版 v2（全23セル）
+- `v2/`：講義版 v2（完成した見本→穴埋め→自然言語から自力で作成）
 
 学生が入力したコードはブラウザ内のwebRで実行されます。この教材は入力内容を収集・保存しません。

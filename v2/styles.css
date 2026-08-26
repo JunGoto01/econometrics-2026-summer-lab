@@ -806,6 +806,10 @@ a {
   border-color: rgba(238, 108, 77, 0.75);
 }
 
+.r-cell.needs-revision {
+  border-color: rgba(238, 108, 77, 0.75);
+}
+
 .r-cell__head {
   display: flex;
   justify-content: space-between;
@@ -845,8 +849,170 @@ a {
   font-size: 1rem;
 }
 
-.r-setup {
+.r-setup,
+.r-check {
   display: none;
+}
+
+.practice-section {
+  margin-top: 52px;
+  margin-bottom: 64px;
+  padding: 34px;
+  background: #f2f7fa;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.practice-intro h2 {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(1.55rem, 3.5vw, 2.2rem);
+  line-height: 1.35;
+}
+
+.practice-intro > p:not(.section-label) {
+  max-width: 880px;
+  margin: 12px 0 20px;
+}
+
+.stage-path {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.stage-path span {
+  min-height: 78px;
+  padding: 13px 16px;
+  color: var(--navy);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+
+.stage-path span.is-done {
+  color: #1e665d;
+  background: var(--green-pale);
+  border-color: rgba(42, 157, 143, 0.45);
+}
+
+.stage-path b {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.78rem;
+}
+
+.stage-path i {
+  color: var(--orange);
+  font-style: normal;
+  font-weight: 900;
+}
+
+.comment-guide {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 20px 0 0;
+  padding: 13px 16px;
+  background: var(--orange-pale);
+  border-left: 4px solid var(--orange);
+  border-radius: 9px;
+}
+
+.comment-guide > code {
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.practice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 28px;
+}
+
+.practice-card {
+  min-width: 0;
+  padding: 24px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--sky);
+  border-radius: 14px;
+}
+
+.practice-card--free {
+  border-top-color: var(--orange);
+}
+
+.stage-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  color: var(--navy);
+  background: var(--pale);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.practice-card--free .stage-badge {
+  color: #8f321f;
+  background: var(--orange-pale);
+}
+
+.practice-card h3 {
+  margin: 12px 0 14px;
+  color: var(--navy);
+  font-size: 1.25rem;
+  line-height: 1.45;
+}
+
+.practice-card > p {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.request-card {
+  padding: 14px 16px;
+  background: #f8fafc;
+  border-left: 4px solid var(--navy);
+  border-radius: 8px;
+}
+
+.request-card strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--navy);
+  font-size: 0.76rem;
+}
+
+.request-card span {
+  display: block;
+}
+
+.practice-card .r-cell {
+  margin-bottom: 0;
+}
+
+.check-output {
+  padding: 15px 18px;
+  border-top: 1px solid var(--line);
+  white-space: pre-line;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.check-output--pass {
+  color: #1e665d;
+  background: var(--green-pale);
+}
+
+.check-output--retry {
+  color: #8f321f;
+  background: var(--orange-pale);
 }
 
 .grammar-grid {
@@ -1279,6 +1445,7 @@ footer {
   .three-steps,
   .grammar-grid,
   .structure-grid,
+  .practice-grid,
   .system-map__columns,
   .type-grid,
   .chapter-nav,
@@ -1309,6 +1476,14 @@ footer {
 
   .bias-equation {
     flex-wrap: wrap;
+  }
+
+  .stage-path {
+    grid-template-columns: 1fr;
+  }
+
+  .stage-path i {
+    display: none;
   }
 
   .chapter-nav {
@@ -1395,6 +1570,10 @@ footer {
   .lesson {
     display: block;
     padding: 54px 0;
+  }
+
+  .practice-section {
+    padding: 24px 16px;
   }
 
   .lesson__number {

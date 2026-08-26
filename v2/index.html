@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="プログラミング未経験者のための、ブラウザで動くRとランダム化比較実験の入門演習">
-  <title>第4回 講義版 v2｜はじめてのRとRCT</title>
+  <title>第4回 講義版 v2｜見本・穴埋め・自力で学ぶRとRCT</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,10 +14,10 @@
     <div class="hero__inner">
       <p class="eyebrow">計量経済学の応用と実践 · 2026 Summer</p>
       <h1>はじめてのRとRCT</h1>
-      <p class="hero__lead">Rの記号と文法を一つずつ確認し、第3回の職業訓練の例（真の効果4ポイント）で、自己選択による比較と抽選による比較を確かめる。</p>
+      <p class="hero__lead">見本を動かし、核心部分を埋め、最後は自然言語の依頼から一文を書く。第3回の職業訓練の例（真の効果4ポイント）で、自己選択と抽選の違いまで確かめる。</p>
       <div class="hero__meta">
         <span>第4回</span>
-        <span>講義版 v2・全23セル</span>
+        <span>講義版 v2・見本23＋課題10</span>
         <span>2026年8月20日</span>
         <span>プログラミング未経験者向け</span>
         <span>インストール不要</span>
@@ -42,8 +42,8 @@
     <section class="intro content-width" aria-labelledby="intro-title">
       <div class="intro__main">
         <p class="section-label">最初に読む</p>
-        <h2 id="intro-title">このページでは、一回に一文だけ実行する</h2>
-        <p>灰色の入力欄にある一行が、Rに伝える一つの文である。「この一文を実行」を押すと、Rがその文を読み、直下の「Rからの返事」に結果を返す。最初から複数行をまとめて実行することはしない。</p>
+        <h2 id="intro-title">まず見本を読み、最後は自分で一文を書く</h2>
+        <p>灰色の入力欄にあるコードが、Rに伝える一つの文である。見本では完成した一文を実行し、穴埋めでは<code>__</code>を置き換え、自力課題では自然言語の依頼を一つのR文へ翻訳する。</p>
       </div>
       <aside class="note-card">
         <h3>今日区別する三つ</h3>
@@ -56,17 +56,20 @@
     </section>
 
     <section class="how-to content-width" aria-labelledby="howto-title">
-      <h2 id="howto-title">一つのセルで行うこと</h2>
+      <h2 id="howto-title">見本セルで行うこと</h2>
       <div class="three-steps">
         <article><span class="step-number">1</span><h3>文を読む</h3><p>単語と記号が何を意味するか確認する。</p></article>
         <article><span class="step-number">2</span><h3>返事を予想する</h3><p>値が表示されるか、保存だけかを考える。</p></article>
         <article><span class="step-number">3</span><h3>一文を実行する</h3><p>表示された返事と、実行した一文を対応させる。</p></article>
       </div>
-      <div class="takeaway"><strong>重要</strong><span>一行のコードが複数の値や表を返すことはある。しかし、それは複数の命令を実行したという意味ではない。この違いも順番に確認する。</span></div>
+      <div class="takeaway"><strong>重要</strong><span>一つのコードが複数の値や表を返すことはある。しかし、それは複数の命令を実行したという意味ではない。課題の<code>#</code>から右は、人間向けのヒントであり、Rへの命令には数えない。</span></div>
+      <div class="stage-path stage-path--overview" aria-label="このページの三段階">
+        <span><b>第1段階</b>完成した見本を実行して、Rの返事を読む</span><i>→</i><span><b>第2段階</b>少し違う依頼に合わせ、核心の空欄を埋める</span><i>→</i><span><b>第3段階</b>自然言語の依頼から、自分で一文を書く</span>
+      </div>
       <div class="progress-panel" role="group" aria-label="演習の進み具合">
         <div class="progress-panel__labels">
-          <span>実行して確認した文</span>
-          <strong><span id="completed-count">0</span> / <span id="total-count">23</span></strong>
+          <span>実行・正解まで確認したセル</span>
+          <strong><span id="completed-count">0</span> / <span id="total-count">33</span></strong>
         </div>
         <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
       </div>
@@ -191,6 +194,49 @@
           <div class="r-cell__actions"><button class="button run-button" type="button" disabled>この一文を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
+      </div>
+    </section>
+
+    <section class="practice-section content-width" aria-labelledby="practice-a-title">
+      <div class="practice-intro">
+        <p class="section-label">UNIT A｜計算・代入・関数</p>
+        <h2 id="practice-a-title">見本から少し離れて、自分で一文を作る</h2>
+        <p>セル01〜04が第1段階の見本である。次は、要求の一部が変わった穴埋めに進み、その後、自然言語の依頼だけから一文を書く。</p>
+        <div class="stage-path" aria-label="三段階の学習順序">
+          <span class="is-done"><b>第1段階</b>見本を実行</span><i>→</i><span><b>第2段階</b>核心を穴埋め</span><i>→</i><span><b>第3段階</b>自分で書く</span>
+        </div>
+        <div class="comment-guide"><code>#</code><span><code>#</code>から右は人間向けのコメントで、Rは実行しない。課題ではコメントをヒントとして残している。</span></div>
+      </div>
+      <div class="practice-grid">
+        <article class="practice-card practice-card--fill" aria-labelledby="practice-a2-title">
+          <span class="stage-badge">第2段階｜穴埋め</span>
+          <h3 id="practice-a2-title">2と5を足した値を保存する</h3>
+          <div class="request-card"><strong>依頼</strong><span>2と5を足した値を、<code>total</code>という名前で保存してください。</span></div>
+          <p><code>__</code>だけを適切な数値へ置き換える。見本の<code>answer &lt;- 1 + 2</code>と、名前と足す数が少し違う。</p>
+          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="A2" data-empty-output="（表示なし：値を保存する文なので、正誤は下の課題判定で確認する）" data-check-success="正解：totalに7が保存された。" data-check-failure="totalという名前と、2 + 5の結果を確認する。">
+            <script type="text/plain" class="r-check">exists("total", inherits = TRUE) && is.numeric(total) && length(total) == 1 && isTRUE(all.equal(as.numeric(total), 7))</script>
+            <div class="r-cell__head"><span>穴埋めする一文</span><span><code>__</code>を置き換える</span></div>
+            <textarea aria-label="課題A2のRコード" spellcheck="false">total &lt;- 2 + __  # ヒント：見本では右側に足し算を書いた</textarea>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="check-output" hidden role="status" aria-live="polite"></div>
+          </div>
+        </article>
+        <article class="practice-card practice-card--free" aria-labelledby="practice-a3-title">
+          <span class="stage-badge">第3段階｜自力</span>
+          <h3 id="practice-a3-title">関数の結果に名前を付ける</h3>
+          <div class="request-card"><strong>依頼</strong><span>16の平方根を、<code>root</code>という名前で保存してください。</span></div>
+          <p>入力欄にはコメントのヒントしかない。その下に、自分でRの一文を追加する。</p>
+          <div class="r-cell r-cell--exercise" data-cell-id="A3" data-empty-output="（表示なし：値を保存する文なので、正誤は下の課題判定で確認する）" data-check-success="正解：rootに4が保存された。" data-check-failure="rootという名前、&lt;-、sqrt()の三つを使えているか確認する。">
+            <script type="text/plain" class="r-check">exists("root", inherits = TRUE) && is.numeric(root) && length(root) == 1 && isTRUE(all.equal(as.numeric(root), 4))</script>
+            <div class="r-cell__head"><span>自分で一文を書く</span><span>コメントの下に入力</span></div>
+            <textarea aria-label="課題A3のRコード" spellcheck="false"># ヒント：名前 &lt;- 関数名(引数)
+</textarea>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">自分で書いた文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="check-output" hidden role="status" aria-live="polite"></div>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -335,6 +381,45 @@
       </div>
     </section>
 
+    <section class="practice-section content-width" aria-labelledby="practice-b-title">
+      <div class="practice-intro">
+        <p class="section-label">UNIT B｜ベクトルと平均</p>
+        <h2 id="practice-b-title">同じ変数をまとめ、関数へ渡す</h2>
+        <p>セル05〜10で、<code>c()</code>がベクトルを作り、<code>mean()</code>がそのベクトルを材料にすることを見た。別の値でも同じ文法を使えるか確かめる。</p>
+        <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル05〜10</span><i>→</i><span><b>第2段階</b>ベクトルを穴埋め</span><i>→</i><span><b>第3段階</b>平均まで自力</span></div>
+      </div>
+      <div class="practice-grid">
+        <article class="practice-card practice-card--fill" aria-labelledby="practice-b2-title">
+          <span class="stage-badge">第2段階｜穴埋め</span>
+          <h3 id="practice-b2-title">新しい5人の就職状況を保存する</h3>
+          <div class="request-card"><strong>依頼</strong><span>就職状況が1、1、0、1、1の5人をベクトルにし、<code>employed_new</code>として保存してください。</span></div>
+          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="B2" data-empty-output="（表示なし：ベクトルを保存した。下の課題判定で中身を確認する）" data-check-success="正解：employed_newに5人分の数値ベクトルが保存された。" data-check-failure="c()の中の順番が1, 1, 0, 1, 1になっているか確認する。">
+            <script type="text/plain" class="r-check">exists("employed_new", inherits = TRUE) && is.numeric(employed_new) && identical(as.numeric(employed_new), c(1, 1, 0, 1, 1))</script>
+            <div class="r-cell__head"><span>穴埋めする一文</span><span>核心の値を補う</span></div>
+            <textarea aria-label="課題B2のRコード" spellcheck="false">employed_new &lt;- c(1, 1, __, 1, 1)  # ヒント：未就職は0</textarea>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="check-output" hidden role="status" aria-live="polite"></div>
+          </div>
+        </article>
+        <article class="practice-card practice-card--free" aria-labelledby="practice-b3-title">
+          <span class="stage-badge">第3段階｜自力</span>
+          <h3 id="practice-b3-title">ベクトルを作って平均する</h3>
+          <div class="request-card"><strong>依頼</strong><span>5人の就職状況1、0、1、1、1の平均を計算し、<code>employment_rate</code>という名前で保存してください。</span></div>
+          <p>一文の中で<code>c()</code>の結果を<code>mean()</code>へ渡してよい。</p>
+          <div class="r-cell r-cell--exercise" data-cell-id="B3" data-empty-output="（表示なし：平均を保存した。下の課題判定で値を確認する）" data-check-success="正解：employment_rateに0.8が保存された。" data-check-failure="c()で5人分を作り、そのベクトルをmean()へ渡して保存する。">
+            <script type="text/plain" class="r-check">exists("employment_rate", inherits = TRUE) && is.numeric(employment_rate) && length(employment_rate) == 1 && isTRUE(all.equal(as.numeric(employment_rate), 0.8))</script>
+            <div class="r-cell__head"><span>自分で一文を書く</span><span>コメントの下に入力</span></div>
+            <textarea aria-label="課題B3のRコード" spellcheck="false"># ヒント：名前 &lt;- mean(c(五人分の値))
+</textarea>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">自分で書いた文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="check-output" hidden role="status" aria-live="polite"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
     <section class="part-heading" id="part-2">
       <div class="content-width"><p>PART 2</p><h2>ベクトルから表へ</h2><span>一列のベクトルを横にそろえると、複数の変数を持つ表になる</span></div>
     </section>
@@ -409,6 +494,50 @@ control <- c(0, 1, 0, 0)</script>
           <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
         <div class="warning-card"><strong>50ポイントはまだ効果ではない</strong><span>この一文が計算したのは、観察された二群の差である。参加の決まり方を知らなければ、この差を因果効果とは呼べない。</span></div>
+      </div>
+    </section>
+
+    <section class="practice-section content-width" aria-labelledby="practice-c-title">
+      <div class="practice-intro">
+        <p class="section-label">UNIT C｜二群の平均差</p>
+        <h2 id="practice-c-title">数字が変わっても、同じ比較を組み立てる</h2>
+        <p>セル11〜14では、参加群と不参加群の平均を別々に求め、その差を計算した。ここでは教材が用意した別の二群を、同じ文法で比較する。</p>
+        <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル11〜14</span><i>→</i><span><b>第2段階</b>群名を穴埋め</span><i>→</i><span><b>第3段階</b>比較を自力</span></div>
+      </div>
+      <div class="practice-grid">
+        <article class="practice-card practice-card--fill" aria-labelledby="practice-c2-title">
+          <span class="stage-badge">第2段階｜穴埋め</span>
+          <h3 id="practice-c2-title">新しい二群の差を保存する</h3>
+          <div class="request-card"><strong>依頼</strong><span><code>treated_new</code>と<code>control_new</code>の就職率の差をポイントで計算し、<code>gap</code>として保存してください。</span></div>
+          <p>二群のベクトルは教材が準備する。<code>__</code>を正しい群名に置き換える。</p>
+          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="C2" data-empty-output="（表示なし：平均差を保存した。下の課題判定で値を確認する）" data-check-success="正解：gapに50ポイントが保存された。" data-check-failure="参加群から比較群を引く順番と、control_newという名前を確認する。">
+            <script type="text/plain" class="r-setup">treated_new <- c(1, 1, 1, 0)
+control_new <- c(1, 0, 0, 0)</script>
+            <script type="text/plain" class="r-check">exists("gap", inherits = TRUE) && is.numeric(gap) && length(gap) == 1 && isTRUE(all.equal(as.numeric(gap), 50))</script>
+            <div class="r-cell__head"><span>穴埋めする一文</span><span>比較群の名前を補う</span></div>
+            <textarea aria-label="課題C2のRコード" spellcheck="false">gap &lt;- 100 * (mean(treated_new) - mean(__))  # ヒント：比較群はcontrol_new</textarea>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="check-output" hidden role="status" aria-live="polite"></div>
+          </div>
+        </article>
+        <article class="practice-card practice-card--free" aria-labelledby="practice-c3-title">
+          <span class="stage-badge">第3段階｜自力</span>
+          <h3 id="practice-c3-title">自然言語から二群比較を書く</h3>
+          <div class="request-card"><strong>依頼</strong><span><code>program</code>群と<code>comparison</code>群の平均の差をポイントで計算し、<code>estimated_effect</code>として保存してください。</span></div>
+          <p>二群のデータは教材が準備する。ここでは「観察された差」をコードに翻訳する。</p>
+          <div class="r-cell r-cell--exercise" data-cell-id="C3" data-empty-output="（表示なし：平均差を保存した。下の課題判定で値を確認する）" data-check-success="正解：estimated_effectに40ポイントが保存された。" data-check-failure="100 ×（programの平均 − comparisonの平均）を一文で保存する。">
+            <script type="text/plain" class="r-setup">program <- c(1, 1, 1, 0, 1)
+comparison <- c(1, 0, 0, 1, 0)</script>
+            <script type="text/plain" class="r-check">exists("estimated_effect", inherits = TRUE) && is.numeric(estimated_effect) && length(estimated_effect) == 1 && isTRUE(all.equal(as.numeric(estimated_effect), 40))</script>
+            <div class="r-cell__head"><span>自分で一文を書く</span><span>コメントの下に入力</span></div>
+            <textarea aria-label="課題C3のRコード" spellcheck="false"># ヒント：100 * (参加群の平均 - 比較群の平均)
+</textarea>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">自分で書いた文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="check-output" hidden role="status" aria-live="polite"></div>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -528,6 +657,45 @@ self_group <- factor(ifelse(self_selected, "参加", "不参加"), levels = c("�
         </div>
         <div class="bias-equation" aria-label="観察された差の分解"><span><small>観察された差</small><b>6</b></span><i>=</i><span><small>研修の効果</small><b>4</b></span><i>+</i><span><small>もともとの差</small><b>2</b></span></div>
         <div class="warning-card"><strong>2は現実には見えない</strong><span>参加した人の「もし研修を受けなかった場合」の32%は反実仮想である。神の設定を知る教材だから分解できるが、現実の観察データだけでは直接計算できない。</span></div>
+      </div>
+    </section>
+
+    <section class="practice-section content-width" aria-labelledby="practice-d-title">
+      <div class="practice-intro">
+        <p class="section-label">UNIT D｜因果効果とselection bias</p>
+        <h2 id="practice-d-title">4＋2＝6を、別の世界でも再現する</h2>
+        <p>セル15〜19で、観察された差は「真の効果＋もともとの差」になることを確認した。数値が変わっても同じ分解ができるか確かめる。</p>
+        <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル15〜19</span><i>→</i><span><b>第2段階</b>biasを穴埋め</span><i>→</i><span><b>第3段階</b>分解を自力</span></div>
+      </div>
+      <div class="practice-grid">
+        <article class="practice-card practice-card--fill" aria-labelledby="practice-d2-title">
+          <span class="stage-badge">第2段階｜穴埋め</span>
+          <h3 id="practice-d2-title">効果5、bias 3の観察差</h3>
+          <div class="request-card"><strong>依頼</strong><span>真の効果が5ポイント、研修がなくても存在する意欲差が3ポイントの世界で、自己選択比較に現れる差を<code>observed_gap</code>として保存してください。</span></div>
+          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="D2" data-empty-output="（表示なし：観察差を保存した。下の課題判定で値を確認する）" data-check-success="正解：observed_gapは8ポイント。5ポイントの効果に3ポイントのbiasが加わった。" data-check-failure="観察された差＝真の効果＋selection biasを使う。">
+            <script type="text/plain" class="r-check">exists("observed_gap", inherits = TRUE) && is.numeric(observed_gap) && length(observed_gap) == 1 && isTRUE(all.equal(as.numeric(observed_gap), 8))</script>
+            <div class="r-cell__head"><span>穴埋めする一文</span><span>selection biasを補う</span></div>
+            <textarea aria-label="課題D2のRコード" spellcheck="false">observed_gap &lt;- 5 + __  # ヒント：研修がなくても存在する差は3</textarea>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="check-output" hidden role="status" aria-live="polite"></div>
+          </div>
+        </article>
+        <article class="practice-card practice-card--free" aria-labelledby="practice-d3-title">
+          <span class="stage-badge">第3段階｜自力</span>
+          <h3 id="practice-d3-title">三つの就職率から分解する</h3>
+          <div class="request-card"><strong>依頼</strong><span>高意欲者は研修なし35%、研修あり40%、低意欲者は研修なし31%です。研修効果と意欲差を足した観察差を計算し、<code>observed_difference</code>として保存してください。</span></div>
+          <p>40−31と直接計算しても9になるが、ここでは効果とbiasの二つに分けてから足す。</p>
+          <div class="r-cell r-cell--exercise" data-cell-id="D3" data-empty-output="（表示なし：観察差を保存した。下の課題判定で値を確認する）" data-check-success="正解：効果5＋bias 4＝観察差9と再現できた。" data-check-failure="（40 − 35）と（35 − 31）を計算し、その二つを足す。">
+            <script type="text/plain" class="r-check">exists("observed_difference", inherits = TRUE) && is.numeric(observed_difference) && length(observed_difference) == 1 && isTRUE(all.equal(as.numeric(observed_difference), 9))</script>
+            <div class="r-cell__head"><span>自分で一文を書く</span><span>コメントの下に入力</span></div>
+            <textarea aria-label="課題D3のRコード" spellcheck="false"># ヒント：(研修あり - 高意欲の研修なし) + (高意欲の研修なし - 低意欲の研修なし)
+</textarea>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">自分で書いた文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="check-output" hidden role="status" aria-live="polite"></div>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -679,6 +847,50 @@ rct_result <- data.frame(
       </div>
     </section>
 
+    <section class="practice-section content-width" aria-labelledby="practice-e-title">
+      <div class="practice-intro">
+        <p class="section-label">UNIT E｜意欲を使わない無作為割付</p>
+        <h2 id="practice-e-title">人数が変わっても、半数ずつ抽選する</h2>
+        <p>セル20〜23では二千人を千人ずつに分けた。最後に、人数だけが変わった依頼を同じ関数の組み合わせへ翻訳する。</p>
+        <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル20〜23</span><i>→</i><span><b>第2段階</b>人数を穴埋め</span><i>→</i><span><b>第3段階</b>割付を自力</span></div>
+      </div>
+      <div class="practice-grid">
+        <article class="practice-card practice-card--fill" aria-labelledby="practice-e2-title">
+          <span class="stage-badge">第2段階｜穴埋め</span>
+          <h3 id="practice-e2-title">100人を50人ずつへ分ける</h3>
+          <div class="request-card"><strong>依頼</strong><span>100人を50人ずつへ無作為に分け、その割付を<code>assignment</code>として保存してください。</span></div>
+          <p><code>n_exercise</code>には100が保存済みである。意欲を表す名前は右辺に登場しない。</p>
+          <div class="r-cell r-cell--single r-cell--exercise" data-cell-id="E2" data-empty-output="（表示なし：100人分の割付を保存した。下の課題判定で人数を確認する）" data-check-success="正解：100人をFALSE 50人、TRUE 50人へ無作為に分けた。" data-check-failure="eachには全人数の半分を指定する。assignmentの長さ100、TRUEの人数50を確認する。">
+            <script type="text/plain" class="r-setup">set.seed(4810)
+n_exercise <- 100</script>
+            <script type="text/plain" class="r-check">exists("assignment", inherits = TRUE) && is.logical(assignment) && length(assignment) == 100 && sum(assignment) == 50</script>
+            <div class="r-cell__head"><span>穴埋めする一文</span><span>全人数の名前を補う</span></div>
+            <textarea aria-label="課題E2のRコード" spellcheck="false">assignment &lt;- sample(rep(c(FALSE, TRUE), each = __ / 2))  # ヒント：全人数はn_exercise</textarea>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="check-output" hidden role="status" aria-live="polite"></div>
+          </div>
+        </article>
+        <article class="practice-card practice-card--free" aria-labelledby="practice-e3-title">
+          <span class="stage-badge">第3段階｜自力</span>
+          <h3 id="practice-e3-title">200人の割付を一文で書く</h3>
+          <div class="request-card"><strong>依頼</strong><span>200人を100人ずつへ無作為に分け、その割付を<code>lottery</code>という名前で保存してください。参加の決定に意欲は使いません。</span></div>
+          <p><code>n_challenge</code>には200が保存済みである。見本と同じ三つの関数を組み合わせる。</p>
+          <div class="r-cell r-cell--exercise" data-cell-id="E3" data-empty-output="（表示なし：200人分の割付を保存した。下の課題判定で人数を確認する）" data-check-success="正解：200人をFALSE 100人、TRUE 100人へ無作為に分けた。右辺に意欲はない。" data-check-failure="lotteryへ、sample(rep(c(FALSE, TRUE), each = n_challenge / 2))の結果を保存する。">
+            <script type="text/plain" class="r-setup">set.seed(8270)
+n_challenge <- 200</script>
+            <script type="text/plain" class="r-check">exists("lottery", inherits = TRUE) && is.logical(lottery) && length(lottery) == 200 && sum(lottery) == 100</script>
+            <div class="r-cell__head"><span>自分で一文を書く</span><span>コメントの下に入力</span></div>
+            <textarea aria-label="課題E3のRコード" spellcheck="false"># ヒント：sample(rep(c(FALSE, TRUE), each = 人数 / 2))
+</textarea>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">自分で書いた文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="check-output" hidden role="status" aria-live="polite"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
     <section class="summary content-width" aria-labelledby="summary-title">
       <p class="section-label">まとめ</p>
       <h2 id="summary-title">この回で身に付ける読み方</h2>
@@ -697,7 +909,7 @@ rct_result <- data.frame(
           <article><span>文の形</span><p><code>名前 &lt;- 値</code>　<code>関数名(引数)</code>　<code>値 演算子 値</code></p></article>
         </div>
       </div>
-      <div class="final-message">長いコードを暗記する必要はない。まず、一つの文を部品に分け、Rに何を頼み、Rが何を返したかを説明できるようにする。</div>
+      <div class="final-message">長いコードを暗記する必要はない。見本を読み、少し変え、最後は自然言語の依頼をRの一文へ翻訳できればよい。</div>
     </section>
   </main>
 
