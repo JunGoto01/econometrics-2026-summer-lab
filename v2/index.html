@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Rの基本的な文法とデータ構造から、職業訓練の単純比較とRCTによる効果推定までを学ぶ、プログラミング未経験者向けのブラウザR演習">
+  <meta name="description" content="Rの基本的な文法とデータ構造から、職業訓練の単純比較、単回帰、RCTによる効果推定までを学ぶ、プログラミング未経験者向けのブラウザR演習">
   <title>第4回 講義版 v2｜はじめてのRとRCT</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -14,10 +14,10 @@
     <div class="hero__inner">
       <p class="eyebrow">計量経済学の応用と実践 · 2026 Summer</p>
       <h1>はじめてのRとRCT</h1>
-      <p class="hero__lead">この回では、Rの基本的な文法とデータ構造を一つずつ学ぶ。後半では職業訓練への参加と就職を題材に、参加者と不参加者の単純比較が研修そのものの効果を表すとは限らない理由と、ランダム化比較実験（RCT）の考え方をRで確かめる。</p>
+      <p class="hero__lead">この回では、Rの基本的な文法とデータ構造を一つずつ学ぶ。後半では職業訓練への参加と就職を題材に、参加者と不参加者の単純比較を単回帰で推計・解釈・図示する。そのうえで、単純比較が研修そのものの効果を表すとは限らない理由と、ランダム化比較実験（RCT）の考え方をRで確かめる。</p>
       <div class="hero__meta">
         <span>第4回</span>
-        <span>講義版 v2・見本34＋課題12</span>
+        <span>講義版 v2・見本40＋課題12</span>
         <span>2026年8月20日</span>
         <span>プログラミング未経験者向け</span>
         <span>インストール不要</span>
@@ -144,6 +144,80 @@
       </div>
     </section>
 
+    <section class="interface-guide content-width" aria-labelledby="interface-guide-title">
+      <p class="section-label">画面の読み方</p>
+      <h2 id="interface-guide-title">番号が変わっても、各セルの構造と読む順序は同じ</h2>
+      <p class="interface-guide__lead">上の1〜5は分析内容の設計図である。ここから現れるセル01、セル02……は、Rを一つずつ操作する学習単位である。番号やコードの内容が変わっても、セルの各部分が担う役割と、読む順序は変わらない。</p>
+
+      <div class="number-system" aria-label="このページで使う四種類の番号">
+        <article><span>設計図 1〜5</span><strong>分析内容を理解する説明</strong><p>問い、仮想データ、自己選択、選択バイアス、RCTをコードより先に確認する。</p></article>
+        <article><span>右側 1〜7</span><strong>講義全体の現在地</strong><p>いまRの基礎、単純比較、効果推定のどこにいるかを示す。</p></article>
+        <article><span>セル01・02…</span><strong>コードを実行する学習単位</strong><p>一つの目的、Editor、実行操作、Outputを一組として読む。</p></article>
+        <article><span>課題A2・A3…</span><strong>穴埋め課題と自力課題</strong><p>見本と同じ画面構造に、自然言語の依頼と課題判定が加わる。</p></article>
+      </div>
+
+      <div class="cell-anatomy" aria-labelledby="cell-anatomy-title">
+        <div class="cell-anatomy__heading">
+          <p class="section-label">共通する一つの型</p>
+          <h3 id="cell-anatomy-title">セルの七つの部分を先に確認する</h3>
+          <p>下は実際のセル01と同じ配置で作った見本であり、実行はできない。1〜7の丸数字と説明を対応させてから、実際のセル01へ進む。</p>
+        </div>
+
+        <div class="cell-anatomy__stage">
+          <div class="cell-anatomy__mock" aria-label="セル01を例にした共通画面の見本">
+            <div class="cell-anatomy__number"><span class="anatomy-target-marker" aria-hidden="true">1</span>01</div>
+            <div class="cell-anatomy__mock-body">
+              <div class="cell-anatomy__purpose"><span class="anatomy-target-marker" aria-hidden="true">2</span><strong>最初の一文：二つの値を足す</strong><p>コードの意味を読み、実行前にRからの返事を予想する。</p></div>
+              <div class="cell-anatomy__profile"><span><b>文の種類</b>算術演算</span><span><b>材料</b>数値2個</span><span><b>結果</b>数値1個</span></div>
+              <div class="cell-anatomy__r-cell">
+                <div class="cell-anatomy__editor-head"><span class="anatomy-target-marker" aria-hidden="true">3</span><b>EDITOR</b><small>Rに伝える一文</small></div>
+                <pre class="cell-anatomy__editor">1 + 2</pre>
+                <div class="cell-anatomy__actions"><span><i class="anatomy-target-marker" aria-hidden="true">4</i>この一文を実行</span><span><i class="anatomy-target-marker" aria-hidden="true">5</i>入力を元に戻す</span></div>
+                <div class="cell-anatomy__output"><span class="anatomy-target-marker" aria-hidden="true">6</span><small>OUTPUT｜Rからの返事</small><pre>[1] 3</pre></div>
+                <div class="cell-anatomy__check"><span class="anatomy-target-marker" aria-hidden="true">7</span><small>課題の判定｜第2・第3段階だけに表示</small><strong>依頼された結果を作れたか確認する</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <svg class="cell-anatomy__lines" viewBox="0 0 1080 760" preserveAspectRatio="none" aria-hidden="true">
+            <g class="cell-anatomy__line-group">
+              <path d="M 225 72 C 255 72, 274 108, 296 108" />
+              <ellipse cx="318" cy="108" rx="22" ry="28" />
+              <path d="M 855 78 C 795 78, 720 126, 665 142" />
+              <ellipse cx="546" cy="142" rx="119" ry="48" />
+              <path d="M 225 286 C 265 286, 288 292, 324 292" />
+              <ellipse cx="546" cy="292" rx="222" ry="72" />
+              <path d="M 855 362 C 760 362, 665 385, 540 385" />
+              <ellipse cx="449" cy="385" rx="91" ry="30" />
+              <path d="M 855 452 C 805 452, 772 385, 760 385" />
+              <ellipse cx="658" cy="385" rx="102" ry="30" />
+              <path d="M 225 565 C 270 565, 292 477, 324 477" />
+              <ellipse cx="546" cy="477" rx="222" ry="56" />
+              <path d="M 855 686 C 805 686, 774 566, 768 566" />
+              <ellipse cx="546" cy="566" rx="222" ry="42" />
+            </g>
+          </svg>
+
+          <article class="anatomy-callout anatomy-callout--1"><span class="anatomy-marker">1</span><div><strong>セル番号</strong><p>上から進む目印。F01やDATA01も、それぞれ一つの学習単位である。</p></div></article>
+          <article class="anatomy-callout anatomy-callout--2"><span class="anatomy-marker">2</span><div><strong>目的と説明</strong><p>Rへ何を頼むのか、実行前に何を予想するのかを確認する。</p></div></article>
+          <article class="anatomy-callout anatomy-callout--3"><span class="anatomy-marker">3</span><div><strong>Editor（入力欄）</strong><p>Rへ送るコードを書く場所。見本では読み、課題では空欄やコメントの下を書き換える。</p></div></article>
+          <article class="anatomy-callout anatomy-callout--4"><span class="anatomy-marker">4</span><div><strong>実行ボタン</strong><p>Editor内のコード全体をRへ送る。複数行なら上から順にすべて実行する。</p></div></article>
+          <article class="anatomy-callout anatomy-callout--5"><span class="anatomy-marker">5</span><div><strong>入力を元に戻す</strong><p>このセルの入力と表示を初期状態へ戻す。Rがすでに覚えた値や関数は消さない。</p></div></article>
+          <article class="anatomy-callout anatomy-callout--6"><span class="anatomy-marker">6</span><div><strong>Output（Rからの返事）</strong><p>値、表、エラー、図を見る場所。コードが一行でも、返事が複数行になることがある。</p></div></article>
+          <article class="anatomy-callout anatomy-callout--7"><span class="anatomy-marker">7</span><div><strong>課題の判定</strong><p>第2・第3段階だけに現れ、依頼された結果を作れたかを確認する。</p></div></article>
+        </div>
+      </div>
+
+      <div class="terminal-definition"><strong>EditorとOutput</strong><p>この教材では、コードを書く場所を<strong>Editor</strong>、Rの返事を見る場所を<strong>Output</strong>と呼ぶ。Outputは、RStudioのConsoleや一般的なターミナルの出力欄に相当する。Editorの行数とOutputの行数は一致するとは限らない。</p></div>
+      <ol class="cell-reading-cycle" aria-label="各セルを読む五つの順序">
+        <li><span>1</span>番号と目的を読む</li>
+        <li><span>2</span>Editorのコードを読む・書く</li>
+        <li><span>3</span>実行する</li>
+        <li><span>4</span>Outputを読む</li>
+        <li><span>5</span>課題なら判定を見る</li>
+      </ol>
+    </section>
+
     <section class="intro content-width" aria-labelledby="intro-title">
       <div class="intro__main">
         <p class="section-label">最初に読む</p>
@@ -175,9 +249,9 @@
       <div class="progress-panel" role="group" aria-label="演習の進み具合">
         <div class="progress-panel__labels">
           <span>実行・正解まで確認したセル</span>
-          <strong><span id="completed-count">0</span> / <span id="total-count">46</span></strong>
+          <strong><span id="completed-count">0</span> / <span id="total-count">52</span></strong>
         </div>
-        <div class="progress-track" id="progress-track" role="progressbar" aria-label="実行または正解まで確認したセル" aria-valuemin="0" aria-valuemax="46" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-track" id="progress-track" role="progressbar" aria-label="実行または正解まで確認したセル" aria-valuemin="0" aria-valuemax="52" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
       </div>
     </section>
 
@@ -1132,7 +1206,7 @@ observed_gap</textarea>
     </section>
 
     <section class="part-heading part-heading--accent" id="decomposition" data-flow-section="decompose">
-      <div class="content-width"><p>STEP 5</p><h2>単純比較に含まれる差を分解する</h2><span>二つの潜在的結果を使い、平均因果効果と選択バイアスを順に計算する</span></div>
+      <div class="content-width"><p>STEP 5</p><h2>単純比較に含まれる差を分解する</h2><span>二つの潜在的結果を使い、因果効果と選択バイアスを順に計算する</span></div>
     </section>
 
     <section class="lesson content-width" aria-labelledby="lesson-17-title">
@@ -1180,11 +1254,11 @@ selection_bias</textarea>
     <section class="lesson content-width" aria-labelledby="lesson-19-title">
       <div class="lesson__number">19</div>
       <div class="lesson__body">
-        <h2 id="lesson-19-title">単純比較を平均因果効果と選択バイアスに分ける</h2>
-        <p>セル14、17、18で一度ずつ確認した三つの計算を、比較できるように同じセルへ再掲する。最後に、観察差と「平均因果効果＋選択バイアス」を名前付きベクトルとして並べる。</p>
-        <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>ベクトルを作る関数</span><span><b>材料</b>計算済みの数値</span><span><b>結果</b>観察差と分解後の値を照合</span></div>
+        <h2 id="lesson-19-title">この仮想データで、単純比較を因果効果と選択バイアスに分ける</h2>
+        <p>一般に、観察差は「実際に参加した人に対する平均因果効果（ATT）」と選択バイアスに分かれる。この仮想データでは低意欲群と高意欲群の平均因果効果をともに4ポイントに設定したため、ATTと2,000人全体の平均因果効果（ATE）が同じ4になる。セル14、17、18の計算を同じセルへ再掲し、この場合の分解を確かめる。</p>
+        <div class="sentence-profile" aria-label="この文の分類"><span><b>文の種類</b>平均・条件抽出・ベクトル</span><span><b>材料</b>観察結果と二つの潜在的結果</span><span><b>結果</b>観察差、ATT、ATE、バイアスを照合</span></div>
         <div class="r-cell" data-cell-id="19" data-use-data>
-          <div class="r-cell__head"><span>三つの量を計算して照合する</span><span>非表示の正解値なし</span></div>
+          <div class="r-cell__head"><span>観察差、ATT、ATE、選択バイアスを計算して照合する</span><span>非表示の正解値なし</span></div>
           <textarea aria-label="観察差と平均因果効果と選択バイアスの和を照合するRコード" spellcheck="false">self_participant_rate &lt;-
   100 * mean(people$employment_self[people$training_self])
 self_nonparticipant_rate &lt;-
@@ -1197,6 +1271,11 @@ causal_effect &lt;- 100 * mean(
     people$employment_no_training
 )
 
+att &lt;- 100 * mean(
+  (people$employment_with_training -
+    people$employment_no_training)[people$training_self]
+)
+
 selection_bias &lt;- 100 * (
   mean(people$employment_no_training[people$training_self]) -
     mean(people$employment_no_training[!people$training_self])
@@ -1204,19 +1283,214 @@ selection_bias &lt;- 100 * (
 
 c(
   observed_gap = observed_gap,
-  effect_plus_bias = causal_effect + selection_bias
+  ATT = att,
+  ATE = causal_effect,
+  selection_bias = selection_bias,
+  ATT_plus_bias = att + selection_bias
 )</textarea>
-          <div class="r-cell__actions"><button class="button run-button" type="button" disabled>三つの量を計算して照合する</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
-          <div class="r-output" hidden><div class="r-output__label">観察差と分解後の照合結果</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+          <div class="r-cell__actions"><button class="button run-button" type="button" disabled>四つの量を計算して照合する</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
+          <div class="r-output" hidden><div class="r-output__label">観察差、ATT、ATE、選択バイアスの照合結果</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
         </div>
-        <div class="bias-equation" aria-label="観察された差6ポイントは、平均因果効果4ポイントと選択バイアス2ポイントの合計"><span><small>観察された差</small><b>6</b></span><i>=</i><span><small>平均因果効果</small><b>4</b></span><i>+</i><span><small>選択バイアス</small><b>2</b></span></div>
+        <div class="bias-equation" aria-label="観察された差6ポイントは、参加者への平均因果効果4ポイントと選択バイアス2ポイントの合計"><span><small>観察された差</small><b>6</b></span><i>=</i><span><small>参加者への平均因果効果 ATT</small><b>4</b></span><i>+</i><span><small>選択バイアス</small><b>2</b></span></div>
+        <div class="explanation"><strong>この教材ではATT＝ATE</strong><span>低意欲群と高意欲群の平均因果効果を、ともに4ポイントへ設定したためである。一般には参加者の平均効果（ATT）と全体の平均効果（ATE）は一致せず、単純比較の分解に入るのはATTである。</span></div>
         <div class="warning-card"><strong>選択バイアスは通常の観察データから直接は見えない</strong><span>参加した人の「もし研修を受けなかった場合」は反実仮想である。この仮想データには二つの潜在的結果が設定されているため分解できるが、現実には参加者の潜在的な研修なし結果を直接観察できない。</span></div>
+      </div>
+    </section>
+
+    <section class="concept-section content-width" id="self-selection-regression" aria-labelledby="self-selection-regression-title">
+      <p class="section-label">推計の方法・結果の読み方・図示</p>
+      <h2 id="self-selection-regression-title">二群の単純比較を、単回帰として推計する</h2>
+      <p>セル14では参加者率から不参加者率を直接引いた。ここでは同じ比較を単回帰で表し、推計結果の表とグラフを読む。回帰を使っただけで因果効果になるわけではない。どのように参加群と不参加群が作られたかが、係数の解釈を決める。</p>
+      <div class="regression-formula" aria-label="二値変数を使った単回帰の式と係数の意味">
+        <div class="regression-formula__equation"><span>就職結果</span><b>=</b><span>切片</span><b>+</b><span>係数 × 研修参加</span><b>+</b><span>その他の違い</span></div>
+        <div class="regression-formula__values">
+          <article><code>training_self = FALSE</code><strong>予測値は切片</strong><span>不参加群の就職率30%</span></article>
+          <article><code>training_self = TRUE</code><strong>予測値は切片＋係数</strong><span>参加群の就職率36%</span></article>
+          <article><code>係数 = 36 - 30</code><strong>二群の平均差</strong><span>単純比較と同じ6ポイント</span></article>
+        </div>
+      </div>
+      <div class="regression-route" aria-label="回帰分析を学ぶ四つの順序">
+        <article><span>REG01</span><strong>推計する</strong><p><code>lm()</code>へ結果、説明変数、データを渡す。</p></article>
+        <i aria-hidden="true">→</i>
+        <article><span>REG02</span><strong>結果を読む</strong><p>係数、標準誤差、p値、95%信頼区間を区別する。</p></article>
+        <i aria-hidden="true">→</i>
+        <article><span>REG03</span><strong>図示する</strong><p>0/1の観測点、二群の予測値、回帰直線を対応させる。</p></article>
+        <i aria-hidden="true">→</i>
+        <article><span>REG04</span><strong>因果分解する</strong><p>係数6をATT 4と選択バイアス2へ分ける。</p></article>
+      </div>
+    </section>
+
+    <section class="lesson content-width" aria-labelledby="lesson-reg01-title">
+      <div class="lesson__number">REG01</div>
+      <div class="lesson__body">
+        <h2 id="lesson-reg01-title"><code>lm()</code>で自己選択の単純比較を推計する</h2>
+        <p><code>lm()</code>はlinear model（線形モデル）を推計するRの標準関数である。左側に結果、<code>~</code>の右側に比較へ使う説明変数、<code>data =</code>の右側に列が入った表を書く。</p>
+        <div class="syntax-card"><code>lm(結果 ~ 説明変数, data = 表)</code><span><code>~</code>は「左側の結果を、右側の変数で説明・比較する」という式の区切りであり、因果関係を表す矢印ではない。</span></div>
+        <div class="sentence-profile" aria-label="このコードの分類"><span><b>文の種類</b>標準関数＋代入</span><span><b>材料</b>就職結果・自己選択参加・people</span><span><b>結果</b>推計済みの単回帰モデル</span></div>
+        <div class="r-cell" data-cell-id="REG01" data-use-data>
+          <div class="r-cell__head"><span>単回帰を推計し、二つの係数を取り出す</span><span>base Rだけを使用</span></div>
+          <textarea aria-label="自己選択の単回帰を推計するRコード" spellcheck="false">self_selection_model &lt;- lm(
+  100 * employment_self ~ training_self,
+  data = people
+)
+
+coef(self_selection_model)</textarea>
+          <div class="r-cell__actions"><button class="button run-button" type="button" disabled>自己選択の単回帰を推計する</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
+          <div class="r-output" hidden><div class="r-output__label">推計された切片と係数</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+        </div>
+        <div class="coefficient-reading coefficient-reading--two">
+          <article><span><code>(Intercept)</code></span><strong>30</strong><p><code>training_self = FALSE</code>、つまり不参加群の推計就職率。</p></article>
+          <article><span><code>training_selfTRUE</code></span><strong>6</strong><p>参加群36%と不参加群30%の差。二値変数だけの単回帰では、傾きが二群平均差と一致する。</p></article>
+        </div>
+        <div class="warning-card"><strong>ここで推計したのは関連</strong><span>参加群は高意欲者、不参加群は低意欲者なので、係数6には研修の効果と参加前からの群間差が含まれる。<code>lm()</code>を使ったという理由だけで因果効果とは呼べない。</span></div>
+      </div>
+    </section>
+
+    <section class="lesson content-width" aria-labelledby="lesson-reg02-title">
+      <div class="lesson__number">REG02</div>
+      <div class="lesson__body">
+        <h2 id="lesson-reg02-title">係数表と95%信頼区間を読み分ける</h2>
+        <p><code>summary()</code>は推計結果を詳しく要約する標準関数で、<code>$coefficients</code>はその要約から係数表を取り出す。<code>confint()</code>は各係数の95%信頼区間を計算する。モデルの推計から同じセルへ再掲するため、単独でも実行できる。</p>
+        <div class="r-cell" data-cell-id="REG02" data-use-data>
+          <div class="r-cell__head"><span>モデルを推計して係数表と区間を表示</span><span>小数第3位まで表示</span></div>
+          <textarea aria-label="自己選択回帰の係数表と信頼区間を表示するRコード" spellcheck="false">self_selection_model &lt;- lm(
+  100 * employment_self ~ training_self,
+  data = people
+)
+
+self_selection_table &lt;-
+  summary(self_selection_model)$coefficients
+self_selection_interval &lt;-
+  confint(self_selection_model)
+
+round(self_selection_table, 3)
+round(self_selection_interval, 3)</textarea>
+          <div class="r-cell__actions"><button class="button run-button" type="button" disabled>係数表と95%信頼区間を表示する</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
+          <div class="r-output" hidden><div class="r-output__label">自己選択回帰の係数表と95%信頼区間</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+        </div>
+        <div class="coefficient-reading">
+          <article><span>Estimate</span><strong>6.000</strong><p>データから推計された参加群と不参加群の差。</p></article>
+          <article><span>Std. Error</span><strong>2.100</strong><p>標本が変わると推定値がどの程度動くかを表す尺度。</p></article>
+          <article><span>t value / p値</span><strong>2.858 / 0.004</strong><p>係数が0なら、今回以上に極端なt値が出る確率をp値として読む。</p></article>
+          <article><span>95% CI</span><strong>[1.882, 10.118]</strong><p>通常の回帰モデルの仮定の下で推計の不確実性を表す区間。</p></article>
+        </div>
+        <div class="warning-card"><strong>統計的有意性と因果性は別</strong><span>p値が0.004と小さくても、自己選択による参加の決まり方は変わらない。係数が0とは考えにくいことと、その係数が研修の因果効果であることは別の主張である。</span></div>
+        <div class="explanation"><strong>この係数表の位置付け</strong><span>仮想データの2,000人をより大きな母集団からの標本とみなしたときの、一般的な回帰結果の読み方を練習している。作成した2,000人そのものについては、36%、30%、差6は設定から正確に決まっている。</span></div>
+      </div>
+    </section>
+
+    <section class="lesson content-width" aria-labelledby="lesson-reg03-title">
+      <div class="lesson__number">REG03</div>
+      <div class="lesson__body">
+        <h2 id="lesson-reg03-title">観測点、二群の推計値、回帰直線を同じ図に描く</h2>
+        <p>一人の就職結果は0か100なので、点は上下二か所へ重なる。<code>jitter()</code>は重なりを見やすくするため表示位置だけを少しずらす。<code>predict()</code>で二群の推計値30と36を作り、<code>abline()</code>で推計した回帰直線を加える。</p>
+        <div class="plot-command-map">
+          <article><code>plot()</code><span>2,000人の0/100の観測点を描く</span></article>
+          <article><code>axis()</code><span>0を不参加、1を参加と表示する</span></article>
+          <article><code>abline()</code><span>推計した切片30と傾き6の線を引く</span></article>
+          <article><code>points()</code><span>二群の推計就職率30と36を強調する</span></article>
+        </div>
+        <div class="r-cell r-cell--long" data-cell-id="REG03" data-use-data>
+          <div class="r-cell__head"><span>自己選択の観測点と回帰直線を図示</span><span>作図命令をすべて表示</span></div>
+          <textarea aria-label="自己選択回帰の観測点と回帰直線を作図するRコード" spellcheck="false">self_selection_model &lt;- lm(
+  100 * employment_self ~ training_self,
+  data = people
+)
+self_selection_x &lt;-
+  as.numeric(people$training_self)
+self_selection_prediction &lt;- predict(
+  self_selection_model,
+  newdata = data.frame(
+    training_self = c(FALSE, TRUE)
+  )
+)
+
+set.seed(2401)
+plot(
+  jitter(self_selection_x, amount = 0.06),
+  jitter(100 * people$employment_self, amount = 2),
+  xlim = c(-0.25, 1.25),
+  ylim = c(-5, 105),
+  xaxt = "n",
+  xlab = "Training participation",
+  ylab = "Employment outcome (%)",
+  main = "Self-selection: observations and regression",
+  pch = 16,
+  cex = 0.55,
+  col = rgb(42/255, 111/255, 151/255, 0.16)
+)
+axis(
+  1,
+  at = c(0, 1),
+  labels = c("Non-participant", "Participant")
+)
+abline(self_selection_model, col = "#EE6C4D", lwd = 3)
+points(
+  c(0, 1),
+  self_selection_prediction,
+  pch = 19,
+  cex = 1.5,
+  col = "#EE6C4D"
+)</textarea>
+          <div class="r-cell__actions"><button class="button run-button" type="button" disabled>観測点と回帰直線を描く</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
+          <div class="r-output" hidden><div class="r-output__label">自己選択の観測点・二群の推計値・回帰直線</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+        </div>
+        <div class="graph-reading">
+          <article><span>左の橙点</span><strong>30</strong><p>不参加群の推計就職率＝切片。</p></article>
+          <article><span>右の橙点</span><strong>36</strong><p>参加群の推計就職率＝切片＋係数。</p></article>
+          <article><span>線の上昇幅</span><strong>6</strong><p>右端36−左端30＝回帰係数。</p></article>
+        </div>
+        <div class="warning-card"><strong>図に線が引けても因果効果とは限らない</strong><span>この線は自己選択で観察された二群を要約する。参加を無作為に決めていないため、傾き6は研修との関連を表すが、研修だけの効果とは解釈しない。</span></div>
+      </div>
+    </section>
+
+    <section class="lesson content-width" aria-labelledby="lesson-reg04-title">
+      <div class="lesson__number">REG04</div>
+      <div class="lesson__body">
+        <h2 id="lesson-reg04-title">回帰係数6をATT 4と選択バイアス2へ分ける</h2>
+        <p>一つ目の回帰は実際に観察された就職結果を比べる。二つ目の回帰は、全員が研修を受けなかった場合の潜在的結果を同じ参加群・不参加群で比べる。二つ目は、両方の潜在的結果を設定した仮想データだから実行できる診断である。</p>
+        <div class="r-cell" data-cell-id="REG04" data-use-data>
+          <div class="r-cell__head"><span>二つの回帰と潜在的結果から分解</span><span>計算をすべて表示</span></div>
+          <textarea aria-label="自己選択回帰係数をATTと選択バイアスへ分解するRコード" spellcheck="false">self_selection_model &lt;- lm(
+  100 * employment_self ~ training_self,
+  data = people
+)
+bias_model &lt;- lm(
+  100 * employment_no_training ~ training_self,
+  data = people
+)
+
+att &lt;- 100 * mean(
+  (people$employment_with_training -
+    people$employment_no_training)[people$training_self]
+)
+ate &lt;- 100 * mean(
+  people$employment_with_training -
+    people$employment_no_training
+)
+observed_coefficient &lt;-
+  unname(coef(self_selection_model)["training_selfTRUE"])
+bias_coefficient &lt;-
+  unname(coef(bias_model)["training_selfTRUE"])
+
+c(
+  observed_regression = observed_coefficient,
+  ATT = att,
+  ATE = ate,
+  selection_bias_regression = bias_coefficient,
+  ATT_plus_bias = att + bias_coefficient
+)</textarea>
+          <div class="r-cell__actions"><button class="button run-button" type="button" disabled>回帰係数を因果分解する</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
+          <div class="r-output" hidden><div class="r-output__label">観察回帰・ATT・ATE・選択バイアスの照合</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+        </div>
+        <div class="bias-equation" aria-label="観察された回帰係数6ポイントはATT4ポイントと選択バイアス回帰係数2ポイントの合計"><span><small>観察された回帰係数</small><b>6</b></span><i>=</i><span><small>ATT</small><b>4</b></span><i>+</i><span><small>選択バイアス回帰係数</small><b>2</b></span></div>
+        <div class="warning-card"><strong><code>bias_model</code>は現実にはそのまま推計できない</strong><span>参加者の<code>employment_no_training</code>は、現実には観察されない反実仮想である。ここでは仮想データが両方の潜在的結果を持つため、選択バイアス2を回帰係数として取り出して仕組みを確認できる。</span></div>
       </div>
     </section>
 
     <section class="practice-section content-width" aria-labelledby="practice-d-title">
       <div class="practice-intro">
-        <p class="section-label">UNIT D｜平均因果効果と選択バイアス</p>
+        <p class="section-label">UNIT D｜参加者の平均因果効果と選択バイアス</p>
         <h2 id="practice-d-title">単純比較の内訳を自分で計算する</h2>
         <p>セル14、17、18で使った式を課題欄にも表示する。教材が先に正解値を保存するのではなく、自分のコードで各量を作ってから最後の差を完成させる。</p>
         <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル15〜19</span><i>→</i><span><b>第2段階</b>選択バイアスを穴埋め</span><i>→</i><span><b>第3段階</b>観察差を自力</span></div>
@@ -1224,15 +1498,17 @@ c(
       <div class="practice-grid">
         <article class="practice-card practice-card--fill" aria-labelledby="practice-d2-title">
           <span class="stage-badge">第2段階｜穴埋め</span>
-          <h3 id="practice-d2-title">平均因果効果に選択バイアスを足す</h3>
-          <div class="request-card"><strong>依頼</strong><span>平均因果効果と選択バイアスを足し、<code>decomposed_gap</code>として保存してください。</span></div>
-          <div class="r-cell r-cell--exercise" data-cell-id="D2" data-use-data data-empty-output="（表示なし：分解後の差を保存した。下の課題判定で値を確認する）" data-check-success="正解：平均因果効果4ポイントと選択バイアス2ポイントから、観察差6ポイントを再現できた。" data-check-failure="最後の行でcausal_effectへselection_biasを足しているか確認する。">
-            <script type="text/plain" class="r-setup">if (exists("decomposed_gap", inherits = FALSE)) rm(decomposed_gap)</script>
-            <script type="text/plain" class="r-check">exists("decomposed_gap", inherits = TRUE) && is.numeric(decomposed_gap) && length(decomposed_gap) == 1 && isTRUE(all.equal(as.numeric(decomposed_gap), 6))</script>
+          <h3 id="practice-d2-title">ATTに選択バイアスを足す</h3>
+          <div class="request-card"><strong>依頼</strong><span>参加者に対する平均因果効果（ATT）と選択バイアスを足し、<code>decomposed_gap</code>として保存してください。</span></div>
+          <div class="r-cell r-cell--exercise" data-cell-id="D2" data-use-data data-empty-output="（表示なし：分解後の差を保存した。下の課題判定で値を確認する）" data-check-success="正解：ATT 4ポイントと選択バイアス2ポイントから、観察差6ポイントを再現できた。" data-check-failure="最後の行でattへselection_biasを足しているか確認する。">
+            <script type="text/plain" class="r-setup">if (exists("att", inherits = FALSE)) rm(att)
+if (exists("selection_bias", inherits = FALSE)) rm(selection_bias)
+if (exists("decomposed_gap", inherits = FALSE)) rm(decomposed_gap)</script>
+            <script type="text/plain" class="r-check">exists("att", inherits = TRUE) && is.numeric(att) && length(att) == 1 && isTRUE(all.equal(as.numeric(att), 4)) && exists("selection_bias", inherits = TRUE) && is.numeric(selection_bias) && length(selection_bias) == 1 && isTRUE(all.equal(as.numeric(selection_bias), 2)) && exists("decomposed_gap", inherits = TRUE) && is.numeric(decomposed_gap) && length(decomposed_gap) == 1 && isTRUE(all.equal(as.numeric(decomposed_gap), as.numeric(att + selection_bias))) && isTRUE(all.equal(as.numeric(decomposed_gap), 6))</script>
             <div class="r-cell__head"><span>二つの量を作って最後を穴埋め</span><span>非表示の正解値なし</span></div>
-            <textarea aria-label="課題D2のRコード" spellcheck="false">causal_effect &lt;- 100 * mean(
-  people$employment_with_training -
-    people$employment_no_training
+            <textarea aria-label="課題D2のRコード" spellcheck="false">att &lt;- 100 * mean(
+  (people$employment_with_training -
+    people$employment_no_training)[people$training_self]
 )
 
 selection_bias &lt;- 100 * (
@@ -1240,7 +1516,7 @@ selection_bias &lt;- 100 * (
     mean(people$employment_no_training[!people$training_self])
 )
 
-decomposed_gap &lt;- causal_effect + __  # ヒント：選択バイアスの名前</textarea>
+decomposed_gap &lt;- att + __  # ヒント：選択バイアスの名前</textarea>
             <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
             <div class="r-output" hidden><div class="r-output__label">この一文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
             <div class="check-output" hidden role="status" aria-live="polite"></div>
@@ -1362,7 +1638,9 @@ rct_se &lt;- 100 * sqrt(
   var(people$employment_rct[!people$training_rct]) /
     sum(!people$training_rct)
 )
-rct_ci &lt;- rct_estimate + c(-1, 1) * 1.96 * rct_se
+rct_critical_value &lt;- qt(0.975, df = n_people - 2)
+rct_ci &lt;-
+  rct_estimate + c(-1, 1) * rct_critical_value * rct_se
 
 c(
   training_rate = rct_training_rate,
@@ -1378,7 +1656,7 @@ c(
         <ol class="line-explanation">
           <li><code>people$training_rct</code>は誰を研修群へ割り付けたか、<code>people$employment_rct</code>はその割付で実際に観察される結果を表す。どちらも<code>people</code>へ追加した列である。</li>
           <li>研修群率から比較群率を引いた<code>rct_estimate</code>が、一回のRCTによる効果推定値である。</li>
-          <li><code>rct_se</code>は二群の0/1結果のばらつきと人数から標準誤差を計算する。<code>rct_ci</code>は推定値の上下へ標準誤差の1.96倍を足し引きした95%信頼区間である。</li>
+          <li><code>rct_se</code>は二群の0/1結果のばらつきと人数から標準誤差を計算する。<code>qt(0.975, df = n_people - 2)</code>は自由度1,998のt分布から95%区間に使う臨界値を求め、<code>rct_ci</code>は推定値の上下へ「臨界値×標準誤差」を足し引きする。</li>
           <li>最後の<code>c()</code>は、ここまでに作った六つの確認値を名前付きベクトルとして表示する。</li>
         </ol>
         <div class="rct-diagnostics" aria-label="この一回のRCTの確認値">
@@ -1388,10 +1666,153 @@ c(
       </div>
     </section>
 
+    <section class="concept-section content-width" id="rct-regression" aria-labelledby="rct-regression-title">
+      <p class="section-label">同じ推計方法をRCTへ適用する</p>
+      <h2 id="rct-regression-title">コードの形ではなく、二群を作った方法が因果解釈を決める</h2>
+      <p>自己選択でもRCTでも、0/1の参加変数だけを使う単回帰の係数は二群の平均差になる。異なるのは<code>lm()</code>の書き方ではなく、参加が意欲で決まったか、参加前の特徴と関係のない抽選で決まったかである。</p>
+      <div class="identification-contrast">
+        <article><span>自己選択の単回帰</span><strong>係数6＝関連</strong><p>参加群と不参加群は研修前から異なる。係数と区間を因果効果としては読まない。</p></article>
+        <article><span>RCTの単回帰</span><strong>係数4.6＝因果効果の推定値</strong><p>参加前に無作為割付した二群なので、平均差を因果効果の推定値として読める。</p></article>
+      </div>
+    </section>
+
+    <section class="lesson content-width" aria-labelledby="lesson-rct01-title">
+      <div class="lesson__number">RCT01</div>
+      <div class="lesson__body">
+        <h2 id="lesson-rct01-title">RCTの二群を、同じ<code>lm()</code>で推計する</h2>
+        <p>seed 3895の割付と観察結果をこのセルでも作り、<code>training_self</code>を<code>training_rct</code>へ替えて単回帰を推計する。係数表と95%信頼区間の列はREG02と同じ順序で読む。</p>
+        <div class="r-cell r-cell--long" data-cell-id="RCT01" data-use-data>
+          <div class="r-cell__head"><span>割付・観察結果・単回帰・係数表を全表示</span><span>前のRCT列へ依存しない</span></div>
+          <textarea aria-label="RCTの単回帰を推計して係数表と信頼区間を表示するRコード" spellcheck="false">set.seed(3895)
+people$training_rct &lt;-
+  sample(rep(c(FALSE, TRUE), each = n_people / 2))
+people$employment_rct &lt;- ifelse(
+  people$training_rct,
+  people$employment_with_training,
+  people$employment_no_training
+)
+
+rct_model &lt;- lm(
+  100 * employment_rct ~ training_rct,
+  data = people
+)
+rct_table &lt;- summary(rct_model)$coefficients
+rct_interval &lt;- confint(rct_model)
+
+round(rct_table, 3)
+round(rct_interval, 3)</textarea>
+          <div class="r-cell__actions"><button class="button run-button" type="button" disabled>RCTの単回帰を推計して読む</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
+          <div class="r-output" hidden><div class="r-output__label">RCT回帰の係数表と95%信頼区間</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+        </div>
+        <div class="coefficient-reading">
+          <article><span><code>(Intercept)</code></span><strong>31.000</strong><p>比較群の推計就職率。</p></article>
+          <article><span><code>training_rctTRUE</code></span><strong>4.600</strong><p>研修群35.6%−比較群31.0%。一回のRCTによる因果効果推定値。</p></article>
+          <article><span>Std. Error / p値</span><strong>2.106 / 0.029</strong><p>この一回の推計に伴う不確実性を表す。</p></article>
+          <article><span>95% CI</span><strong>[0.469, 8.731]</strong><p><code>confint()</code>がt分布の臨界値を使って計算した区間。</p></article>
+        </div>
+        <div class="takeaway"><strong>同じ係数でも解釈が変わる</strong><span>RCTでは割付が参加前の意欲や潜在的結果と系統的に結び付かないため、係数4.6を因果効果の推定値として読む。設定上の効果4との差0.6は、この一回の無作為割付による偶然である。</span></div>
+      </div>
+    </section>
+
+    <section class="lesson content-width" aria-labelledby="lesson-rct02-title">
+      <div class="lesson__number">RCT02</div>
+      <div class="lesson__body">
+        <h2 id="lesson-rct02-title">自己選択とRCTの係数・95%信頼区間を同じ図で比べる</h2>
+        <p>二つのモデルを同じセルで推計し、係数を点、95%信頼区間を横線として描く。緑の縦線は、仮想データに設定したATE 4である。点の位置だけでなく、どの設計から得た区間かを区別して読む。</p>
+        <div class="r-cell r-cell--long" data-cell-id="RCT02" data-use-data>
+          <div class="r-cell__head"><span>二つの係数と95%信頼区間を図示</span><span>推計と作図を全表示</span></div>
+          <textarea aria-label="自己選択とRCTの回帰係数と信頼区間を比較するRコード" spellcheck="false">self_selection_model &lt;- lm(
+  100 * employment_self ~ training_self,
+  data = people
+)
+
+set.seed(3895)
+people$training_rct &lt;-
+  sample(rep(c(FALSE, TRUE), each = n_people / 2))
+people$employment_rct &lt;- ifelse(
+  people$training_rct,
+  people$employment_with_training,
+  people$employment_no_training
+)
+rct_model &lt;- lm(
+  100 * employment_rct ~ training_rct,
+  data = people
+)
+
+estimates &lt;- c(
+  coef(self_selection_model)["training_selfTRUE"],
+  coef(rct_model)["training_rctTRUE"]
+)
+intervals &lt;- rbind(
+  confint(self_selection_model)["training_selfTRUE", ],
+  confint(rct_model)["training_rctTRUE", ]
+)
+y_positions &lt;- c(2, 1)
+causal_effect &lt;- 100 * mean(
+  people$employment_with_training -
+    people$employment_no_training
+)
+
+par(mar = c(5, 8, 4, 2) + 0.1)
+plot(
+  estimates,
+  y_positions,
+  xlim = c(0, 11),
+  ylim = c(0.5, 2.5),
+  yaxt = "n",
+  xlab = "Estimated difference (percentage points)",
+  ylab = "",
+  main = "Same regression, different assignment",
+  pch = 19,
+  cex = 1.4,
+  col = c("#EE6C4D", "#2A6F97")
+)
+segments(
+  intervals[, 1], y_positions,
+  intervals[, 2], y_positions,
+  lwd = 3,
+  col = c("#EE6C4D", "#2A6F97")
+)
+points(
+  estimates, y_positions,
+  pch = 19, cex = 1.4,
+  col = c("#EE6C4D", "#2A6F97")
+)
+axis(
+  2,
+  at = y_positions,
+  labels = c("Self-selection", "RCT"),
+  las = 1
+)
+abline(
+  v = causal_effect,
+  col = "#2A9D8F",
+  lwd = 3,
+  lty = 2
+)
+legend(
+  "topright",
+  "ATE set in the simulated data = 4",
+  col = "#2A9D8F",
+  lwd = 3,
+  lty = 2,
+  bty = "n"
+)</textarea>
+          <div class="r-cell__actions"><button class="button run-button" type="button" disabled>二つの推定結果を同じ図に描く</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
+          <div class="r-output" hidden><div class="r-output__label">自己選択とRCTの係数・95%信頼区間</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+        </div>
+        <div class="identification-contrast">
+          <article><span>橙｜自己選択</span><strong>6 [1.88, 10.12]</strong><p>偏りを含む関連6の周りの不確実性。ATEの信頼区間としては読まない。</p></article>
+          <article><span>青｜RCT</span><strong>4.6 [0.47, 8.73]</strong><p>無作為割付による因果効果推定値と、その推計の不確実性。</p></article>
+        </div>
+        <div class="takeaway"><strong>最初に推計方法、次に識別設計を読む</strong><span>二つとも同じ形の単回帰である。しかし、因果解釈を可能にするのは関数名やp値ではなく、研修参加を潜在的結果から独立にしたランダム割付である。</span></div>
+      </div>
+    </section>
+
     <section class="concept-section content-width" id="function-studio" aria-labelledby="function-studio-title">
       <p class="section-label">理解した処理を関数へまとめる</p>
       <h2 id="function-studio-title"><code>compare_designs()</code>を呼ぶ前に、中で必要な処理をすべて作る</h2>
-      <p>セル22までで、一回のRCTに必要な割付、観察結果、二群の平均差を直接書いた。ここからは、その理解済みの処理を小さな関数へまとめ、少ない回数で確かめてから500回へ広げる。関数名だけで結論を出すことはしない。</p>
+      <p>セル22で一回のRCTを手計算し、RCT01・RCT02では同じ差を単回帰として推計・図示した。ここからは、無作為割付を何度も繰り返したときの推定値を調べるため、セル22の割付と平均差を小さな関数へまとめ、少ない回数で確かめてから500回へ広げる。関数名だけで結論を出すことはしない。</p>
       <div class="function-stack" aria-label="最終関数までの組み立て順序">
         <article><span>23</span><code>estimate_one_rct()</code><p>一回の割付と推定</p></article>
         <i>→</i>
@@ -1684,10 +2105,10 @@ compare_designs()</textarea>
 
     <section class="practice-section content-width" aria-labelledby="practice-e-title">
       <div class="practice-intro">
-        <p class="section-label">UNIT E｜意欲を使わない無作為割付</p>
-        <h2 id="practice-e-title">ランダム割付と効果推定を自分で書く</h2>
-        <p><code>people</code>の2,000人について、意欲を使わない割付と一回のRCT平均差を、準備処理を含めて再現する。</p>
-        <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル20〜27</span><i>→</i><span><b>第2段階</b>人数を穴埋め</span><i>→</i><span><b>第3段階</b>観察結果とRCT差を自力</span></div>
+        <p class="section-label">UNIT E｜ランダム割付と単回帰</p>
+        <h2 id="practice-e-title">RCTの割付と回帰推定を自分で書く</h2>
+        <p><code>people</code>の2,000人について、意欲を使わない割付を作り、RCT01で学んだ単回帰から一回の因果効果推定値を取り出す。</p>
+        <div class="stage-path" aria-label="三段階の学習順序"><span class="is-done"><b>第1段階</b>セル20〜27・RCT01〜02</span><i>→</i><span><b>第2段階</b>割付人数を穴埋め</span><i>→</i><span><b>第3段階</b>RCT回帰を自力</span></div>
       </div>
       <div class="practice-grid">
         <article class="practice-card practice-card--fill" aria-labelledby="practice-e2-title">
@@ -1709,13 +2130,14 @@ training_rct_exercise &lt;-
         </article>
         <article class="practice-card practice-card--free" aria-labelledby="practice-e3-title">
           <span class="stage-badge">第3段階｜自力</span>
-          <h3 id="practice-e3-title">RCTの就職率差を一文で書く</h3>
-          <div class="request-card"><strong>依頼</strong><span>表示済みの割付から観察結果を作り、研修群と比較群の就職率差を<code>rct_estimate_answer</code>として保存してください。</span></div>
-          <p>割付と<code>ifelse()</code>は見本として表示している。最後に<code>employment_rct_answer</code>を<code>training_rct_answer</code>で二群へ分け、研修群から比較群を引く。</p>
-          <div class="r-cell r-cell--exercise" data-cell-id="E3" data-use-data data-empty-output="（表示なし：RCT推定値を保存した。下の課題判定で確認する）" data-check-success="正解：割付から観察結果を作り、この一回のRCT推定値4.6ポイントを再現できた。" data-check-failure="employment_rct_answerをtraining_rct_answerで二群に分け、TRUE群の平均からFALSE群の平均を引く。">
-            <script type="text/plain" class="r-setup">if (exists("rct_estimate_answer", inherits = FALSE)) rm(rct_estimate_answer)</script>
-            <script type="text/plain" class="r-check">exists("rct_estimate_answer", inherits = TRUE) && is.numeric(rct_estimate_answer) && length(rct_estimate_answer) == 1 && isTRUE(all.equal(as.numeric(rct_estimate_answer), 4.6))</script>
-            <div class="r-cell__head"><span>割付と観察結果を作ってから差を書く</span><span>コメントの下に入力</span></div>
+          <h3 id="practice-e3-title">RCTの単回帰と係数を自分で書く</h3>
+          <div class="request-card"><strong>依頼</strong><span>表示済みの割付と観察結果を使い、就職結果を割付で説明する単回帰を<code>rct_model_answer</code>として推計してください。研修群の係数を<code>rct_regression_estimate</code>として保存してください。</span></div>
+          <p>割付と<code>ifelse()</code>は見本として表示している。RCT01の<code>lm(結果 ~ 説明変数)</code>と<code>coef()</code>を思い出し、コメントの下へ二つの代入を書く。</p>
+          <div class="r-cell r-cell--exercise" data-cell-id="E3" data-use-data data-empty-output="（表示なし：RCT回帰モデルと係数を保存した。下の課題判定で確認する）" data-check-success="正解：RCTの観察結果を単回帰で推計し、研修群の係数4.6ポイントを取り出せた。" data-check-failure="lm()の左に100 * employment_rct_answer、右にtraining_rct_answerを書く。次にcoef()からTRUEの係数を取り出す。">
+            <script type="text/plain" class="r-setup">if (exists("rct_model_answer", inherits = FALSE)) rm(rct_model_answer)
+if (exists("rct_regression_estimate", inherits = FALSE)) rm(rct_regression_estimate)</script>
+            <script type="text/plain" class="r-check">exists("rct_model_answer", inherits = TRUE) && inherits(rct_model_answer, "lm") && identical(all.vars(formula(rct_model_answer)), c("employment_rct_answer", "training_rct_answer")) && nobs(rct_model_answer) == n_people && exists("rct_regression_estimate", inherits = TRUE) && is.numeric(rct_regression_estimate) && length(rct_regression_estimate) == 1 && isTRUE(all.equal(as.numeric(rct_regression_estimate), as.numeric(coef(rct_model_answer)["training_rct_answerTRUE"]))) && isTRUE(all.equal(as.numeric(rct_regression_estimate), 4.6))</script>
+            <div class="r-cell__head"><span>割付と観察結果の後へ回帰を書く</span><span>コメントの下に二つの代入</span></div>
             <textarea aria-label="課題E3のRコード" spellcheck="false">set.seed(3895)
 training_rct_answer &lt;-
   sample(rep(c(FALSE, TRUE), each = n_people / 2))
@@ -1725,10 +2147,11 @@ employment_rct_answer &lt;- ifelse(
   people$employment_no_training
 )
 
-# ヒント：rct_estimate_answer &lt;- 100 * (研修群の平均 - 比較群の平均)
+# ヒント1：rct_model_answer &lt;- lm(100 * 結果 ~ 割付)
+# ヒント2：rct_regression_estimate &lt;- coef(モデル)["割付TRUE"]
 </textarea>
-            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
-            <div class="r-output" hidden><div class="r-output__label">自分で書いた文に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            <div class="r-cell__actions"><button class="button run-button" type="button" disabled>回帰を実行して答えを確かめる</button><button class="button button--quiet restore-button" type="button">入力を元に戻す</button></div>
+            <div class="r-output" hidden><div class="r-output__label">自分で書いた回帰に対するRからの返事</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
             <div class="check-output" hidden role="status" aria-live="polite"></div>
           </div>
         </article>
@@ -1742,8 +2165,9 @@ employment_rct_answer &lt;- ifelse(
         <article><span>1</span><p>標準関数はRが用意した処理、自作関数は理解した複数の処理を<code>function()</code>で定義し、名前と括弧で呼び出す処理である。</p></article>
         <article><span>2</span><p>同じ変数を一括計算するなら<code>c()</code>でベクトルを作り、種類や役割の違う要素を保つなら<code>list()</code>でリストを作る。</p></article>
         <article><span>3</span><p><code>data_settings</code>から0と1の潜在的結果を作り、自己選択の観察結果までを<code>people</code>へまとめる全工程を確認した。</p></article>
-        <article><span>4</span><p>自己選択では参加前の群間差が単純比較に含まれるため、観察差を平均因果効果と選択バイアスへ分けて計算した。</p></article>
-        <article><span>5</span><p>一回のRCTを直接計算してから、反復と作図を小さな関数へまとめ、最後に定義全文を読んだ上で<code>compare_designs()</code>を呼び出した。</p></article>
+        <article><span>4</span><p>自己選択では参加前の群間差が単純比較に含まれる。一般に観察差はATTと選択バイアスに分かれ、この教材ではATT＝ATE＝4なので6＝4＋2になった。</p></article>
+        <article><span>5</span><p>単純比較を<code>lm()</code>で推計し、切片と係数、標準誤差、p値、95%信頼区間を読み、観測点・回帰直線・係数区間を図示した。</p></article>
+        <article><span>6</span><p>同じ単回帰でも因果解釈は割付方法で変わる。一回のRCTを直接計算した後、反復と作図を小さな関数へまとめ、定義全文を読んで<code>compare_designs()</code>を呼び出した。</p></article>
       </div>
       <div class="system-reference" aria-labelledby="system-reference-title">
         <h3 id="system-reference-title">あとから見返す体系表</h3>
@@ -1752,6 +2176,7 @@ employment_rct_answer &lt;- ifelse(
           <article><span>データ構造</span><p><code>c()</code> ベクトル　<code>list()</code> リスト　<code>data.frame()</code> 表</p></article>
           <article><span>演算子</span><p><code>&lt;-</code> 代入　<code>+ - * /</code> 算術　<code>&gt; &lt; == !=</code> 比較</p></article>
           <article><span>表から選ぶ</span><p><code>people$列名</code>　<code>値[条件]</code>　<code>!</code>で条件を反転</p></article>
+          <article><span>単回帰</span><p><code>lm(結果 ~ 説明変数, data = 表)</code>　係数表は<code>summary()</code>、区間は<code>confint()</code></p></article>
           <article><span>自作関数</span><p><code>名前 &lt;- function(引数) { 処理; return(返り値) }</code></p></article>
         </div>
       </div>
