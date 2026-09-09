@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="パネルデータの構造と固定効果を学び、3つの合成データで差分の差分法をfixestにより推定するブラウザR実習">
+  <title>第9・10回｜Rで差分の差分法</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2316324f'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-size='34' font-family='sans-serif' font-weight='700' fill='white'%3ER%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">本文へ移動</a>
+
+  <header class="hero">
+    <div class="hero__inner">
+      <p class="eyebrow">計量経済学の応用と実践 · 2026 Summer</p>
+      <h1>Rで差分の差分法</h1>
+      <p class="hero__lead">第7・8回で学んだDiDを、3つの合成パネルデータに適用する。データ構造の確認、記述統計、固定効果モデル、イベントスタディ、プラセボ分析までの一連の手順を実行する。</p>
+      <div class="hero__meta">
+        <span>第9回・第10回</span>
+        <span>静的HTML＋webR</span>
+        <span>fixest::feols()</span>
+        <span>インストール不要</span>
+        <span>ブラウザ教材</span>
+      </div>
+      <div class="difficulty-map" aria-label="三つの実習段階">
+        <article><span>LEVEL 1</span><strong>アニメ</strong><small>完成コードを実行</small></article>
+        <i aria-hidden="true">→</i>
+        <article><span>LEVEL 2</span><strong>16 and Pregnant</strong><small>一部を穴埋め</small></article>
+        <i aria-hidden="true">→</i>
+        <article><span>LEVEL 3</span><strong>警官配置</strong><small>指示文からコードを作成</small></article>
+      </div>
+      <div class="hero__start-actions" aria-label="講義の開始位置">
+        <a class="hero-start-link" href="#structure"><span>第9回</span><strong>最初から始める</strong></a>
+        <a class="hero-start-link" href="#mtv"><span>第10回</span><strong>MTVから始める</strong></a>
+        <button class="hero-start-link hero-start-link--resume" id="hero-resume-button" type="button" hidden><span>前回の記録</span><strong>続きから再開</strong></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="runtime-bar" id="runtime-bar">
+    <div class="runtime-bar__inner">
+      <div class="runtime-status" role="status" aria-live="polite">
+        <span class="status-dot status-dot--loading" id="status-dot" aria-hidden="true"></span>
+        <div><strong id="status-title">Rを準備中</strong><span id="status-detail">初回は30秒から1分ほどかかります</span></div>
+      </div>
+      <div class="progress-block">
+        <span><b id="completed-count">0</b> / <b id="total-count">0</b> セル完了</span>
+        <strong class="current-step" id="current-step">導入を読んでいます</strong>
+        <div class="progress-track" id="progress-track" role="progressbar" aria-valuemin="0" aria-valuenow="0"><i id="progress-fill"></i></div>
+      </div>
+      <div class="runtime-actions">
+        <button class="button button--quiet" id="resume-button" type="button" hidden>続きから</button>
+        <button class="button button--quiet" id="previous-step-button" type="button">前のセル</button>
+        <button class="button" id="next-step-button" type="button">次の未完了へ</button>
+        <button class="button button--quiet" id="restart-button" type="button">全消去</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="main">
+    <div class="course-layout">
+      <nav class="flow-rail" aria-label="この回の流れ">
+        <p class="flow-rail__eyebrow">この回の流れ</p>
+        <p class="flow-rail__mobile"><span>現在地</span><strong id="flow-mobile-current">導入</strong></p>
+        <ol id="flow-list">
+          <li data-flow-item="intro"><a href="#intro"><span>0</span><b class="flow-rail__text">導入</b></a></li>
+          <li data-flow-item="structure"><a href="#structure"><span>1</span><b class="flow-rail__text">データ構造</b></a></li>
+          <li data-flow-item="fe"><a href="#fixed-effects"><span>2</span><b class="flow-rail__text">固定効果</b></a></li>
+          <li data-flow-item="anime"><a href="#anime"><span>3</span><b class="flow-rail__text">アニメ</b></a></li>
+          <li data-flow-item="mtv"><a href="#mtv"><span>4</span><b class="flow-rail__text">MTV</b></a></li>
+          <li data-flow-item="police"><a href="#police"><span>5</span><b class="flow-rail__text">警官配置</b></a></li>
+          <li data-flow-item="summary"><a href="#summary"><span>6</span><b class="flow-rail__text">まとめ</b></a></li>
+        </ol>
+      </nav>
+
+      <div class="course-main">
+        <section class="content-section" id="intro" data-flow-section="intro">
+          <p class="section-label">INTRODUCTION</p>
+          <h2>三つの事例で、同じ分析手順を繰り返す</h2>
+          <div class="workflow" aria-label="DiD実証分析の手順">
+            <article><span>01</span><strong>問いと処置を定義</strong><p>何が、どの単位に、いつ始まったか。</p></article>
+            <article><span>02</span><strong>データの形を確認</strong><p>単位×時点のパネルになっているか。</p></article>
+            <article><span>03</span><strong>記述統計と図</strong><p>人数、欠損、群別平均、処置前の動き。</p></article>
+            <article><span>04</span><strong>固定効果で推定</strong><p>単位固有の水準差と共通時間変化を調整する。</p></article>
+            <article><span>05</span><strong>仮定を点検</strong><p>イベントスタディとプラセボ。</p></article>
+            <article><span>06</span><strong>文脈に基づく解釈</strong><p>係数の単位と分析上の限界を明記する。</p></article>
+          </div>
+          <div class="notice notice--important">
+            <strong>この教材のデータはすべて教育用の合成データ</strong>
+            <p>実論文の問いと比較の構造を参考に、ブラウザで扱いやすい大きさに生成した。数値は論文の推定結果ではなく、論文のreplicationでもない。</p>
+          </div>
+          <div class="session-grid">
+            <article><span>第9回</span><h3>データ構造・固定効果・アニメ事例</h3><p>クロスセクションとパネルデータ、固定効果を確認し、アニメ事例の完成コードを順に実行する。</p></article>
+            <article><span>第10回</span><h3>MTV事例・警官配置事例</h3><p>MTV事例では穴埋め、警官配置事例では指示文に基づいてコードを作成する。</p></article>
+          </div>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">教材の構成</div>
+            <h3>説明、実行、出力確認、解釈の順に進む</h3>
+            <div class="learning-grid">
+              <article><span>UNDERSTAND</span><strong>短い説明パネル</strong><p>講義に必要な概念は、コードの直前にスライド型で示す。</p></article>
+              <article><span>RUN</span><strong>実行ボタン</strong><p>Editorのコード全体をブラウザ内のRへ送り、Outputを確認する。</p></article>
+              <article><span>TRANSFER</span><strong>入力支援を段階的に減らす</strong><p>完成コード、穴埋め、指示文に基づくコード作成の順で進む。</p></article>
+            </div>
+            <div class="slide-takeaway">到達目標：データの構造を説明し、固定効果DiDを指定し、event studyとplaceboを根拠に基づいて解釈する。</div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact r-survival-slide">
+            <div class="slide-kicker">R BEGINNER GUIDE｜最初のセルを動かす前に</div>
+            <h3>Rコードで使用する基本記号</h3>
+            <div class="r-symbol-grid">
+              <article><code>&lt;-</code><strong>名前を付けて保存</strong><p><code>model &lt;- feols(...)</code>なら、推定結果をmodelへ保存する。</p></article>
+              <article><code>$</code><strong>列を取り出す</strong><p><code>anime$year</code>は、animeという表のyear列。</p></article>
+              <article><code>==</code> <code>&gt;</code><strong>条件を作る</strong><p><code>post == 0</code>は処置前、<code>rating &gt; cutoff</code>はcutoffより大きい。</p></article>
+              <article><code>&amp;</code><strong>二つの条件を同時に満たす</strong><p><code>treated == 1 &amp; post == 1</code>は、処置群であり、かつ処置後である行。</p></article>
+              <article><code>%in%</code><strong>候補のいずれかに含まれる</strong><p><code>year %in% c(2009, 2011)</code>は、yearが2009または2011である行。</p></article>
+              <article><code>~</code><strong>結果と分け方を結ぶ</strong><p><code>income ~ group + year</code>は、incomeをgroupとyearで分ける式。</p></article>
+              <article><code>:</code><strong>二つが同時に1</strong><p><code>treated:post</code>は処置群で、かつ処置後というDiDの項。</p></article>
+              <article><code>|</code><strong>固定効果を分ける</strong><p>左側に説明変数、右側に単位・時間固定効果を指定する。</p></article>
+            </div>
+            <div class="r-function-guide">
+              <h4>実習で使用する主要関数</h4>
+              <div>
+                <article><code>dim() / names() / head()</code><span>表の大きさ・列名・先頭行を見る</span></article>
+                <article><code>subset()</code><span>条件に合う行だけ残す</span></article>
+                <article><code>aggregate()</code><span>群×時間などで平均を作る</span></article>
+                <article><code>c() / cbind()</code><span>値や複数の列をまとめる</span></article>
+                <article><code>unique() / duplicated()</code><span>種類数と重複を調べる</span></article>
+                <article><code>fixest::feols()</code><span>追加パッケージfixestのfeols()で固定効果回帰を推定する</span></article>
+              </div>
+              <p><code>関数名(材料)</code>が基本形。括弧の中へ、使うdataや列、条件を渡す。fixestはRへ機能を加えるパッケージで、<code>fixest::feols()</code>は「fixestの中にあるfeols()を使う」という指定である。本文中の<code>feols()</code>は同じ関数を指す。</p>
+            </div>
+            <div class="cell-anatomy" aria-label="Rセルの進め方">
+              <article><b>1</b><span>目的を読む</span><small>このセルで何を確かめるか</small></article>
+              <i>→</i><article><b>2</b><span>Editorを確認</span><small>完成・穴埋め・指示入力</small></article>
+              <i>→</i><article><b>3</b><span>実行ボタン</span><small>コード全体を実行</small></article>
+              <i>→</i><article><b>4</b><span>出力を確認</span><small>指定された数値・図を確認</small></article>
+            </div>
+            <div class="notice cell-isolation-note">
+              <strong>この教材では、どのセルも単独で実行できます</strong>
+              <p>必要なデータと前処理は、各セル専用のR環境へ自動的に読み込まれます。このため、各セルは独立して実行できます。教材の学習順序はページ上部から下部の順です。入力内容と完了記録はブラウザに保存されます。「完了」はコードの実行または課題判定が成功した状態を示し、理解度の評価ではありません。</p>
+            </div>
+            <details class="keyboard-help">
+              <summary>操作方法</summary>
+              <ul><li>実行は各セルの実行ボタン、またはWindowsのCtrl＋Enter／MacのCommand＋Enter。</li><li>Tabキーはインデントを入力せず、次の操作要素へフォーカスを移す。インデントには半角スペースを使用する。</li><li>「元に戻す」は、そのセルのEditorだけを初期状態へ戻す。</li><li>長いコードはEditor内を横にスクロールできる。</li><li>穴埋めやコード作成では、ヒント1 → ヒント2 → 解答例の順に参照できる。</li></ul>
+            </details>
+          </article>
+        </section>
+
+        <section class="content-section" id="structure" data-flow-section="structure">
+          <p class="section-label">PART 0 · DATA STRUCTURE</p>
+          <h2>DiDで使用するパネルデータの構造</h2>
+
+          <article class="session-divider">
+            <span>LECTURE 9 · PART 1</span>
+            <h3>回帰式より先に、「一行・一単位・一時点」を確定する</h3>
+            <p>データの構造を誤ると、正しい式を書いても違う比較を推定してしまう。</p>
+          </article>
+
+          <article class="concept-slide">
+            <div class="slide-kicker">SLIDE 1｜観察の単位</div>
+            <h3>クロスセクションは一時点、パネルは同じ単位を時間に沿って追う</h3>
+            <div class="data-shape-comparison">
+              <div>
+                <span>クロスセクション</span>
+                <table><thead><tr><th>自治体</th><th>2011年所得</th><th>舞台</th></tr></thead><tbody><tr><td>A</td><td>110</td><td>1</td></tr><tr><td>B</td><td>100</td><td>0</td></tr><tr><td>C</td><td>98</td><td>0</td></tr></tbody></table>
+                <p>2011年の水準は比較できる。ただし、各自治体が放送前からどのように変化したかは確認できない。</p>
+              </div>
+              <div>
+                <span>パネルデータ</span>
+                <table><thead><tr><th>自治体</th><th>年</th><th>所得</th><th>舞台</th></tr></thead><tbody><tr><td>A</td><td>2009</td><td>100</td><td>1</td></tr><tr><td>A</td><td>2011</td><td>110</td><td>1</td></tr><tr><td>B</td><td>2009</td><td>95</td><td>0</td></tr><tr><td>B</td><td>2011</td><td>100</td><td>0</td></tr></tbody></table>
+                <p>同じ自治体の前後差と、異なる群の変化の差を同時に計算できる。</p>
+              </div>
+            </div>
+            <div class="slide-takeaway">DiDには、処置群・対照群だけでなく、処置前・処置後も必要。</div>
+          </article>
+
+          <article class="concept-slide">
+            <div class="slide-kicker">SLIDE 2｜1行が表すもの</div>
+            <h3>long形式では、一行が「一つの単位の一つの時点」</h3>
+            <div class="key-diagram">
+              <span><b>municipality_id</b><small>誰・どこ</small></span>
+              <i>＋</i>
+              <span><b>year</b><small>いつ</small></span>
+              <i>＝</i>
+              <span class="key-diagram__result"><b>行を一意に決めるkey</b><small>同じ組合せが二行あれば重複</small></span>
+            </div>
+            <div class="four-variable-grid">
+              <article><span>単位ID</span><b>municipality_id</b><p>同じ自治体を年をまたいで結ぶ。</p></article>
+              <article><span>時間</span><b>year</b><p>処置の前後と相対時点を作る。</p></article>
+              <article><span>結果</span><b>income_index</b><p>処置が変えたか知りたい量。</p></article>
+              <article><span>処置</span><b>anime_stage × post</b><p>処置群で、かつ処置後の観察を示す。</p></article>
+            </div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 3｜観測のそろい方</div>
+            <h3>balancedかどうかは、各単位の観測時点数で決まる</h3>
+            <div class="concept-grid concept-grid--2">
+              <article class="concept-card concept-card--blue"><span>BALANCED</span><strong>全単位が全時点にある</strong><p>60自治体すべてに2005–2015年の11行がある。今回の三データはこちら。</p></article>
+              <article class="concept-card"><span>UNBALANCED</span><strong>単位により観測時点数が違う</strong><p>欠測、参入、退出がある。それ自体は誤りではないが、処置や結果と関連する脱落かを調べる。</p></article>
+            </div>
+            <div class="slide-takeaway">行数＝単位数×時点数の確認に加えて、重複key、各単位の行数、欠損を個別に点検する。</div>
+          </article>
+
+          <div class="dataset-atlas">
+            <article><span>ANIME</span><strong>自治体×年</strong><p>60自治体、2005–2015年、660行</p><small>結果：所得指数</small></article>
+            <article><span>MTV</span><strong>市場×四半期</strong><p>80市場、2007Q1–2011Q4、1,600行</p><small>結果：10代出生率</small></article>
+            <article><span>POLICE</span><strong>街区×月</strong><p>300街区、1994年1月–1995年6月、5,400行</p><small>結果：自動車盗件数</small></article>
+          </div>
+
+          <article class="concept-slide">
+            <div class="slide-kicker">SLIDE 4｜DiDに必要な役割</div>
+            <h3>列名ではなく、研究上の役割を先に確定する</h3>
+            <div class="role-table-wrap">
+              <table class="role-table">
+                <thead><tr><th>役割</th><th>アニメの例</th><th>確認する問い</th></tr></thead>
+                <tbody>
+                  <tr><th>単位ID</th><td><code>municipality_id</code></td><td>誰・どこを繰り返し観測するか</td></tr>
+                  <tr><th>時間ID</th><td><code>year</code></td><td>いつの観測か</td></tr>
+                  <tr><th>結果 Y</th><td><code>income_index</code></td><td>何への効果を測るか、単位は何か</td></tr>
+                  <tr><th>処置群 D</th><td><code>anime_stage</code></td><td>どの単位が処置を受けるか</td></tr>
+                  <tr><th>処置後 Post</th><td><code>post</code></td><td>いつから処置後か</td></tr>
+                  <tr><th>相対時点 k</th><td><code>relative_year</code></td><td>処置から何期前・何期後か</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="slide-takeaway"><code>post = 1</code>だけでは処置を受けたことにならない。処置群で、かつ処置後の行が処置状態。</div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 5｜記述統計の順序</div>
+            <h3>記述統計は回帰前の品質管理である</h3>
+            <div class="step-lane" aria-label="記述統計の順序">
+              <article><b>1</b><span>形</span><small>行数・列名・先頭行</small></article>
+              <i>→</i><article><b>2</b><span>key</span><small>単位数・時点数・重複</small></article>
+              <i>→</i><article><b>3</b><span>欠損</span><small>結果・処置・時間</small></article>
+              <i>→</i><article><b>4</b><span>割付</span><small>群の大きさ・開始時点</small></article>
+              <i>→</i><article><b>5</b><span>推移</span><small>処置前の群平均</small></article>
+            </div>
+            <div class="slide-takeaway">回帰モデルを実行できることだけでは、データの品質を確認したことにはならない。推定前に、意図した比較を構成するデータであるかを確認する。</div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル D01</span><h3>データの大きさ、列名、先頭行を確認する</h3></div>
+            <p>分析前に、行数、列数、変数名、先頭行を確認する。あわせて、一行が表す観測単位を特定する。</p>
+            <div class="r-cell" data-cell-id="D01" data-dataset="anime">
+              <textarea aria-label="セルD01のRコード" spellcheck="false">dim(anime)
+names(anime)
+head(anime, 8)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>構造を表示</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">DATA STRUCTURE</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="reading-note"><strong>読む順序</strong><span>660行×11列 → 列名 → 同じ自治体M01が年ごとに繰り返される。</span></div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル D02</span><h3>行数を「単位数×時点数」へ分解する</h3></div>
+            <p>660という行数だけではパネルか分からない。自治体数60×年数11＝660になっていることを確認する。</p>
+            <div class="r-cell" data-cell-id="D02" data-dataset="anime">
+              <textarea aria-label="セルD02のRコード" spellcheck="false">c(
+  rows = nrow(anime),
+  municipalities = length(unique(anime$municipality_id)),
+  years = length(unique(anime$year)),
+  municipalities_times_years =
+    length(unique(anime$municipality_id)) * length(unique(anime$year))
+)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>数を確認</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">PANEL SIZE</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル D03</span><h3>keyの重複とbalanced panelを確認する</h3></div>
+            <p><code>municipality_id</code>と<code>year</code>をつないだkeyに重複がないか、各自治体に11行ずつあるかを確認する。</p>
+            <div class="r-cell" data-cell-id="D03" data-dataset="anime">
+              <textarea aria-label="セルD03のRコード" spellcheck="false"># paste()は二つの値を空白でつなぎ、一つのkeyを作る
+panel_key &lt;- paste(anime$municipality_id, anime$year)
+rows_per_municipality &lt;- table(anime$municipality_id)
+balanced &lt;- min(rows_per_municipality) == max(rows_per_municipality)
+
+c(
+  duplicated_keys = sum(duplicated(panel_key)),
+  minimum_rows = min(rows_per_municipality),
+  maximum_rows = max(rows_per_municipality)
+)
+
+balanced</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>panel keyを点検</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">KEY AND BALANCE</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="definition-strip"><b>balanced panel</b><span>すべての単位が同じ時点数だけ観察されるパネル。最後の出力が<code>TRUE</code>ならこの条件を満たす。この教材の3データはすべてbalanced。</span></div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル D04</span><h3>欠損と変数の分布を確認する</h3></div>
+            <p>推定の前に、結果・処置・時点に欠損がないか、値の範囲が意味のあるものかを見る。</p>
+            <div class="r-cell" data-cell-id="D04" data-dataset="anime">
+              <textarea aria-label="セルD04のRコード" spellcheck="false"># is.na()で欠損をTRUEにし、colSums()で列ごとの個数を数える
+colSums(is.na(anime))
+
+# c("列名", ...)で確認する列を並べ、anime[...]でその列だけを選ぶ
+summary(anime[c(
+  "year",
+  "income_index",
+  "population_thousands",
+  "anime_stage",
+  "post"
+)])
+
+anime_units &lt;- unique(anime[c("municipality_id", "anime_stage")])
+table(anime_units$anime_stage)
+
+min(anime$year[anime$post == 1])</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>欠損と分布を表示</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">MISSINGNESS AND SUMMARY</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="reading-note"><strong>Outputで見る場所</strong><span>最初に各列の欠損数が0かを確認する。<code>summary()</code>ではMin.（最小値）、Mean（平均）、Max.（最大値）を中心に読む。1st Qu.と3rd Qu.は、値を小さい順に並べたときの25%点と75%点である。最後に群別自治体数と、処置開始年2010を確認する。</span></div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル D05</span><h3>群×年の平均を作り、推定前のデータを要約する</h3></div>
+            <p>個々の660行を、舞台／対照×11年の22行へ要約する。イベントスタディの前に見るべき図の材料になる。</p>
+            <div class="r-cell" data-cell-id="D05" data-dataset="anime">
+              <textarea aria-label="セルD05のRコード" spellcheck="false">anime_year_means &lt;- aggregate(
+  income_index ~ anime_stage + year,
+  data = anime,
+  # meanに()は付けず、平均を計算する関数そのものをFUNへ渡す
+  FUN = mean
+)
+
+anime_year_means</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>群別平均を作る</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">GROUP × YEAR MEANS</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+          </article>
+
+          <div class="checkpoint">
+            <strong>推定前チェック</strong>
+            <ol><li>一行が何を表すか</li><li>単位IDと時間変数は何か</li><li>処置開始はいつか</li><li>処置群と対照群は何単位か</li><li>keyの重複・欠損・脱落はないか</li><li>処置前の平均はどう動くか</li></ol>
+          </div>
+        </section>
+
+        <section class="content-section" id="fixed-effects" data-flow-section="fe">
+          <p class="section-label">PART 1 · FIXED EFFECTS</p>
+          <h2><code>| 自治体 + 年</code>による二方向固定効果の指定</h2>
+
+          <article class="session-divider session-divider--blue">
+            <span>LECTURE 9 · PART 2</span>
+            <h3>単位固定効果と時間固定効果による調整</h3>
+            <p>単位固有の水準と、各時点に共通する変化を調整する。</p>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 6｜なぜ水準差を使わないか</div>
+            <h3>放送後の所得差には、放送前からの水準差が含まれる</h3>
+            <div class="subtraction-board">
+              <article><span>観察される水準差</span><strong>舞台自治体 − 対照自治体</strong></article>
+              <i>＝</i>
+              <article><span>知りたいもの</span><strong>アニメ放送の効果</strong></article>
+              <i>＋</i>
+              <article class="subtraction-board__warning"><span>混ざるもの</span><strong>都市規模・地理・観光資源…</strong></article>
+            </div>
+            <div class="slide-takeaway">比較対象は観測時点の水準差ではなく、各自治体の基準水準からの変化である。</div>
+          </article>
+
+          <article class="concept-slide concept-slide--navy">
+            <div class="slide-kicker">SLIDE 7｜自治体固定効果</div>
+            <h3>自治体固有の時間不変な水準差を調整する</h3>
+            <div class="fe-visual">
+              <div><span>自治体A</span><i style="--level:82%"></i><b>観光資源が多い</b></div>
+              <div><span>自治体B</span><i style="--level:57%"></i><b>平均的</b></div>
+              <div><span>自治体C</span><i style="--level:34%"></i><b>所得水準が低い</b></div>
+            </div>
+            <p>地理、歴史、既存の観光資源など、期間中ほぼ変化しない自治体属性に由来する水準差を調整する。これにより、各自治体の基準水準からの変化を比較できる。</p>
+            <div class="slide-takeaway">自治体固定効果は、時間不変の自治体間の水準差を調整する。</div>
+          </article>
+
+          <article class="concept-slide concept-slide--navy">
+            <div class="slide-kicker">SLIDE 8｜年固定効果</div>
+            <h3>各年に全自治体へ共通するショックを調整する</h3>
+            <div class="time-shock-row"><span>景気</span><span>物価</span><span>全国的観光ブーム</span><span>全国制度</span></div>
+            <div class="shock-arrow" aria-hidden="true">↓　↓　↓　すべての自治体へ　↓　↓　↓</div>
+            <p>2009年と2011年で全国の所得が変化した場合、各年に共通する変化を年固定効果で調整する。これは、DiDにおいて対照群の時間変化を用いて調整する操作に対応する。</p>
+            <div class="slide-takeaway">年固定効果は、各時点に共通する時間変化を調整する。</div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 9｜二方向固定効果DiD</div>
+            <h3>式の各項と分析上の役割を対応させる</h3>
+            <div class="model-equation" aria-label="二方向固定効果モデル">
+              <span>Y<sub>it</sub></span><i>＝</i><b>α<sub>i</sub></b><i>＋</i><b>λ<sub>t</sub></b><i>＋</i><strong>β（D<sub>i</sub>×Post<sub>t</sub>）</strong><i>＋</i><span>ε<sub>it</sub></span>
+            </div>
+            <div class="concept-grid concept-grid--3">
+              <article class="concept-card"><span>α<sub>i</sub></span><strong>単位固定効果</strong><p>各単位固有の時間不変な水準。</p></article>
+              <article class="concept-card"><span>λ<sub>t</sub></span><strong>時間固定効果</strong><p>各時点に共通する動き。</p></article>
+              <article class="concept-card concept-card--green"><span>β</span><strong>DiD係数</strong><p>処置群における処置後の追加的な変化。</p></article>
+            </div>
+          </article>
+
+          <article class="concept-slide">
+            <div class="slide-kicker">SLIDE 10｜fixestの式</div>
+            <h3>縦棒の左側に説明変数、右側に固定効果を指定する</h3>
+            <div class="formula-anatomy">
+              <code>feols(income_index ~ anime_stage:post | municipality_id + year)</code>
+              <div><span>結果</span><b>income_index</b></div>
+              <div><span>DiD</span><b>anime_stage:post</b></div>
+              <div><span>固定効果</span><b>municipality_id + year</b></div>
+            </div>
+            <ul>
+              <li><code>:</code>は二つの変数の積。「舞台自治体で、かつ放送後」を表す。</li>
+              <li><code>|</code>は通常の説明変数と固定効果を分ける。因果の矢印ではない。</li>
+              <li><code>cluster = ~municipality_id</code>は、同じ自治体の年ごとの誤差が似る可能性を考慮する。</li>
+            </ul>
+            <div class="slide-takeaway">固定効果のみでは、時間とともに変化する交絡要因や平行トレンド仮定の違反には対処できない。</div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 11｜固定効果に吸収される変数</div>
+            <h3><code>anime_stage</code>と<code>post</code>を別々に入れなくてよい理由</h3>
+            <div class="concept-grid concept-grid--2">
+              <article class="concept-card"><span>anime_stage</span><strong>自治体内で変わらない</strong><p>舞台群かどうかによる水準差は自治体固定効果に吸収される。</p></article>
+              <article class="concept-card"><span>post</span><strong>同じ年なら全自治体で共通</strong><p>放送後であることによる時間差は年固定効果に吸収される。</p></article>
+            </div>
+            <div class="slide-takeaway">残して推定するのは<code>anime_stage:post</code>。「舞台群で、かつ放送後」の追加的な変化。</div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 12｜cluster標準誤差</div>
+            <h3>同一自治体内の11観測は互いに独立とは限らない</h3>
+            <div class="cluster-visual">
+              <article><span>M01</span><b>2005</b><b>2006</b><b>…</b><b>2015</b></article>
+              <article><span>M02</span><b>2005</b><b>2006</b><b>…</b><b>2015</b></article>
+              <article><span>M03</span><b>2005</b><b>2006</b><b>…</b><b>2015</b></article>
+            </div>
+            <div class="concept-grid concept-grid--2">
+              <article class="concept-card concept-card--blue"><span>何をするか</span><strong>自治体内の誤差の相関を許す</strong><p><code>cluster = ~municipality_id</code></p></article>
+              <article class="concept-card"><span>何をしないか</span><strong>交絡や仮定違反は直さない</strong><p>変わるのは主に標準誤差と信頼区間。</p></article>
+            </div>
+          </article>
+
+          <div class="equivalence-strip">
+            <span>表のDiD</span><i>＝</i><span>自治体内の前後差</span><i>−</i><span>対照群の時間変化</span><i>＝</i><strong>二方向固定効果の係数</strong>
+          </div>
+        </section>
+
+        <section class="content-section" id="anime" data-flow-section="anime">
+          <p class="section-label">LEVEL 1 · COMPLETE CODE</p>
+          <h2>アニメの舞台と地域所得：完成コードによる一連の分析</h2>
+          <div class="case-brief">
+            <div><span>問い</span><strong>アニメの舞台になると地域所得は上がるか</strong></div>
+            <div><span>単位×時間</span><strong>60自治体×2005–2015年</strong></div>
+            <div><span>処置</span><strong>20自治体が2010年に一斉に舞台となる</strong></div>
+            <div><span>結果</span><strong>所得指数</strong></div>
+          </div>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 13｜処置を行へ落とす</div>
+            <h3><code>post = 1</code>でも、対照自治体は処置を受けていない</h3>
+            <div class="role-table-wrap">
+              <table class="role-table treatment-table">
+                <thead><tr><th><code>anime_stage</code></th><th><code>post</code></th><th><code>anime_stage:post</code></th><th>その行の意味</th></tr></thead>
+                <tbody>
+                  <tr><td>0</td><td>0</td><td>0</td><td>対照自治体・放送前</td></tr>
+                  <tr><td>0</td><td>1</td><td>0</td><td>対照自治体・放送後</td></tr>
+                  <tr><td>1</td><td>0</td><td>0</td><td>舞台自治体・放送前</td></tr>
+                  <tr class="treatment-row"><td>1</td><td>1</td><td>1</td><td>舞台自治体・放送後＝処置状態</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="slide-takeaway">今回は全20処置自治体が2010年に一斉に処置を受ける。処置開始が単位ごとに違うstaggered DiDではない。</div>
+          </article>
+
+          <article class="concept-slide">
+            <div class="slide-kicker">SLIDE 14｜因果効果と読むための四つの仮定</div>
+            <h3>回帰を実行する前に、識別仮定を損なう要因を確認する</h3>
+            <div class="assumption-grid">
+              <article><b>1</b><span>平行トレンド</span><p>放送がなければ、二群の所得は同じ変化をした。</p><small>A01・A06で間接点検</small></article>
+              <article><b>2</b><span>先取りなし</span><p>放送前から住民や企業が反応していない。</p><small>A06の処置前を確認</small></article>
+              <article><b>3</b><span>波及なし</span><p>舞台自治体の効果が対照自治体へ広がらない。</p><small>地理と交流を検討</small></article>
+              <article><b>4</b><span>同時の交絡なし</span><p>同じ地域・時期の別の出来事を効果と誤認しない。</p><small>A08で再開発を確認</small></article>
+            </div>
+            <div class="slide-takeaway">event studyとplaceboは識別仮定を証明するものではない。観察可能な範囲で、識別仮定との不整合を点検する。</div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル A01</span><h3>群別平均を折れ線にして、処置前の動きを見る</h3></div>
+            <p>最初に二群の平均推移を確認する。二本の線の水準ではなく、2010年より前の傾きが類似しているかを確認する。教材用関数<code>plot_did_trends()</code>を使用し、時間・結果・群に対応する列を指定する。<code>aggregate()</code>の<code>~</code>式では列名を引用符なしで書く。一方、この教材用関数の<code>time</code>、<code>outcome</code>、<code>group</code>には、列名を<code>""</code>で囲んだ文字列として渡す。</p>
+            <div class="r-cell r-cell--long" data-cell-id="A01" data-dataset="anime">
+              <textarea aria-label="セルA01のRコード" spellcheck="false">anime_trend &lt;- aggregate(
+  income_index ~ anime_stage + year,
+  data = anime,
+  FUN = mean
+)
+
+plot_did_trends(
+  data = anime_trend,
+  time = "year", outcome = "income_index", group = "anime_stage",
+  intervention = 2010,
+  group_labels = c("Comparison", "Anime location"),
+  event_label = "Broadcast",
+  xlab = "Year", ylab = "Mean income index",
+  main = "Anime locations and comparison municipalities"
+)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>平均の図を描く</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">RAW TRENDS</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="interpretation"><strong>見る場所</strong><p>放送前は約5ポイントの水準差があるが、二本の線はほぼ平行。放送後に舞台自治体だけが上へ離れる。</p></div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル A02</span><h3>2009年と2011年を取り出し、手計算のDiD＝5を再現する</h3></div>
+            <p>前回の四つの数字が、多数の自治体の群平均としてデータ内に入っていることを確かめる。</p>
+            <div class="r-cell r-cell--long" data-cell-id="A02" data-dataset="anime">
+              <textarea aria-label="セルA02のRコード" spellcheck="false"># %in%は、yearが括弧内の候補のいずれかに含まれるかを調べる
+anime_2x2 &lt;- subset(anime, year %in% c(2009, 2011))
+
+four_means &lt;- aggregate(
+  income_index ~ anime_stage + post,
+  data = anime_2x2,
+  FUN = mean
+)
+
+# &amp;は左右の条件を両方満たす行を選ぶ
+treated_change &lt;-
+  mean(anime_2x2$income_index[anime_2x2$anime_stage == 1 &amp; anime_2x2$post == 1]) -
+  mean(anime_2x2$income_index[anime_2x2$anime_stage == 1 &amp; anime_2x2$post == 0])
+
+control_change &lt;-
+  mean(anime_2x2$income_index[anime_2x2$anime_stage == 0 &amp; anime_2x2$post == 1]) -
+  mean(anime_2x2$income_index[anime_2x2$anime_stage == 0 &amp; anime_2x2$post == 0])
+
+did_by_hand &lt;- treated_change - control_change
+
+four_means
+c(treated_change = treated_change,
+  control_change = control_change,
+  did = did_by_hand)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>手計算のDiDを実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">2 × 2 DIFFERENCE-IN-DIFFERENCES</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="numeric-story"><span>舞台<strong>100 → 110</strong><b>＋10</b></span><i>−</i><span>対照<strong>95 → 100</strong><b>＋5</b></span><i>＝</i><span class="numeric-story__answer">DiD<strong>5</strong></span></div>
+          </article>
+
+          <article class="lesson-card lesson-card--accent">
+            <div class="lesson-card__heading"><span>セル A03</span><h3><code>feols()</code>で同じDiDを推定する</h3></div>
+            <p>2009年と2011年のデータに、自治体固定効果と年固定効果を入れる。係数は手計算と同じ5になる。</p>
+            <div class="r-cell" data-cell-id="A03" data-dataset="anime" data-depends-on="A02">
+              <textarea aria-label="セルA03のRコード" spellcheck="false">anime_model_2x2 &lt;- fixest::feols(
+  income_index ~ anime_stage:post | municipality_id + year,
+  data = anime_2x2,
+  cluster = ~municipality_id
+)
+
+anime_model_2x2</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>feolsで推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">FIXEST MODEL</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="coefficient-reader"><span><b>Estimate</b>効果の大きさ</span><span><b>Std. Error</b>推定のブレ</span><span><b>Pr(&gt;|t|)</b>効果ゼロとの比較</span><span><b>Fixed-effects</b>差し引いた単位と時間</span></div>
+            <div class="reading-note"><strong>今回は読まない欄</strong><span><code>RMSE</code>は残差の大きさ、<code>Adj. R2</code>は説明変数を考慮した当てはまり、<code>Within R2</code>は固定効果を差し引いた後の当てはまりを表す。<code>***</code>、<code>**</code>、<code>*</code>はp値の範囲を示す目安記号である。これらは表示されるが、今回の係数の読み取りには用いない。</span></div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル A04</span><h3>係数と95%信頼区間を取り出す</h3></div>
+            <p>長い出力のどこを読むかを固定する。統計的有意性と因果的解釈は別である。</p>
+            <div class="r-cell" data-cell-id="A04" data-dataset="anime" data-depends-on="A02 A03">
+              <textarea aria-label="セルA04のRコード" spellcheck="false">coef(anime_model_2x2)
+confint(anime_model_2x2)
+
+fixest::etable(
+  anime_model_2x2,
+  dict = c("anime_stage:post" = "舞台自治体 × 放送後")
+)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>係数と区間を読む</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">COEFFICIENT AND 95% CI</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="notice"><strong>因果効果として解釈するための条件</strong><p>係数が5で統計的に有意であることだけでは、因果効果とは解釈できない。平行トレンド、先取りなし、波及なし、同時期の交絡要因なしを制度的背景に基づいて検討する必要がある。</p></div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル A05</span><h3>11年すべてを使い、平均的な放送後効果を推定する</h3></div>
+            <p>2群2期から複数時点へ拡張しても式の形は同じ。ただし、効果が年ごとに異なると、この係数は複数の放送後効果を一つにまとめた値になる。</p>
+            <div class="r-cell" data-cell-id="A05" data-dataset="anime">
+              <textarea aria-label="セルA05のRコード" spellcheck="false">anime_model_all_years &lt;- fixest::feols(
+  income_index ~ anime_stage:post | municipality_id + year,
+  data = anime,
+  cluster = ~municipality_id
+)
+
+anime_model_all_years</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>全期間で推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">ALL-YEAR DID</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="interpretation"><strong>結果の読み方</strong><p>約4.98は、2010–2015年の効果を一つにまとめた推定値。年ごとの違いは次のイベントスタディで見る。</p></div>
+          </article>
+
+          <article class="concept-slide concept-slide--event">
+            <div class="slide-kicker">SLIDE 15｜イベントスタディ</div>
+            <h3>放送後効果を放送からの経過年数別に推定する</h3>
+            <div class="event-axis"><span>−5</span><span>−4</span><span>−3</span><span>−2</span><span class="event-axis__ref">−1<br><b>基準</b></span><span class="event-axis__post">0</span><span class="event-axis__post">＋1</span><span class="event-axis__post">＋2…</span></div>
+            <ul><li>放送前の係数：平行トレンドの間接的な点検</li><li>放送年以降の係数：効果がいつ現れ、どう変化したか</li><li>縦線：95%信頼区間。0をまたぐかも確認する</li></ul>
+          </article>
+
+          <article class="lesson-card lesson-card--accent">
+            <div class="lesson-card__heading"><span>セル A06</span><h3><code>i()</code>でイベントスタディを推定・作図する</h3></div>
+            <p>放送前年（−1）を比較の基準にする。<code>i()</code>は相対年ごとに舞台自治体との差を作る。</p>
+            <div class="r-cell" data-cell-id="A06" data-dataset="anime">
+              <textarea aria-label="セルA06のRコード" spellcheck="false">anime_event_model &lt;- fixest::feols(
+  income_index ~ i(relative_year, anime_stage, ref = -1) |
+    municipality_id + year,
+  data = anime,
+  cluster = ~municipality_id
+)
+
+fixest::iplot(
+  anime_event_model,
+  ref.line = 0,
+  main = "Event study: anime locations",
+  xlab = "Years from broadcast",
+  ylab = "Effect on income index"
+)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>イベントスタディを描く</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">EVENT STUDY</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="two-question"><article><span>放送前</span><strong>0付近か</strong><p>平行トレンドを直接証明はしないが、明確な事前差がないかを見る。</p></article><article><span>放送後</span><strong>いつ動くか</strong><p>効果が放送年から生じ、翌年に大きくなる構造を読む。</p></article></div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル A07</span><h3>偽の処置群でplaceboを行う</h3></div>
+            <p>実際の舞台自治体を除き、対照自治体の一部を「偽の舞台」とする。同じ方法で効果が推定される場合、一般的な群間差を効果として捉えている可能性がある。</p>
+            <div class="r-cell" data-cell-id="A07" data-dataset="anime">
+              <textarea aria-label="セルA07のRコード" spellcheck="false">anime_placebo_data &lt;- subset(anime, anime_stage == 0)
+
+anime_placebo_model &lt;- fixest::feols(
+  income_index ~ fake_stage:post | municipality_id + year,
+  data = anime_placebo_data,
+  cluster = ~municipality_id
+)
+
+anime_placebo_model</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>偽の処置群を推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">FAKE-TREATED PLACEBO</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="interpretation"><strong>期待する結果</strong><p>係数はほぼ0。これは本分析を証明するのではなく、「処置群の名前を変えても何でも効果が出る」という失敗がないことを確認する。</p></div>
+          </article>
+
+          <article class="lesson-card">
+            <div class="lesson-card__heading"><span>セル A08</span><h3>同時期の再開発を加え、推定値が動くか確認する</h3></div>
+            <p>駅前再開発は所得を上げうる。再開発を入れない式と入れた式を並べ、アニメの係数が大きく変わるかを見る。</p>
+            <div class="r-cell r-cell--long" data-cell-id="A08" data-dataset="anime">
+              <textarea aria-label="セルA08のRコード" spellcheck="false">anime_basic_model &lt;- fixest::feols(
+  income_index ~ anime_stage:post | municipality_id + year,
+  data = anime,
+  cluster = ~municipality_id
+)
+
+anime_adjusted_model &lt;- fixest::feols(
+  income_index ~ anime_stage:post + redevelopment |
+    municipality_id + year,
+  data = anime,
+  cluster = ~municipality_id
+)
+
+fixest::etable(
+  list(
+    "基本" = anime_basic_model,
+    "再開発を追加" = anime_adjusted_model
+  ),
+  dict = c(
+    "anime_stage:post" = "舞台 × 放送後",
+    "redevelopment" = "駅前再開発",
+    "municipality_id" = "自治体",
+    "year" = "年"
+  )
+)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>二つのモデルを比較</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">CONFOUNDING CHECK</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
+            </div>
+            <div class="notice"><strong>注意</strong><p>統制変数を足せば交絡が消えるとは限らない。制度史を調べて候補を特定し、係数の変化と残る懸念を報告する。</p></div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 16｜アニメ事例の結論を組み立てる</div>
+            <h3>データ、推定結果および頑健性検証を報告する</h3>
+            <div class="evidence-stack">
+              <article><span>DATA</span><strong>60自治体×11年</strong><p>重複keyと主要変数の欠損なし。</p></article>
+              <article><span>RAW TREND</span><strong>処置前はほぼ平行</strong><p>水準差はあるが傾きは近い。</p></article>
+              <article><span>DID</span><strong>2期では5、全期間では約4.98</strong><p>所得指数の相対的な上昇。</p></article>
+              <article><span>CHECKS</span><strong>偽群は0付近、再開発追加でも安定</strong><p>ただし仮定の証明ではない。</p></article>
+            </div>
+          </article>
+
+          <article class="self-check">
+            <span class="self-check__label">第9回の出口チェック</span>
+            <h3>第9回の確認事項</h3>
+            <details><summary>Q1　一行は何を表していたか</summary><p>一つの自治体の一つの年。単位IDと時間IDの組合せが行のkeyになる。</p></details>
+            <details><summary>Q2　<code>| municipality_id + year</code>は何を調整するか</summary><p>自治体固有の時間不変な水準と、各年に全自治体へ共通する変化を調整する。</p></details>
+            <details><summary>Q3　平行トレンドはどこを見るか</summary><p>A01とA06の処置前。水準が同じかではなく、処置前の傾きや係数が大きくずれていないかを見る。</p></details>
+          </article>
+          <div class="level-complete" data-completion-section="lecture9" hidden><span>第9回の13セル完了</span><strong>データ確認 → 平均の図 → 手計算 → 固定効果 → イベントスタディ → placebo → 頑健性</strong><p>入力内容と完了記録はブラウザに保存される。第10回はMTV事例から開始する。</p><a class="completion-link" href="#mtv">第10回へ進む</a></div>
+        </section>
+
+        <!-- LEVEL 2 and LEVEL 3 follow below. -->
+        <section class="content-section" id="mtv" data-flow-section="mtv">
+          <p class="section-label">LEVEL 2 · FILL THE MASKS</p>
+          <h2>16 and Pregnant：アニメ事例に対応するコードの穴埋め</h2>
+
+          <article class="session-divider session-divider--purple">
+            <span>LECTURE 10 · LEVEL 2</span>
+            <h3>分析上の役割と変数名を対応させる</h3>
+            <p>完成コードの一部を空欄にしている。対応表を参照し、各役割に該当する列を選択する。</p>
+          </article>
+
+          <div class="case-brief case-brief--mtv">
+            <div><span>問い</span><strong>番組への強い露出は10代の出生率を下げたか</strong></div>
+            <div><span>単位×時間</span><strong>80メディア市場×20四半期</strong></div>
+            <div><span>処置</span><strong>放送前MTV視聴率が中央値より高い市場×放送後</strong></div>
+            <div><span>結果</span><strong>15–19歳女性1,000人当たり出生数</strong></div>
+          </div>
+
+          <article class="concept-slide concept-slide--compact concept-slide--purple">
+            <div class="slide-kicker">SLIDE 17｜元研究の発想</div>
+            <h3>放送前MTV視聴率は市場によって異なる</h3>
+            <div class="exposure-flow">
+              <article><span>全国共通</span><strong>番組が2009年に始まる</strong></article>
+              <i>×</i>
+              <article><span>地域差</span><strong>放送前MTV視聴率</strong></article>
+              <i>→</i>
+              <article class="exposure-flow__result"><span>処置の強さ</span><strong>番組への地域別露出</strong></article>
+            </div>
+            <div class="slide-takeaway">元研究は連続的な処置強度とIV・event studyを用いる。この実習は構造を学ぶ簡略版で、元論文のreplicationではない。</div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact concept-slide--purple">
+            <div class="slide-kicker">SLIDE 18｜教育上の二値化</div>
+            <h3>中央値13.235をcutoffに、80市場を40対40へ分ける</h3>
+            <div class="cutoff-scale" aria-label="MTV視聴率のcutoff">
+              <span class="cutoff-scale__low">低MTV市場｜40</span>
+              <b>13.235<br><small>中央値</small></b>
+              <span class="cutoff-scale__high">高MTV市場｜40</span>
+            </div>
+            <div class="concept-grid concept-grid--2">
+              <article class="concept-card concept-card--blue"><span>利点</span><strong>2群のDiDとして理解しやすい</strong><p>アニメ事例と同じコード構造へ移せる。</p></article>
+              <article class="concept-card concept-card--warning"><span>代償</span><strong>連続的な情報を失う</strong><p>cutoff直前・直後を別群にし、同じ群内の差を無視する。</p></article>
+            </div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 19｜MTVデータの対応表</div>
+            <h3>アニメ事例の役割を、MTV事例の列名へ対応づける</h3>
+            <div class="role-table-wrap">
+              <table class="role-table mapping-table">
+                <thead><tr><th>役割</th><th>アニメ</th><th>MTV</th></tr></thead>
+                <tbody>
+                  <tr><th>結果</th><td><code>income_index</code></td><td><code>teen_birth_rate</code></td></tr>
+                  <tr><th>処置群</th><td><code>anime_stage</code></td><td><code>high_mtv</code>を作る</td></tr>
+                  <tr><th>処置後</th><td><code>post</code></td><td><code>post</code></td></tr>
+                  <tr><th>単位FE</th><td><code>municipality_id</code></td><td><code>market_id</code></td></tr>
+                  <tr><th>時間FE</th><td><code>year</code></td><td><code>period</code></td></tr>
+                  <tr><th>相対時点</th><td><code>relative_year</code></td><td><code>relative_quarter</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 20｜穴埋めの考え方</div>
+            <h3>各空欄に対応する変数の役割と列名を確認する</h3>
+            <div class="formula-template"><code>結果 ~ 処置群:処置後 | 単位ID + 時間ID</code><span>cluster = ~単位ID</span></div>
+            <div class="step-lane step-lane--short">
+              <article><b>1</b><span>役割を読む</span><small>結果か、群か、時点か</small></article><i>→</i>
+              <article><b>2</b><span>対応表を見る</span><small>MTVの列名を選ぶ</small></article><i>→</i>
+              <article><b>3</b><span>実行して判定</span><small>Outputを確認する</small></article>
+            </div>
+          </article>
+
+          <article class="lesson-card lesson-card--exercise">
+            <div class="lesson-card__heading"><span>セル M01</span><h3>中央値をcutoffに、処置群を作る</h3></div>
+            <p><code>__</code>をRコードへ置き換える。放送前視聴率が中央値より高ければ1、それ以外は0にする。<code>as.integer()</code>は比較結果の<code>TRUE</code>を1、<code>FALSE</code>を0へ変換する。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="M01" data-dataset="mtv" data-check-success="判定結果：中央値13.235に基づく各40市場の二群を作成。" data-check-failure="median()と比較演算子 &gt; を確認してください。">
+              <script type="text/plain" class="r-check">exists("mtv_cutoff") && isTRUE(all.equal(mtv_cutoff, 13.235)) && exists("high_mtv") && identical(as.integer(table(mtv$high_mtv)), c(800L, 800L))</script>
+              <script type="text/plain" class="r-answer">mtv_cutoff <- median(mtv$mtv_rating_pre)
+mtv$high_mtv <- as.integer(mtv$mtv_rating_pre > mtv_cutoff)
+
+# 市場IDと処置群だけを選び、unique()で市場ごとに1行へ縮める
+high_mtv <- unique(mtv[c("market_id", "high_mtv")])$high_mtv
+print(c(cutoff = mtv_cutoff,
+  low_markets = sum(high_mtv == 0),
+  high_markets = sum(high_mtv == 1)),
+  digits = 6)</script>
+              <textarea aria-label="セルM01のRコード" spellcheck="false">mtv_cutoff &lt;- __(mtv$mtv_rating_pre)
+mtv$high_mtv &lt;- as.integer(mtv$mtv_rating_pre __ mtv_cutoff)
+
+# 市場IDと処置群だけを選び、unique()で市場ごとに1行へ縮める
+high_mtv &lt;- unique(mtv[c("market_id", "high_mtv")])$high_mtv
+print(c(cutoff = mtv_cutoff,
+  low_markets = sum(high_mtv == 0),
+  high_markets = sum(high_mtv == 1)),
+  digits = 6)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>穴埋めを実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">TREATMENT GROUP</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+          </article>
+
+          <article class="lesson-card lesson-card--exercise">
+            <div class="lesson-card__heading"><span>セル M02</span><h3>群ごとの処置前特徴を記述する</h3></div>
+            <p>放送前の行だけに絞り、出生率、MTV視聴率、失業率の平均を二群で比較する。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="M02" data-dataset="mtv" data-depends-on="M01" data-check-success="判定結果：放送前の三変数を二群別に要約。" data-check-failure="subset()の条件とaggregate()の左側を確認してください。">
+              <script type="text/plain" class="r-check">exists("mtv_pre_summary") && is.data.frame(mtv_pre_summary) && nrow(mtv_pre_summary) == 2 && all(c("teen_birth_rate", "mtv_rating_pre", "unemployment_rate") %in% names(mtv_pre_summary))</script>
+              <script type="text/plain" class="r-answer">mtv_pre <- subset(mtv, post == 0)
+
+mtv_pre_summary <- aggregate(
+  cbind(teen_birth_rate, mtv_rating_pre, unemployment_rate) ~ high_mtv,
+  data = mtv_pre,
+  FUN = mean
+)
+
+mtv_pre_summary</script>
+              <textarea aria-label="セルM02のRコード" spellcheck="false">mtv_pre &lt;- subset(mtv, __ == 0)
+
+mtv_pre_summary &lt;- aggregate(
+  cbind(__, __, __) ~ high_mtv,
+  data = mtv_pre,
+  FUN = mean
+)
+
+mtv_pre_summary</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>記述統計を作る</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">PRE-TREATMENT DESCRIPTIVES</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+            <div class="interpretation"><strong>重要</strong><p>二群の水準が同じである必要はない。DiDで重要なのは、放送がなければ同じ変化をしたと考えられるか。</p></div>
+          </article>
+
+          <article class="lesson-card lesson-card--exercise">
+            <div class="lesson-card__heading"><span>セル M03</span><h3>二群の四半期平均を作図する</h3></div>
+            <p>アニメのA01と同じ構造で、変数名だけが変わる。穴埋め後の図で放送前の傾きを見る。</p>
+            <div class="r-cell r-cell--exercise r-cell--long" data-cell-id="M03" data-dataset="mtv" data-depends-on="M01" data-requires-plot="true" data-check-success="判定結果：40個の群×四半期平均を作成し、図示。" data-check-failure="aggregate()の結果変数・群・時間と、plot_did_trends()の呼び出しを確認してください。">
+              <script type="text/plain" class="r-check">exists("mtv_trend") && nrow(mtv_trend) == 40</script>
+              <script type="text/plain" class="r-answer">mtv_trend <- aggregate(
+  teen_birth_rate ~ high_mtv + period_index,
+  data = mtv,
+  FUN = mean
+)
+
+plot_did_trends(
+  data = mtv_trend,
+  time = "period_index", outcome = "teen_birth_rate", group = "high_mtv",
+  intervention = 11,
+  group_labels = c("Low MTV", "High MTV"),
+  event_label = "Broadcast",
+  xlab = "Quarter index", ylab = "Teen birth rate",
+  main = "Pre-broadcast MTV viewing and teen births"
+)</script>
+              <textarea aria-label="セルM03のRコード" spellcheck="false">mtv_trend &lt;- aggregate(
+  __ ~ __ + __,
+  data = mtv,
+  FUN = mean
+)
+
+plot_did_trends(
+  data = mtv_trend,
+  time = "period_index", outcome = "teen_birth_rate", group = "high_mtv",
+  intervention = 11,
+  group_labels = c("Low MTV", "High MTV"),
+  event_label = "Broadcast",
+  xlab = "Quarter index", ylab = "Teen birth rate",
+  main = "Pre-broadcast MTV viewing and teen births"
+)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>穴埋めして作図</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">QUARTERLY TRENDS</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+          </article>
+
+          <article class="lesson-card lesson-card--exercise lesson-card--accent">
+            <div class="lesson-card__heading"><span>セル M04</span><h3>市場固定効果と四半期固定効果でDiDを推定する</h3></div>
+            <p>A05の式で、結果・処置群・単位・時間だけをこの事例の変数へ置き換える。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="M04" data-dataset="mtv" data-depends-on="M01" data-check-success="判定結果：二方向固定効果モデルを推定。係数は約−1.70。" data-check-failure="結果変数、high_mtvとpostの交互作用、市場・四半期固定効果、市場clusterを確認してください。">
+              <script type="text/plain" class="r-check">exists("mtv_model") &&
+  has_model_spec(
+    mtv_model,
+    "teen_birth_rate",
+    "market_id",
+    c("period", "period_index"),
+    "market_id"
+  ) &&
+  nobs(mtv_model) == 1600 &&
+  isTRUE(all.equal(
+    did_coefficient(mtv_model, "high_mtv", "post"),
+    -1.697087,
+    tolerance = 0.003
+  ))</script>
+              <script type="text/plain" class="r-answer">mtv_model <- fixest::feols(
+  teen_birth_rate ~ high_mtv:post | market_id + period,
+  data = mtv,
+  cluster = ~market_id
+)
+
+mtv_model</script>
+              <textarea aria-label="セルM04のRコード" spellcheck="false">mtv_model &lt;- fixest::feols(
+  __ ~ __:__ | __ + __,
+  data = mtv,
+  cluster = ~__
+)
+
+mtv_model</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>DiDを推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">MTV DID MODEL</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+            <div class="interpretation"><strong>係数の単位</strong><p>放送前MTV視聴率が高い市場では、低い市場と比べて、放送後の10代出生率が平均約1.70ポイント余分に低下した。</p></div>
+          </article>
+
+          <article class="lesson-card lesson-card--exercise">
+            <div class="lesson-card__heading"><span>セル M05</span><h3>四半期単位のイベントスタディを描く</h3></div>
+            <p><code>relative_quarter</code>を使い、放送直前の四半期−1を基準にする。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="M05" data-dataset="mtv" data-depends-on="M01" data-requires-plot="true" data-check-success="判定結果：四半期イベントスタディを推定し、図示。" data-check-failure="i()の相対時点、処置群、ref=-1と、iplot()の呼び出しを確認してください。">
+              <script type="text/plain" class="r-check">exists("mtv_event_model") && inherits(mtv_event_model, "fixest") && length(coef(mtv_event_model)) == 19</script>
+              <script type="text/plain" class="r-answer">mtv_event_model <- fixest::feols(
+  teen_birth_rate ~ i(relative_quarter, high_mtv, ref = -1) |
+    market_id + period,
+  data = mtv,
+  cluster = ~market_id
+)
+
+fixest::iplot(
+  mtv_event_model,
+  ref.line = 0,
+  main = "Event study: 16 and Pregnant",
+  xlab = "Quarters from broadcast",
+  ylab = "Effect on teen birth rate"
+)</script>
+              <textarea aria-label="セルM05のRコード" spellcheck="false">mtv_event_model &lt;- fixest::feols(
+  teen_birth_rate ~ i(__, __, ref = __) |
+    __ + __,
+  data = mtv,
+  cluster = ~__
+)
+
+fixest::iplot(
+  mtv_event_model,
+  ref.line = 0,
+  main = "Event study: 16 and Pregnant",
+  xlab = "Quarters from broadcast",
+  ylab = "Effect on teen birth rate"
+)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>イベントスタディを推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">MTV EVENT STUDY</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+          </article>
+
+          <article class="lesson-card lesson-card--exercise">
+            <div class="lesson-card__heading"><span>セル M06</span><h3>放送前だけで、偽の放送時期placeboを行う</h3></div>
+            <p>本当の放送より前の10四半期だけを使い、2008年第3四半期を偽の開始時点とする。効果がないはずの時期に同じ推定を行う。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="M06" data-dataset="mtv" data-depends-on="M01" data-check-success="判定結果：偽の放送時期の係数は0付近。" data-check-failure="period_index &lt;= 10で放送前へ限定し、period_index &gt;= 7をfake_postとして、市場clusterで推定してください。">
+              <script type="text/plain" class="r-check">exists("mtv_before_broadcast") &&
+  is.data.frame(mtv_before_broadcast) &&
+  nrow(mtv_before_broadcast) == 800 &&
+  max(mtv_before_broadcast$period_index) == 10 &&
+  isTRUE(all(
+    mtv_before_broadcast$fake_post ==
+      as.integer(mtv_before_broadcast$period_index >= 7)
+  )) &&
+  exists("mtv_time_placebo") &&
+  has_model_spec(
+    mtv_time_placebo,
+    "teen_birth_rate",
+    "market_id",
+    c("period", "period_index"),
+    "market_id"
+  ) &&
+  nobs(mtv_time_placebo) == 800 &&
+  isTRUE(all.equal(
+    did_coefficient(mtv_time_placebo, "high_mtv", "fake_post"),
+    0.061183,
+    tolerance = 0.003
+  ))</script>
+              <script type="text/plain" class="r-answer">mtv_before_broadcast <- subset(mtv, period_index <= 10)
+mtv_before_broadcast$fake_post <- as.integer(
+  mtv_before_broadcast$period_index >= 7
+)
+
+mtv_time_placebo <- fixest::feols(
+  teen_birth_rate ~ high_mtv:fake_post | market_id + period,
+  data = mtv_before_broadcast,
+  cluster = ~market_id
+)
+
+mtv_time_placebo</script>
+              <textarea aria-label="セルM06のRコード" spellcheck="false">mtv_before_broadcast &lt;- subset(mtv, period_index __ 10)
+mtv_before_broadcast$fake_post &lt;- as.integer(
+  mtv_before_broadcast$period_index __ 7
+)
+
+mtv_time_placebo &lt;- fixest::feols(
+  teen_birth_rate ~ __:__ | __ + __,
+  data = mtv_before_broadcast,
+  cluster = ~__
+)
+
+mtv_time_placebo</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>時期placeboを推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">FAKE-TIME PLACEBO</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact concept-slide--purple">
+            <div class="slide-kicker">SLIDE 21｜MTV事例の読み方</div>
+            <h3>推定値の意味と、今回の実習だけでは言えないことを分ける</h3>
+            <div class="can-cannot">
+              <article><span>合成データ内で確認できる結果</span><ul><li>高MTV市場の相対低下は約1.70</li><li>event studyは放送時期と整合する</li><li>偽の放送時期の係数は0付近</li></ul></article>
+              <article><span>本実習からは結論できない事項</span><ul><li>元論文の推定値を再現した</li><li>個人が番組を見た効果である</li><li>視聴率1ポイントの連続効果である</li></ul></article>
+            </div>
+            <div class="slide-takeaway">二値処置の係数は「高MTV群と低MTV群の放送後の相対差」。連続的な視聴率の係数ではない。</div>
+          </article>
+
+          <div class="level-complete level-complete--mtv" data-completion-section="mtv" hidden><span>LEVEL 2 · 6セル完了</span><strong>MTV事例の分析項目を完了</strong><p>LEVEL 3では、指示文に基づいてRコードを作成する。</p><a class="completion-link" href="#police">LEVEL 3へ進む</a></div>
+        </section>
+
+        <section class="content-section" id="police" data-flow-section="police">
+          <p class="section-label">LEVEL 3 · WRITE FROM INSTRUCTIONS</p>
+          <h2>警官配置と自動車盗：指示文からDiDを再現する</h2>
+
+          <article class="session-divider session-divider--green">
+            <span>LECTURE 10 · LEVEL 3</span>
+            <h3>指示文に基づいてRコードを作成する</h3>
+            <p>完成コードや空欄は示さない。前二事例を参照しながら、必要な処理を記述する。</p>
+          </article>
+
+          <div class="case-brief case-brief--police">
+            <div><span>問い</span><strong>施設前への警官配置は自動車盗を減らしたか</strong></div>
+            <div><span>単位×時間</span><strong>300街区×18か月</strong></div>
+            <div><span>処置</span><strong>ユダヤ系施設のある街区×1994年8月以降</strong></div>
+            <div><span>結果</span><strong>街区当たり月間自動車盗件数</strong></div>
+          </div>
+
+          <article class="concept-slide concept-slide--compact concept-slide--green">
+            <div class="slide-kicker">SLIDE 22｜自然実験の状況</div>
+            <h3>処置はテロそのものではなく、事件後の施設前への警官配置</h3>
+            <div class="timeline-board">
+              <article><span>1994年7月</span><strong>主要なユダヤ系施設へのテロ</strong></article>
+              <i>→</i>
+              <article><span>1994年8月以降</span><strong>施設前へ警官を継続配置</strong></article>
+              <i>→</i>
+              <article><span>比較する結果</span><strong>街区別の自動車盗</strong></article>
+            </div>
+            <div class="slide-takeaway">本分析における処置は、テロ事件そのものではなく、事件後の施設前への警官配置である。<code>protected_facility × post</code>は「施設街区×警官配置後」を表す。</div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 23｜警官配置データの対応表</div>
+            <h3>今回は街区を、月ごとに18回観測する</h3>
+            <div class="role-table-wrap">
+              <table class="role-table">
+                <thead><tr><th>役割</th><th>変数</th><th>内容</th></tr></thead>
+                <tbody>
+                  <tr><th>単位×時間</th><td><code>block_id × period</code></td><td>300街区×18か月＝5,400行</td></tr>
+                  <tr><th>結果</th><td><code>car_thefts</code></td><td>街区当たり月間自動車盗件数</td></tr>
+                  <tr><th>処置群</th><td><code>protected_facility</code></td><td>ユダヤ系施設がある街区</td></tr>
+                  <tr><th>処置後</th><td><code>post</code></td><td>1994年8月以降</td></tr>
+                  <tr><th>波及候補</th><td><code>adjacent_block</code></td><td>施設の隣接街区</td></tr>
+                  <tr><th>偽アウトカム</th><td><code>bicycle_thefts</code></td><td>自転車盗件数</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">SLIDE 24｜指示をコードへ翻訳する設計図</div>
+            <h3>コード作成前に、五つの変数の役割を確認する</h3>
+            <div class="translation-board">
+              <article><span>結果</span><strong>car_thefts</strong></article>
+              <article><span>処置</span><strong>protected_facility:<wbr>post</strong></article>
+              <article><span>単位FE</span><strong>block_id</strong></article>
+              <article><span>時間FE</span><strong>period</strong></article>
+              <article><span>cluster</span><strong>block_id</strong></article>
+            </div>
+            <div class="formula-template"><code>car_thefts ~ protected_facility:post | block_id + period</code><span>cluster = ~block_id</span></div>
+            <div class="slide-takeaway">必要に応じて<a class="cell-reference" href="#cell-A01">A01</a>・<a class="cell-reference" href="#cell-A06">A06</a>、<a class="cell-reference" href="#cell-M03">M03</a>・<a class="cell-reference" href="#cell-M05">M05</a>のコード構造を参照する。参照後はブラウザの「戻る」でこの位置へ戻る。</div>
+          </article>
+
+          <article class="lesson-card lesson-card--scratch">
+            <div class="lesson-card__heading"><span>セル P01</span><h3>パネルの大きさとkeyを点検する</h3></div>
+            <p>コメントの指示を満たすコードを作成する。結果は<code>police_structure</code>へ保存する。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="P01" data-dataset="police" data-check-success="判定結果：5,400行＝300街区×18か月、重複keyは0件。" data-check-failure="police_structureにrows、blocks、months、duplicated_keysの四つを名前付きで保存してください。要素の順序は問いません。">
+              <script type="text/plain" class="r-check">exists("police_structure") &&
+  is.atomic(police_structure) &&
+  all(c("rows", "blocks", "months", "duplicated_keys") %in%
+    names(police_structure)) &&
+  isTRUE(all.equal(
+    as.numeric(police_structure[c(
+      "rows", "blocks", "months", "duplicated_keys"
+    )]),
+    c(5400, 300, 18, 0)
+  ))</script>
+              <script type="text/plain" class="r-answer">police_key <- paste(police$block_id, police$period)
+
+police_structure <- c(
+  rows = nrow(police),
+  blocks = length(unique(police$block_id)),
+  months = length(unique(police$period)),
+  duplicated_keys = sum(duplicated(police_key))
+)
+
+police_structure</script>
+              <textarea aria-label="セルP01のRコード" spellcheck="false"># 依頼
+# 1. block_idとperiodをつないだkeyを作る
+# 2. 行数、街区数、月数、重複key数を一つのvectorにする
+# 3. vectorへpolice_structureという名前を付けて表示する
+
+# ヒント：nrow(), length(unique()), paste(), duplicated()</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>入力コードを実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">POLICE PANEL STRUCTURE</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+          </article>
+
+          <article class="lesson-card lesson-card--scratch">
+            <div class="lesson-card__heading"><span>セル P02</span><h3>処置群×前後の記述統計を作る</h3></div>
+            <p>自動車盗の平均を四つのマスへまとめ、<code>police_summary</code>へ保存する。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="P02" data-dataset="police" data-check-success="判定結果：施設街区×前後の四平均を作成。" data-check-failure="police_summaryにprotected_facility×postの四つのcar_thefts平均を保存してください。formula形式と非formula形式のaggregate()、2×2のtapply()を判定できます。">
+              <script type="text/plain" class="r-check">exists("police_summary") &&
+  valid_police_summary(police_summary, police)</script>
+              <script type="text/plain" class="r-answer">police_summary <- aggregate(
+  car_thefts ~ protected_facility + post,
+  data = police,
+  FUN = mean
+)
+
+police_summary</script>
+              <textarea aria-label="セルP02のRコード" spellcheck="false"># 依頼
+# car_theftsの平均をprotected_facilityとpostの組合せごとに計算する
+# 結果へpolice_summaryという名前を付けて表示する
+
+# ヒント：aggregate(結果 ~ 群 + 前後, data = 表, FUN = mean)</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>記述統計を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">FOUR MEANS</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+          </article>
+
+          <article class="lesson-card lesson-card--scratch">
+            <div class="lesson-card__heading"><span>セル P03</span><h3>月ごとの二群平均を折れ線にする</h3></div>
+            <p><a class="cell-reference" href="#cell-A01">A01</a>と<a class="cell-reference" href="#cell-M03">M03</a>を参照し、<code>police_trend</code>を作って二本の線を描く。処置開始はmonth_index＝8。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="P03" data-dataset="police" data-requires-plot="true" data-check-success="判定結果：36個の群×月平均を作成し、処置開始線を含む図を表示。" data-check-failure="car_theftsの群×月平均を36行で作成し、plot_did_trends()へ渡して図を表示してください。">
+              <script type="text/plain" class="r-check">exists("police_trend") &&
+  is.data.frame(police_trend) &&
+  nrow(police_trend) == 36 &&
+  all(c("protected_facility", "month_index", "car_thefts") %in%
+    names(police_trend)) &&
+  {
+    expected_trend <- aggregate(
+      car_thefts ~ protected_facility + month_index,
+      data = police,
+      FUN = mean
+    )
+    actual_order <- order(
+      police_trend$protected_facility,
+      police_trend$month_index
+    )
+    expected_order <- order(
+      expected_trend$protected_facility,
+      expected_trend$month_index
+    )
+    isTRUE(all.equal(
+      police_trend[actual_order, names(expected_trend)],
+      expected_trend[expected_order, ],
+      check.attributes = FALSE,
+      tolerance = 1e-8
+    ))
+  }</script>
+              <script type="text/plain" class="r-answer">police_trend <- aggregate(
+  car_thefts ~ protected_facility + month_index,
+  data = police,
+  FUN = mean
+)
+
+plot_did_trends(
+  data = police_trend,
+  time = "month_index", outcome = "car_thefts", group = "protected_facility",
+  intervention = 8,
+  group_labels = c("Comparison", "Protected facility"),
+  event_label = "Deployment",
+  xlab = "Month index", ylab = "Mean car thefts",
+  main = "Police deployment and car theft"
+)</script>
+              <textarea aria-label="セルP03のRコード" spellcheck="false"># 依頼
+# 1. car_theftsをprotected_facility×month_indexで平均する
+# 2. 結果へpolice_trendという名前を付ける
+# 3. plot_did_trends()へ表、時間、結果、群、開始時点を渡す
+
+# ヒント：A01またはM03と、役割に対応する変数名だけが違います</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>平均の図を作る</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">MONTHLY TRENDS</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+          </article>
+
+          <article class="lesson-card lesson-card--scratch lesson-card--accent">
+            <div class="lesson-card__heading"><span>セル P04</span><h3>二方向固定効果で警官配置の効果を推定する</h3></div>
+            <p>結果、処置群×処置後、街区固定効果、月固定効果、clusterの単位を指定する。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="P04" data-dataset="police" data-check-success="判定結果：街区・月固定効果のDiDを推定。係数は約−0.96件。" data-check-failure="結果変数、protected_facilityとpostの交互作用、街区・月固定効果、街区clusterを確認してください。交互作用項の順序は問いません。">
+              <script type="text/plain" class="r-check">exists("police_model") &&
+  has_model_spec(
+    police_model,
+    "car_thefts",
+    "block_id",
+    c("period", "month_index"),
+    "block_id"
+  ) &&
+  nobs(police_model) == 5400 &&
+  isTRUE(all.equal(
+    did_coefficient(police_model, "protected_facility", "post"),
+    -0.962446,
+    tolerance = 0.003
+  ))</script>
+              <script type="text/plain" class="r-answer">police_model <- fixest::feols(
+  car_thefts ~ protected_facility:post | block_id + period,
+  data = police,
+  cluster = ~block_id
+)
+
+police_model</script>
+              <textarea aria-label="セルP04のRコード" spellcheck="false"># 依頼
+# fixest::feols()で警官配置のDiDを推定する
+# ・結果：月間自動車盗件数
+# ・処置：施設街区×配置後
+# ・固定効果：街区と月
+# ・標準誤差：街区でcluster
+# モデルへpolice_modelという名前を付けて表示する
+
+# ヒント：結果 ~ 処置群:処置後 | 単位ID + 時間</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>DiDモデルを実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">POLICE DID MODEL</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+            <div class="interpretation"><strong>係数の単位</strong><p>警官が配置された施設街区では、対照街区と比べて、自動車盗が1街区・1か月当たり約0.96件余分に減少した。</p></div>
+          </article>
+
+          <article class="lesson-card lesson-card--scratch">
+            <div class="lesson-card__heading"><span>セル P05</span><h3>月単位のイベントスタディを推定する</h3></div>
+            <p>配置直前月−1を基準にし、<code>relative_month</code>と<code>protected_facility</code>を<code>i()</code>へ渡す。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="P05" data-dataset="police" data-requires-plot="true" data-check-success="判定結果：17個の相対月係数を持つイベントスタディを推定し、図示。" data-check-failure="i(relative_month, protected_facility, ref=-1)と、iplot()の呼び出しを確認してください。">
+              <script type="text/plain" class="r-check">exists("police_event_model") && inherits(police_event_model, "fixest") && length(coef(police_event_model)) == 17</script>
+              <script type="text/plain" class="r-answer">police_event_model <- fixest::feols(
+  car_thefts ~ i(relative_month, protected_facility, ref = -1) |
+    block_id + period,
+  data = police,
+  cluster = ~block_id
+)
+
+fixest::iplot(
+  police_event_model,
+  ref.line = 0,
+  main = "Event study: police deployment",
+  xlab = "Months from deployment",
+  ylab = "Effect on monthly car thefts"
+)</script>
+              <textarea aria-label="セルP05のRコード" spellcheck="false"># 依頼
+# 1. relative_monthごとの効果をi()で推定する
+# 2. 配置直前月-1を基準にする
+# 3. 街区固定効果、月固定効果、街区clusterを使う
+# 4. police_event_modelへ保存する
+# 5. fixest::iplot()で図にする
+
+# ヒント：A06とM05のコード構造を参照できます</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>イベントスタディを書く</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">POLICE EVENT STUDY</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact concept-slide--green">
+            <div class="slide-kicker">SLIDE 25｜二種類の反証テスト</div>
+            <h3>分析対象地域とアウトカムを変更したplacebo分析</h3>
+            <div class="concept-grid concept-grid--2">
+              <article class="concept-card"><span>WHERE｜P06</span><strong>隣接街区への犯罪移転</strong><p>隣で自動車盗が増えれば、犯罪が消えずに場所だけ移った可能性がある。</p><small>調べる係数：<code>adjacent_block:post</code></small></article>
+              <article class="concept-card"><span>WHAT｜P07</span><strong>偽のアウトカム</strong><p>自転車盗にも効果が推定される場合、一般的な犯罪変化を捉えている可能性がある。</p><small>結果だけを<code>bicycle_thefts</code>へ変更</small></article>
+            </div>
+            <div class="slide-takeaway">placeboの定義と0付近を期待する理由は、推定結果の確認前に設定する。</div>
+          </article>
+
+          <article class="lesson-card lesson-card--scratch">
+            <div class="lesson-card__heading"><span>セル P06</span><h3>隣接街区への犯罪移転をplaceboで調べる</h3></div>
+            <p>施設街区を除き、隣接街区を処置群として同じDiDを行う。正の係数なら、犯罪が隣へ移った可能性がある。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="P06" data-dataset="police" data-check-success="判定結果：隣接街区placeboを推定。明確な犯罪移転は確認されない。" data-check-failure="施設街区を除いた4,320行で、adjacent_blockとpostの交互作用、街区・月固定効果、街区clusterを指定してください。">
+              <script type="text/plain" class="r-check">exists("spillover_placebo") &&
+  has_model_spec(
+    spillover_placebo,
+    "car_thefts",
+    "block_id",
+    c("period", "month_index"),
+    "block_id"
+  ) &&
+  nobs(spillover_placebo) == 4320 &&
+  isTRUE(all.equal(
+    did_coefficient(spillover_placebo, "adjacent_block", "post"),
+    -0.096825,
+    tolerance = 0.003
+  ))</script>
+              <script type="text/plain" class="r-answer">nonfacility_blocks <- subset(police, protected_facility == 0)
+
+spillover_placebo <- fixest::feols(
+  car_thefts ~ adjacent_block:post | block_id + period,
+  data = nonfacility_blocks,
+  cluster = ~block_id
+)
+
+spillover_placebo</script>
+              <textarea aria-label="セルP06のRコード" spellcheck="false"># 依頼
+# 1. protected_facility == 0の街区だけを取り出す
+# 2. adjacent_block×postのDiDを推定する
+# 3. 固定効果とclusterは主分析と同じにする
+# 4. spillover_placeboへ保存して表示する
+
+# 解釈：隣接街区で自動車盗が増えているか</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>波及placeboを書く</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">SPILLOVER PLACEBO</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+          </article>
+
+          <article class="lesson-card lesson-card--scratch">
+            <div class="lesson-card__heading"><span>セル P07</span><h3>偽のアウトカムでも効果が出ないか調べる</h3></div>
+            <p>同じ式の結果だけを自転車盗へ変える。警官配置が自動車盗だけに影響する設定なら、自転車盗の係数は0付近になるはず。</p>
+            <div class="r-cell r-cell--exercise" data-cell-id="P07" data-dataset="police" data-check-success="判定結果：偽アウトカムの係数は0付近。" data-check-failure="P04の結果をbicycle_theftsへ変更し、街区・月固定効果と街区clusterを維持してください。交互作用項の順序は問いません。">
+              <script type="text/plain" class="r-check">exists("outcome_placebo") &&
+  has_model_spec(
+    outcome_placebo,
+    "bicycle_thefts",
+    "block_id",
+    c("period", "month_index"),
+    "block_id"
+  ) &&
+  nobs(outcome_placebo) == 5400 &&
+  isTRUE(all.equal(
+    did_coefficient(outcome_placebo, "protected_facility", "post"),
+    -0.041991,
+    tolerance = 0.003
+  ))</script>
+              <script type="text/plain" class="r-answer">outcome_placebo <- fixest::feols(
+  bicycle_thefts ~ protected_facility:post | block_id + period,
+  data = police,
+  cluster = ~block_id
+)
+
+outcome_placebo</script>
+              <textarea aria-label="セルP07のRコード" spellcheck="false"># 依頼
+# P04と同じモデルを使い、結果変数だけをbicycle_theftsへ変える
+# outcome_placeboという名前を付けて表示する
+
+# 解釈：警官配置と無関係なはずの結果にも「効果」が出ていないか</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>偽アウトカムを推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">OUTCOME PLACEBO</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+            </div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact concept-slide--green">
+            <div class="slide-kicker">SLIDE 26｜結果を一段落で報告する</div>
+            <h3>推定結果の報告に含める要素</h3>
+            <div class="report-builder">
+              <span><b>DATA</b>300街区を18か月追跡</span>
+              <i>＋</i><span><b>MODEL</b>街区FE・月FE、街区cluster</span>
+              <i>＋</i><span><b>RESULT</b>約−0.96件／街区・月</span>
+              <i>＋</i><span><b>CHECK</b>事前・隣接・偽結果は0付近</span>
+            </div>
+            <blockquote>施設街区への警官配置後、自動車盗は対照街区に比べ、1街区・1か月当たり約0.96件余分に減少した。これは教育用合成データの結果であり、元論文の再現値ではない。</blockquote>
+          </article>
+
+          <div class="level-complete level-complete--police" data-completion-section="police" hidden><span>LEVEL 3 · 7セル完了</span><strong>警官配置事例の分析項目を完了</strong><p>記述統計、DiD、イベントスタディ、隣接街区placebo、偽アウトカムplaceboを実行した。</p><a class="completion-link" href="#summary">まとめへ進む</a></div>
+        </section>
+
+        <section class="content-section" id="summary" data-flow-section="summary">
+          <p class="section-label">SUMMARY</p>
+          <h2>DiD分析の標準的な手順</h2>
+
+          <article class="concept-slide">
+            <div class="slide-kicker">SLIDE 27｜三事例を横に並べる</div>
+            <h3>分析上の役割に基づいて同一形式の式を指定する</h3>
+            <div class="role-table-wrap">
+              <table class="role-table comparison-table">
+                <thead><tr><th></th><th>アニメ</th><th>MTV</th><th>警官配置</th></tr></thead>
+                <tbody>
+                  <tr><th>単位×時間</th><td>自治体×年</td><td>市場×四半期</td><td>街区×月</td></tr>
+                  <tr><th>結果</th><td>所得指数</td><td>10代出生率</td><td>自動車盗件数</td></tr>
+                  <tr><th>処置群</th><td>舞台自治体</td><td>高MTV市場</td><td>施設街区</td></tr>
+                  <tr><th>固定効果</th><td>自治体＋年</td><td>市場＋四半期</td><td>街区＋月</td></tr>
+                  <tr><th>主推定値</th><td>約＋4.98</td><td>約−1.70</td><td>約−0.96</td></tr>
+                  <tr><th>追加確認</th><td>偽群・再開発</td><td>偽時期</td><td>隣接・偽結果</td></tr>
+                  <tr><th>支援</th><td>完成コード</td><td>穴埋め</td><td>指示＋ヒント</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="slide-takeaway">データ確認 → 平均の図 → DiD → event study → 反証テスト → 限界、という順序を別の問いでも再利用する。</div>
+          </article>
+
+          <div class="final-template">
+            <pre><code># 0. dataを確認
+dim(data)
+head(data)
+table(data$unit_id)
+
+# 1. 群×時点の平均を図示
+trend &lt;- aggregate(outcome ~ treated + time, data, mean)
+
+# 2. 二方向固定効果で平均的なDiDを推定
+did_model &lt;- fixest::feols(
+  outcome ~ treated:post | unit_id + time,
+  data = data,
+  cluster = ~unit_id
+)
+
+# 3. イベントスタディ
+event_model &lt;- fixest::feols(
+  outcome ~ i(relative_time, treated, ref = -1) |
+    unit_id + time,
+  data = data,
+  cluster = ~unit_id
+)
+fixest::iplot(event_model)</code></pre>
+          </div>
+          <div class="final-checklist">
+            <article><span>DATA</span><strong>単位×時間を確認したか</strong><p>key、欠損、balanced/unbalanced、処置開始を確認する。</p></article>
+            <article><span>DESIGN</span><strong>対照群の理由を説明できるか</strong><p>似ているからではなく、反実仮想の動きを再現できる理由を語る。</p></article>
+            <article><span>MODEL</span><strong>固定効果の役割を説明したか</strong><p>単位固有の水準差と共通時間変化を調整する。</p></article>
+            <article><span>CHECK</span><strong>0が出るべき場所を見たか</strong><p>処置前、偽時期、偽処置群、偽アウトカム、波及を点検する。</p></article>
+            <article><span>INTERPRET</span><strong>係数の単位を述べたか</strong><p>何が、何と比べて、いつ、どれだけ変わったかを書く。</p></article>
+            <article><span>LIMIT</span><strong>残る仮定を明記したか</strong><p>統計的有意性に加えて、比較の設計と限界を報告する。</p></article>
+          </div>
+          <div class="closing-message"><strong>因果効果としての解釈に必要な検討</strong><span>推定結果を因果効果として解釈するためには、データ構造、制度的背景および識別仮定を検討する必要がある。</span></div>
+        </section>
+
+        <footer class="references">
+          <h2>事例とソフトウェア</h2>
+          <ul>
+            <li><a href="https://www.waseda.jp/fpse/winpec/assets/uploads/2024/04/3877db102b2bcba2ec12275bc4e423f4.pdf">Takahashi, R. (2024), “From the Holy Land to the Homeland: The Impact of Anime Broadcasts on Economic Growth,” WINPEC Working Paper E2402.</a></li>
+            <li><a href="https://doi.org/10.1257/aer.20140012">Kearney, M. S. and P. B. Levine (2015), “Media Influences on Social Outcomes: The Impact of MTV’s 16 and Pregnant on Teen Childbearing,” <i>American Economic Review</i>, 105(12).</a></li>
+            <li><a href="https://doi.org/10.1257/000282804322970733">Di Tella, R. and E. Schargrodsky (2004), “Do Police Reduce Crime? Estimates Using the Allocation of Police Forces After a Terrorist Attack,” <i>American Economic Review</i>, 94(1).</a></li>
+            <li>推定にはLaurent BergéらによるR package <a href="https://lrberge.github.io/fixest/"><code>fixest</code></a>、ブラウザ実行には<a href="https://docs.r-wasm.org/webr/latest/">webR</a>を使用する。</li>
+          </ul>
+          <p>三つのCSVは上記研究の公開データではなく、本講義用に生成した合成データです。</p>
+        </footer>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

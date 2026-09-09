@@ -1,9 +1,10 @@
-# 第4回：はじめてのRとRCT
+# 計量経済学の応用と実践：ブラウザ実習
 
-計量経済学の講義で使用するブラウザ実習教材です。RやRStudioをインストールせず、ブラウザ上でコードを一文ずつ実行できます。
+計量経済学の講義で使用するブラウザ実習教材です。RやRStudioをインストールせず、ブラウザ上でRコードを実行できます。
 
 ## 実習ページ
 
+- 第9・10回（パネルデータと差分の差分法）：https://jungoto01.github.io/econometrics-2026-summer-lab/did/
 - 講義版 v3（見本59セル＋課題12セル）：https://jungoto01.github.io/econometrics-2026-summer-lab/v3/
 - 講義版 v2（見本40セル＋課題12セル）：https://jungoto01.github.io/econometrics-2026-summer-lab/v2/
 - 予習版（旧18セル）：https://jungoto01.github.io/econometrics-2026-summer-lab/
@@ -19,5 +20,6 @@
 - `app.js`：webRの初期化とコード実行
 - `v2/`：講義版 v2（完成した見本→穴埋め→自然言語から自力で作成）
 - `v3/`：講義版 v3（文法の補足、独立実行、解答表示、データ作成と因果推論の段階的実習）
+- `did/`：第9・10回（データ構造、固定効果DiD、event study、placebo分析）
 
 学生が入力したコードはブラウザ内のwebRで実行されます。この教材は入力内容を収集・保存しません。
