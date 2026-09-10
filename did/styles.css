@@ -1153,6 +1153,46 @@ a:focus-visible {
   color: var(--green);
 }
 
+.dummy-table .dummy-on {
+  color: #145f54;
+  background: var(--green-pale);
+  font-weight: 950;
+  text-align: center;
+}
+
+.expanded-equation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin: 20px 0;
+  padding: 20px;
+  color: var(--navy);
+  background: #f4f8fa;
+  border-radius: 11px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(0.9rem, 1.8vw, 1.15rem);
+}
+
+.expanded-equation i {
+  color: var(--muted);
+  font-style: normal;
+}
+
+.expanded-equation strong {
+  color: var(--green);
+}
+
+.expanded-equation b {
+  font-weight: 700;
+}
+
+.function-table td:nth-child(2),
+.variable-dictionary th {
+  white-space: nowrap;
+}
+
 .cluster-visual {
   display: grid;
   gap: 10px;
@@ -1753,6 +1793,14 @@ a:focus-visible {
   font-size: 0.69rem;
 }
 
+.editor-comment-key {
+  display: block;
+  margin: 6px 0 2px;
+  color: #17694f;
+  font-size: 0.69rem;
+  font-weight: 800;
+}
+
 .cell-state-label {
   display: block;
   margin-top: 5px;
@@ -1814,7 +1862,8 @@ a:focus-visible {
 }
 
 .code-comment {
-  color: #8db69e;
+  color: #9ee6bd;
+  font-weight: 650;
 }
 
 .r-cell__actions {
@@ -2321,6 +2370,37 @@ a:focus-visible {
   font-size: 0.78rem;
 }
 
+.placebo-contract {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.placebo-contract article {
+  padding: 14px;
+  background: #f4f8fa;
+  border-top: 4px solid var(--green);
+  border-radius: 8px;
+}
+
+.placebo-contract span,
+.placebo-contract strong {
+  display: block;
+}
+
+.placebo-contract span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.placebo-contract strong {
+  margin-top: 5px;
+  color: var(--navy);
+  font-size: 0.8rem;
+}
+
 .self-check {
   margin: 38px 0 24px;
   padding: clamp(24px, 4vw, 36px);
@@ -2706,6 +2786,7 @@ a:focus-visible {
   .case-brief,
   .final-checklist,
   .two-question,
+  .placebo-contract,
   .assumption-grid,
   .evidence-stack,
   .translation-board,

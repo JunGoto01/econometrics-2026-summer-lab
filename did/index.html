@@ -146,6 +146,33 @@
               <ul><li>実行は各セルの実行ボタン、またはWindowsのCtrl＋Enter／MacのCommand＋Enter。</li><li>Tabキーはインデントを入力せず、次の操作要素へフォーカスを移す。インデントには半角スペースを使用する。</li><li>「元に戻す」は、そのセルのEditorだけを初期状態へ戻す。</li><li>長いコードはEditor内を横にスクロールできる。</li><li>穴埋めやコード作成では、ヒント1 → ヒント2 → 解答例の順に参照できる。</li></ul>
             </details>
           </article>
+
+          <article class="concept-slide">
+            <div class="slide-kicker">R FUNCTION GUIDE｜データを調べ、変数を作る</div>
+            <h3>今回初めて使う関数は「入力 → 処理 → 出力」で読む</h3>
+            <div class="role-table-wrap">
+              <table class="role-table function-table">
+                <thead><tr><th>関数・構文</th><th>基本形</th><th>挙動</th></tr></thead>
+                <tbody>
+                  <tr><th><code>paste()</code></th><td><code>paste(id, time)</code></td><td>同じ位置にあるIDと時点を文字列でつなぎ、行のkeyを作る。</td></tr>
+                  <tr><th><code>duplicated()</code></th><td><code>duplicated(key)</code></td><td>以前と重複する要素を<code>TRUE</code>にする。<code>sum()</code>で件数を数えられる。</td></tr>
+                  <tr><th><code>table()</code></th><td><code>table(id)</code></td><td>IDなどの値ごとに、何行あるかを数える。</td></tr>
+                  <tr><th><code>unique()</code></th><td><code>unique(id)</code></td><td>重複を除き、異なる値だけを残す。</td></tr>
+                  <tr><th><code>is.na()</code></th><td><code>is.na(data)</code></td><td>欠損値を<code>TRUE</code>、それ以外を<code>FALSE</code>にした同じ形の表を返す。</td></tr>
+                  <tr><th><code>colSums()</code></th><td><code>colSums(is.na(data))</code></td><td>列ごとに合計する。<code>TRUE</code>を1として足すため、各列の欠損数になる。</td></tr>
+                  <tr><th><code>summary()</code></th><td><code>summary(data[c("y", "x")])</code></td><td>指定した列の最小値、四分位、平均、最大値などを返す。</td></tr>
+                  <tr><th><code>data[c(...)]</code></th><td><code>data[c("y", "x")]</code></td><td>列名を文字列で並べ、データフレームから複数の列を選ぶ。</td></tr>
+                  <tr><th><code>subset()</code></th><td><code>subset(data, post == 0)</code></td><td>条件が<code>TRUE</code>の行だけを残した表を返す。</td></tr>
+                  <tr><th><code>aggregate()</code></th><td><code>aggregate(y ~ group + time, data, FUN = mean)</code></td><td><code>group × time</code>の組合せごとに<code>y</code>の平均を計算する。<code>mean</code>には括弧を付けない。</td></tr>
+                  <tr><th><code>cbind()</code></th><td><code>cbind(y1, y2) ~ group</code></td><td>複数の列を横にまとめる。M02では二つ以上の結果を同じ群別に一度で集計する。</td></tr>
+                  <tr><th><code>median()</code></th><td><code>median(x)</code></td><td>値を小さい順に並べた中央の値を返す。</td></tr>
+                  <tr><th><code>as.integer()</code></th><td><code>as.integer(x &gt; cutoff)</code></td><td>比較結果の<code>TRUE</code>を1、<code>FALSE</code>を0へ変換する。</td></tr>
+                  <tr><th><code>print()</code></th><td><code>print(x, digits = 6)</code></td><td>objectをOutputへ表示する。<code>digits</code>で数値表示の有効桁数を指定する。</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="slide-takeaway">各Editorでは、明るい緑色のコメント行が直後のコードの目的を示す。<code>#</code>以降は説明であり、Rは実行しない。</div>
+          </article>
         </section>
 
         <section class="content-section" id="structure" data-flow-section="structure">
@@ -229,6 +256,45 @@
             <div class="slide-takeaway"><code>post = 1</code>だけでは処置を受けたことにならない。処置群で、かつ処置後の行が処置状態。</div>
           </article>
 
+          <article class="concept-slide">
+            <div class="slide-kicker">DATA DICTIONARY｜アニメデータ</div>
+            <h3>CSVに入っている7変数と、分析時に作る変数</h3>
+            <div class="role-table-wrap">
+              <table class="role-table variable-dictionary">
+                <thead><tr><th>変数</th><th>区分</th><th>内容・単位</th></tr></thead>
+                <tbody>
+                  <tr><th><code>municipality_id</code></th><td>CSV</td><td>自治体を一意に識別するID。</td></tr>
+                  <tr><th><code>municipality_name</code></th><td>CSV</td><td>表示用の自治体名。</td></tr>
+                  <tr><th><code>year</code></th><td>CSV</td><td>観測年。2005年から2015年。</td></tr>
+                  <tr><th><code>income_index</code></th><td>CSV</td><td>地域所得指数。主分析の結果変数。</td></tr>
+                  <tr><th><code>population_thousands</code></th><td>CSV</td><td>人口。単位は千人。</td></tr>
+                  <tr><th><code>anime_stage</code></th><td>CSV</td><td>2010年にアニメの舞台となる自治体なら1、対照自治体なら0。</td></tr>
+                  <tr><th><code>redevelopment</code></th><td>CSV</td><td>その年に駅前再開発が進行中なら1。交絡候補の確認に使う。</td></tr>
+                  <tr><th><code>post</code></th><td>作成</td><td><code>year &gt;= 2010</code>を1にした放送後indicator。</td></tr>
+                  <tr><th><code>relative_year</code></th><td>作成</td><td><code>year - 2010</code>。放送年を0とする相対年。</td></tr>
+                  <tr><th><code>fake_stage</code></th><td>作成</td><td>実際の対照自治体内に作る偽の処置群。placebo分析だけで使う。</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="slide-takeaway">CSVには観測された基本変数だけを置く。処置後、相対時点、偽処置は、定義を確認しながらセル内で作る。</div>
+          </article>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">DERIVED VARIABLES｜分析用変数の作り方</div>
+            <h3>処置開始時点が決まれば、同じ三つの式を再利用できる</h3>
+            <div class="role-table-wrap">
+              <table class="role-table">
+                <thead><tr><th>作るもの</th><th>一般形</th><th>アニメの例</th></tr></thead>
+                <tbody>
+                  <tr><th>処置後</th><td><code>post &lt;- as.integer(time &gt;= start)</code></td><td><code>anime$post &lt;- as.integer(anime$year &gt;= 2010)</code></td></tr>
+                  <tr><th>相対時点</th><td><code>relative_time &lt;- time - start</code></td><td><code>anime$relative_year &lt;- anime$year - 2010</code></td></tr>
+                  <tr><th>処置状態</th><td><code>did &lt;- treated * post</code></td><td><code>anime_stage:post</code>を回帰式内で作る</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="slide-takeaway">相対時点が−1なら開始1期前、0なら開始時点、2なら開始2期後を表す。データに最初から与えられるとは限らない。</div>
+          </article>
+
           <article class="concept-slide concept-slide--compact">
             <div class="slide-kicker">SLIDE 5｜記述統計の順序</div>
             <h3>記述統計は回帰前の品質管理である</h3>
@@ -246,23 +312,31 @@
             <div class="lesson-card__heading"><span>セル D01</span><h3>データの大きさ、列名、先頭行を確認する</h3></div>
             <p>分析前に、行数、列数、変数名、先頭行を確認する。あわせて、一行が表す観測単位を特定する。</p>
             <div class="r-cell" data-cell-id="D01" data-dataset="anime">
-              <textarea aria-label="セルD01のRコード" spellcheck="false">dim(anime)
+              <textarea aria-label="セルD01のRコード" spellcheck="false"># animeの行数と列数を表示する
+dim(anime)
+# animeに含まれる7つの列名を表示する
 names(anime)
+# 一行が何を表すか確認するため、先頭8行を表示する
 head(anime, 8)</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>構造を表示</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">DATA STRUCTURE</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
             </div>
-            <div class="reading-note"><strong>読む順序</strong><span>660行×11列 → 列名 → 同じ自治体M01が年ごとに繰り返される。</span></div>
+            <div class="reading-note"><strong>読む順序</strong><span>660行×7列 → 列名 → 同じ自治体M01が年ごとに繰り返される。</span></div>
           </article>
 
           <article class="lesson-card">
             <div class="lesson-card__heading"><span>セル D02</span><h3>行数を「単位数×時点数」へ分解する</h3></div>
             <p>660という行数だけではパネルか分からない。自治体数60×年数11＝660になっていることを確認する。</p>
             <div class="r-cell" data-cell-id="D02" data-dataset="anime">
-              <textarea aria-label="セルD02のRコード" spellcheck="false">c(
+              <textarea aria-label="セルD02のRコード" spellcheck="false"># 四つの確認結果を、名前付きvectorとしてまとめる
+c(
+  # データ全体の行数を数える
   rows = nrow(anime),
+  # 重複を除いた自治体IDの数を数える
   municipalities = length(unique(anime$municipality_id)),
+  # 重複を除いた年の数を数える
   years = length(unique(anime$year)),
+  # 自治体数と年数を掛け、balancedなら期待される行数を求める
   municipalities_times_years =
     length(unique(anime$municipality_id)) * length(unique(anime$year))
 )</textarea>
@@ -275,17 +349,21 @@ head(anime, 8)</textarea>
             <div class="lesson-card__heading"><span>セル D03</span><h3>keyの重複とbalanced panelを確認する</h3></div>
             <p><code>municipality_id</code>と<code>year</code>をつないだkeyに重複がないか、各自治体に11行ずつあるかを確認する。</p>
             <div class="r-cell" data-cell-id="D03" data-dataset="anime">
-              <textarea aria-label="セルD03のRコード" spellcheck="false"># paste()は二つの値を空白でつなぎ、一つのkeyを作る
+              <textarea aria-label="セルD03のRコード" spellcheck="false"># 自治体IDと年を空白でつなぎ、一行ごとのkeyを作る
 panel_key &lt;- paste(anime$municipality_id, anime$year)
+# 自治体IDごとに何行あるかを数える
 rows_per_municipality &lt;- table(anime$municipality_id)
+# 最小行数と最大行数が同じかをTRUE/FALSEで保存する
 balanced &lt;- min(rows_per_municipality) == max(rows_per_municipality)
 
+# 重複key数、最小行数、最大行数を一つのvectorで表示する
 c(
   duplicated_keys = sum(duplicated(panel_key)),
   minimum_rows = min(rows_per_municipality),
   maximum_rows = max(rows_per_municipality)
 )
 
+# 全自治体の観測数が同じかを表示する
 balanced</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>panel keyを点検</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">KEY AND BALANCE</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
@@ -297,10 +375,13 @@ balanced</textarea>
             <div class="lesson-card__heading"><span>セル D04</span><h3>欠損と変数の分布を確認する</h3></div>
             <p>推定の前に、結果・処置・時点に欠損がないか、値の範囲が意味のあるものかを見る。</p>
             <div class="r-cell" data-cell-id="D04" data-dataset="anime">
-              <textarea aria-label="セルD04のRコード" spellcheck="false"># is.na()で欠損をTRUEにし、colSums()で列ごとの個数を数える
+              <textarea aria-label="セルD04のRコード" spellcheck="false"># 2010年以降を1とする放送後indicatorを作る
+anime$post &lt;- as.integer(anime$year &gt;= 2010)
+
+# 欠損をTRUEにし、列ごとのTRUEの数を合計する
 colSums(is.na(anime))
 
-# c("列名", ...)で確認する列を並べ、anime[...]でその列だけを選ぶ
+# 確認する5列を名前で選び、各列の分布を要約する
 summary(anime[c(
   "year",
   "income_index",
@@ -309,9 +390,12 @@ summary(anime[c(
   "post"
 )])
 
+# 自治体IDと処置群だけを選び、同じ自治体の繰り返しを除く
 anime_units &lt;- unique(anime[c("municipality_id", "anime_stage")])
+# 処置群と対照群の自治体数を数える
 table(anime_units$anime_stage)
 
+# postが1になる最初の年を表示する
 min(anime$year[anime$post == 1])</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>欠損と分布を表示</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">MISSINGNESS AND SUMMARY</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
@@ -323,13 +407,17 @@ min(anime$year[anime$post == 1])</textarea>
             <div class="lesson-card__heading"><span>セル D05</span><h3>群×年の平均を作り、推定前のデータを要約する</h3></div>
             <p>個々の660行を、舞台／対照×11年の22行へ要約する。イベントスタディの前に見るべき図の材料になる。</p>
             <div class="r-cell" data-cell-id="D05" data-dataset="anime">
-              <textarea aria-label="セルD05のRコード" spellcheck="false">anime_year_means &lt;- aggregate(
+              <textarea aria-label="セルD05のRコード" spellcheck="false"># 群×年の平均表をanime_year_meansへ保存する
+anime_year_means &lt;- aggregate(
+  # 所得指数を、舞台群と年の組合せごとにまとめる
   income_index ~ anime_stage + year,
+  # 集計にanimeデータを使う
   data = anime,
-  # meanに()は付けず、平均を計算する関数そのものをFUNへ渡す
+  # 各組合せで平均を計算する。meanに括弧は付けない
   FUN = mean
 )
 
+# 作成した22行の平均表を表示する
 anime_year_means</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>群別平均を作る</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">GROUP × YEAR MEANS</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
@@ -386,6 +474,27 @@ anime_year_means</textarea>
             <div class="slide-takeaway">年固定効果は、各時点に共通する時間変化を調整する。</div>
           </article>
 
+          <article class="concept-slide">
+            <div class="slide-kicker">FIXED EFFECTS｜実体は多数の0/1ダミー</div>
+            <h3>ID固定効果と年固定効果は、ID列・年列をダミー列へ展開したもの</h3>
+            <div class="role-table-wrap">
+              <table class="role-table dummy-table">
+                <thead><tr><th>自治体</th><th>年</th><th>所得</th><th>M01ダミー</th><th>M21ダミー</th><th>2009ダミー</th><th>2011ダミー</th></tr></thead>
+                <tbody>
+                  <tr><td>M01</td><td>2009</td><td>100</td><td class="dummy-on">1</td><td>0</td><td class="dummy-on">1</td><td>0</td></tr>
+                  <tr><td>M01</td><td>2011</td><td>110</td><td class="dummy-on">1</td><td>0</td><td>0</td><td class="dummy-on">1</td></tr>
+                  <tr><td>M21</td><td>2009</td><td>95</td><td>0</td><td class="dummy-on">1</td><td class="dummy-on">1</td><td>0</td></tr>
+                  <tr><td>M21</td><td>2011</td><td>100</td><td>0</td><td class="dummy-on">1</td><td>0</td><td class="dummy-on">1</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="expanded-equation" aria-label="固定効果をダミー変数へ展開した回帰式">
+              <span>所得<sub>it</sub></span><i>＝</i><strong>β 処置状態<sub>it</sub></strong><i>＋</i><b>γ<sub>M02</sub>M02ダミー＋…＋γ<sub>M60</sub>M60ダミー</b><i>＋</i><b>δ<sub>2006</sub>2006ダミー＋…＋δ<sub>2015</sub>2015ダミー</b><i>＋</i><span>誤差<sub>it</sub></span>
+            </div>
+            <p>各行は、自分の自治体ダミー一つと、自分の年ダミー一つだけが1になる。完全に重複する列を避けるため、基準となる自治体と年のダミーは一つずつ省略する。<code>fixest</code>は実際に巨大な表を表示せず、これと同じ調整を効率的に計算する。</p>
+            <div class="slide-takeaway"><code>| municipality_id + year</code>は特殊な因果操作ではない。自治体ダミーと年ダミーをまとめて指定する省略記法である。</div>
+          </article>
+
           <article class="concept-slide concept-slide--compact">
             <div class="slide-kicker">SLIDE 9｜二方向固定効果DiD</div>
             <h3>式の各項と分析上の役割を対応させる</h3>
@@ -418,12 +527,19 @@ anime_year_means</textarea>
 
           <article class="concept-slide concept-slide--compact">
             <div class="slide-kicker">SLIDE 11｜固定効果に吸収される変数</div>
-            <h3><code>anime_stage</code>と<code>post</code>を別々に入れなくてよい理由</h3>
-            <div class="concept-grid concept-grid--2">
-              <article class="concept-card"><span>anime_stage</span><strong>自治体内で変わらない</strong><p>舞台群かどうかによる水準差は自治体固定効果に吸収される。</p></article>
-              <article class="concept-card"><span>post</span><strong>同じ年なら全自治体で共通</strong><p>放送後であることによる時間差は年固定効果に吸収される。</p></article>
+            <h3>固定効果のダミー列と同じ動きをする変数は、別の係数を推定できない</h3>
+            <div class="role-table-wrap">
+              <table class="role-table absorption-table">
+                <thead><tr><th>変数</th><th>データ内の動き</th><th>どのダミーで再現できるか</th><th>回帰での扱い</th></tr></thead>
+                <tbody>
+                  <tr><th><code>anime_stage</code></th><td>M01では全期間1、M21では全期間0</td><td>自治体ダミーの組合せ</td><td>自治体FEに吸収</td></tr>
+                  <tr><th><code>post</code></th><td>2009年は全自治体0、2011年は全自治体1</td><td>年ダミーの組合せ</td><td>年FEに吸収</td></tr>
+                  <tr class="treatment-row"><th><code>anime_stage:post</code></th><td>舞台自治体だけが放送後に0から1へ変化</td><td>IDダミーだけでも年ダミーだけでも再現不能</td><td>DiD係数を推定可能</td></tr>
+                </tbody>
+              </table>
             </div>
-            <div class="slide-takeaway">残して推定するのは<code>anime_stage:post</code>。「舞台群で、かつ放送後」の追加的な変化。</div>
+            <p>同じ理由で、海沿いかどうか、創設年、地域区分など、期間中に変わらない自治体属性は、自治体固定効果と同時に独立した係数を推定できない。情報が消えるのではなく、その水準差を自治体固定効果がすでに受け持っている。</p>
+            <div class="slide-takeaway">係数を識別するには、固定効果を差し引いた後にも変化が残る必要がある。DiDでは「処置群だけが処置後に変わる」部分を利用する。</div>
           </article>
 
           <article class="concept-slide concept-slide--compact">
@@ -443,6 +559,24 @@ anime_year_means</textarea>
           <div class="equivalence-strip">
             <span>表のDiD</span><i>＝</i><span>自治体内の前後差</span><i>−</i><span>対照群の時間変化</span><i>＝</i><strong>二方向固定効果の係数</strong>
           </div>
+
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">R FUNCTION GUIDE｜fixestで推定結果を扱う</div>
+            <h3>関数ごとに、渡すobjectと返るものを区別する</h3>
+            <div class="role-table-wrap">
+              <table class="role-table function-table">
+                <thead><tr><th>関数</th><th>基本形</th><th>挙動</th></tr></thead>
+                <tbody>
+                  <tr><th><code>fixest::feols()</code></th><td><code>feols(y ~ did | id + time, data, cluster = ~id)</code></td><td>固定効果回帰を推定し、係数・標準誤差などを持つmodel objectを返す。</td></tr>
+                  <tr><th><code>coef()</code></th><td><code>coef(model)</code></td><td>modelから推定係数だけを取り出す。</td></tr>
+                  <tr><th><code>confint()</code></th><td><code>confint(model)</code></td><td>modelから既定の95%信頼区間を取り出す。</td></tr>
+                  <tr><th><code>fixest::etable()</code></th><td><code>etable(model1, model2)</code></td><td>一つまたは複数のmodelを比較しやすい回帰表に整える。</td></tr>
+                  <tr><th><code>i()</code></th><td><code>i(relative_time, treated, ref = -1)</code></td><td>基準時点−1を除き、相対時点ごとの処置群との交互作用を作る。</td></tr>
+                  <tr><th><code>fixest::iplot()</code></th><td><code>iplot(event_model)</code></td><td><code>i()</code>で推定した係数と信頼区間を図示する。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
         </section>
 
         <section class="content-section" id="anime" data-flow-section="anime">
@@ -484,25 +618,61 @@ anime_year_means</textarea>
             <div class="slide-takeaway">event studyとplaceboは識別仮定を証明するものではない。観察可能な範囲で、識別仮定との不整合を点検する。</div>
           </article>
 
+          <article class="concept-slide concept-slide--compact">
+            <div class="slide-kicker">R FUNCTION GUIDE｜二群の推移をbase Rで描く</div>
+            <h3>隠れた教材用関数は使わず、図を構成する処理をすべてEditorに示す</h3>
+            <div class="role-table-wrap">
+              <table class="role-table function-table">
+                <thead><tr><th>関数</th><th>基本形</th><th>挙動</th></tr></thead>
+                <tbody>
+                  <tr><th><code>range()</code></th><td><code>range(y)</code></td><td><code>y</code>の最小値と最大値を返し、二本の線に共通の縦軸範囲を作る。</td></tr>
+                  <tr><th><code>plot()</code></th><td><code>plot(x, y, type = "o")</code></td><td>最初の系列と作図領域を作る。<code>type = "o"</code>は点と線の両方を描く。</td></tr>
+                  <tr><th><code>lines()</code></th><td><code>lines(x, y, type = "o")</code></td><td>すでにある図へ二本目の系列を重ねる。</td></tr>
+                  <tr><th><code>abline()</code></th><td><code>abline(v = start, lty = 2)</code></td><td>処置開始位置<code>start</code>へ縦の破線を加える。</td></tr>
+                  <tr><th><code>legend()</code></th><td><code>legend("topleft", legend = labels, ...)</code></td><td>線の色・形と群名を対応させる凡例を加える。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
           <article class="lesson-card">
             <div class="lesson-card__heading"><span>セル A01</span><h3>群別平均を折れ線にして、処置前の動きを見る</h3></div>
-            <p>最初に二群の平均推移を確認する。二本の線の水準ではなく、2010年より前の傾きが類似しているかを確認する。教材用関数<code>plot_did_trends()</code>を使用し、時間・結果・群に対応する列を指定する。<code>aggregate()</code>の<code>~</code>式では列名を引用符なしで書く。一方、この教材用関数の<code>time</code>、<code>outcome</code>、<code>group</code>には、列名を<code>""</code>で囲んだ文字列として渡す。</p>
+            <p>最初に二群の平均推移を確認する。二本の線の水準ではなく、2010年より前の傾きが類似しているかを確認する。群別平均を作り、<code>plot()</code>で対照群、<code>lines()</code>で舞台群を描く。使用する処理はすべてEditor内に示す。</p>
             <div class="r-cell r-cell--long" data-cell-id="A01" data-dataset="anime">
-              <textarea aria-label="セルA01のRコード" spellcheck="false">anime_trend &lt;- aggregate(
+              <textarea aria-label="セルA01のRコード" spellcheck="false"># 舞台群×年の所得指数平均を作る
+anime_trend &lt;- aggregate(
+  # 所得指数を舞台群と年で分ける
   income_index ~ anime_stage + year,
+  # animeデータを使う
   data = anime,
+  # 各組合せの平均を計算する
   FUN = mean
 )
 
-plot_did_trends(
-  data = anime_trend,
-  time = "year", outcome = "income_index", group = "anime_stage",
-  intervention = 2010,
-  group_labels = c("Comparison", "Anime location"),
-  event_label = "Broadcast",
+# 平均表から対照自治体の行だけを取り出す
+anime_comparison &lt;- subset(anime_trend, anime_stage == 0)
+# 平均表から舞台自治体の行だけを取り出す
+anime_locations &lt;- subset(anime_trend, anime_stage == 1)
+# 二群に共通する縦軸の最小値と最大値を作る
+income_limits &lt;- range(anime_trend$income_index)
+
+# 対照自治体の年平均を点と線で描き、作図領域を作る
+plot(
+  anime_comparison$year, anime_comparison$income_index,
+  type = "o", pch = 16, col = "#2A6F97", ylim = income_limits,
   xlab = "Year", ylab = "Mean income index",
   main = "Anime locations and comparison municipalities"
-)</textarea>
+)
+# 同じ図へ舞台自治体の年平均を重ねる
+lines(anime_locations$year, anime_locations$income_index,
+  type = "o", pch = 17, col = "#EE6C4D")
+# 放送開始年2010へ縦の破線を加える
+abline(v = 2010, lty = 2, col = "#64748B")
+# 色・点・線が何を表すかを左上に表示する
+legend("topleft",
+  legend = c("Comparison", "Anime location", "Broadcast"),
+  col = c("#2A6F97", "#EE6C4D", "#64748B"),
+  lty = c(1, 1, 2), pch = c(16, 17, NA), bty = "n")</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>平均の図を描く</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">RAW TRENDS</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
             </div>
@@ -513,27 +683,38 @@ plot_did_trends(
             <div class="lesson-card__heading"><span>セル A02</span><h3>2009年と2011年を取り出し、手計算のDiD＝5を再現する</h3></div>
             <p>前回の四つの数字が、多数の自治体の群平均としてデータ内に入っていることを確かめる。</p>
             <div class="r-cell r-cell--long" data-cell-id="A02" data-dataset="anime">
-              <textarea aria-label="セルA02のRコード" spellcheck="false"># %in%は、yearが括弧内の候補のいずれかに含まれるかを調べる
+              <textarea aria-label="セルA02のRコード" spellcheck="false"># 2010年以降を1とする放送後indicatorを作る
+anime$post &lt;- as.integer(anime$year &gt;= 2010)
+
+# 2009年または2011年の行だけを取り出す
 anime_2x2 &lt;- subset(anime, year %in% c(2009, 2011))
 
+# 舞台群×放送前後の四つの所得平均を作る
 four_means &lt;- aggregate(
+  # 所得指数を舞台群と放送前後で分ける
   income_index ~ anime_stage + post,
+  # 取り出した2年分のデータを使う
   data = anime_2x2,
+  # 四つの組合せで平均を計算する
   FUN = mean
 )
 
-# &amp;は左右の条件を両方満たす行を選ぶ
+# 舞台自治体の放送後平均から放送前平均を引く
 treated_change &lt;-
   mean(anime_2x2$income_index[anime_2x2$anime_stage == 1 &amp; anime_2x2$post == 1]) -
   mean(anime_2x2$income_index[anime_2x2$anime_stage == 1 &amp; anime_2x2$post == 0])
 
+# 対照自治体の放送後平均から放送前平均を引く
 control_change &lt;-
   mean(anime_2x2$income_index[anime_2x2$anime_stage == 0 &amp; anime_2x2$post == 1]) -
   mean(anime_2x2$income_index[anime_2x2$anime_stage == 0 &amp; anime_2x2$post == 0])
 
+# 舞台群の変化から対照群の変化を引いてDiDを作る
 did_by_hand &lt;- treated_change - control_change
 
+# 四つの平均を表示する
 four_means
+# 二群の変化とDiDを名前付きvectorで表示する
 c(treated_change = treated_change,
   control_change = control_change,
   did = did_by_hand)</textarea>
@@ -547,12 +728,17 @@ c(treated_change = treated_change,
             <div class="lesson-card__heading"><span>セル A03</span><h3><code>feols()</code>で同じDiDを推定する</h3></div>
             <p>2009年と2011年のデータに、自治体固定効果と年固定効果を入れる。係数は手計算と同じ5になる。</p>
             <div class="r-cell" data-cell-id="A03" data-dataset="anime" data-depends-on="A02">
-              <textarea aria-label="セルA03のRコード" spellcheck="false">anime_model_2x2 &lt;- fixest::feols(
+              <textarea aria-label="セルA03のRコード" spellcheck="false"># 2群2期の固定効果DiDを推定し、modelとして保存する
+anime_model_2x2 &lt;- fixest::feols(
+  # 結果 ~ 処置群×処置後 | 自治体FE + 年FE を指定する
   income_index ~ anime_stage:post | municipality_id + year,
+  # A02で作った2年分のデータを使う
   data = anime_2x2,
+  # 同じ自治体内の誤差相関を許す標準誤差にする
   cluster = ~municipality_id
 )
 
+# 係数表と固定効果の情報を表示する
 anime_model_2x2</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>feolsで推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">FIXEST MODEL</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
@@ -565,11 +751,16 @@ anime_model_2x2</textarea>
             <div class="lesson-card__heading"><span>セル A04</span><h3>係数と95%信頼区間を取り出す</h3></div>
             <p>長い出力のどこを読むかを固定する。統計的有意性と因果的解釈は別である。</p>
             <div class="r-cell" data-cell-id="A04" data-dataset="anime" data-depends-on="A02 A03">
-              <textarea aria-label="セルA04のRコード" spellcheck="false">coef(anime_model_2x2)
+              <textarea aria-label="セルA04のRコード" spellcheck="false"># A03のmodelから推定係数だけを取り出す
+coef(anime_model_2x2)
+# A03のmodelから95%信頼区間を取り出す
 confint(anime_model_2x2)
 
+# A03のmodelを読みやすい回帰表に整える
 fixest::etable(
+  # 表示するmodelを指定する
   anime_model_2x2,
+  # 元の係数名を日本語表示へ置き換える
   dict = c("anime_stage:post" = "舞台自治体 × 放送後")
 )</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>係数と区間を読む</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
@@ -582,12 +773,20 @@ fixest::etable(
             <div class="lesson-card__heading"><span>セル A05</span><h3>11年すべてを使い、平均的な放送後効果を推定する</h3></div>
             <p>2群2期から複数時点へ拡張しても式の形は同じ。ただし、効果が年ごとに異なると、この係数は複数の放送後効果を一つにまとめた値になる。</p>
             <div class="r-cell" data-cell-id="A05" data-dataset="anime">
-              <textarea aria-label="セルA05のRコード" spellcheck="false">anime_model_all_years &lt;- fixest::feols(
+              <textarea aria-label="セルA05のRコード" spellcheck="false"># 2010年以降を1とする放送後indicatorを作る
+anime$post &lt;- as.integer(anime$year &gt;= 2010)
+
+# 11年すべてを使う固定効果DiDを推定する
+anime_model_all_years &lt;- fixest::feols(
+  # 結果 ~ 処置群×処置後 | 自治体FE + 年FE を指定する
   income_index ~ anime_stage:post | municipality_id + year,
+  # 660行すべてのanimeデータを使う
   data = anime,
+  # 自治体単位でcluster標準誤差を計算する
   cluster = ~municipality_id
 )
 
+# 平均的な放送後効果を含むmodelを表示する
 anime_model_all_years</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>全期間で推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">ALL-YEAR DID</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
@@ -604,18 +803,29 @@ anime_model_all_years</textarea>
 
           <article class="lesson-card lesson-card--accent">
             <div class="lesson-card__heading"><span>セル A06</span><h3><code>i()</code>でイベントスタディを推定・作図する</h3></div>
-            <p>放送前年（−1）を比較の基準にする。<code>i()</code>は相対年ごとに舞台自治体との差を作る。</p>
+            <p>最初に<code>year - 2010</code>で<code>relative_year</code>を作る。次に放送前年（−1）を比較の基準とし、<code>i()</code>で相対年ごとの舞台自治体との差を作る。</p>
             <div class="r-cell" data-cell-id="A06" data-dataset="anime">
-              <textarea aria-label="セルA06のRコード" spellcheck="false">anime_event_model &lt;- fixest::feols(
+              <textarea aria-label="セルA06のRコード" spellcheck="false"># 各年から放送開始年2010を引き、放送年を0とする相対年を作る
+anime$relative_year &lt;- anime$year - 2010
+
+# 相対年ごとの効果を推定するevent-study modelを作る
+anime_event_model &lt;- fixest::feols(
+  # 相対年×舞台群を作り、放送前年-1を比較基準から外す
   income_index ~ i(relative_year, anime_stage, ref = -1) |
     municipality_id + year,
+  # 11年すべてのanimeデータを使う
   data = anime,
+  # 自治体単位でcluster標準誤差を計算する
   cluster = ~municipality_id
 )
 
+# i()で推定した相対年係数と95%信頼区間を図示する
 fixest::iplot(
+  # 直前に作ったevent-study modelを渡す
   anime_event_model,
+  # 効果0を表す水平線を加える
   ref.line = 0,
+  # 図のタイトルと軸ラベルを指定する
   main = "Event study: anime locations",
   xlab = "Years from broadcast",
   ylab = "Effect on income index"
@@ -628,16 +838,38 @@ fixest::iplot(
 
           <article class="lesson-card">
             <div class="lesson-card__heading"><span>セル A07</span><h3>偽の処置群でplaceboを行う</h3></div>
-            <p>実際の舞台自治体を除き、対照自治体の一部を「偽の舞台」とする。同じ方法で効果が推定される場合、一般的な群間差を効果として捉えている可能性がある。</p>
+            <p>実際の舞台自治体をすべて除き、残った対照自治体を2005年人口の中央値で二群に分ける。人口が大きい側を「偽の舞台」と呼び、実際の放送開始年2010を境に同じDiDを行う。</p>
+            <div class="placebo-contract"><article><span>偽にするもの</span><strong>未処置自治体内の高人口群を偽処置群にする</strong></article><article><span>なぜ0を期待するか</span><strong>どちらの群もアニメの舞台ではなく、放送による処置がない</strong></article><article><span>効果が出た場合</span><strong>人口規模別の異なるトレンドやmodelの誤指定を疑う</strong></article></div>
             <div class="r-cell" data-cell-id="A07" data-dataset="anime">
-              <textarea aria-label="セルA07のRコード" spellcheck="false">anime_placebo_data &lt;- subset(anime, anime_stage == 0)
+              <textarea aria-label="セルA07のRコード" spellcheck="false"># 2010年以降を1とする放送後indicatorを作る
+anime$post &lt;- as.integer(anime$year &gt;= 2010)
 
+# 実際には舞台でない対照自治体だけを残す
+anime_placebo_data &lt;- subset(anime, anime_stage == 0)
+# 処置前の2005年だけを使い、自治体の基準人口を一行ずつ得る
+placebo_baseline &lt;- subset(anime_placebo_data, year == 2005)
+# 対照自治体の基準人口の中央値を偽群のcutoffにする
+placebo_cutoff &lt;- median(placebo_baseline$population_thousands)
+# 基準人口が中央値より大きい対照自治体のIDを保存する
+fake_units &lt;- placebo_baseline$municipality_id[
+  placebo_baseline$population_thousands &gt; placebo_cutoff
+]
+# そのIDに含まれる自治体を偽の処置群1にする
+anime_placebo_data$fake_stage &lt;- as.integer(
+  anime_placebo_data$municipality_id %in% fake_units
+)
+
+# 偽群×放送後の係数を、主分析と同じ固定効果で推定する
 anime_placebo_model &lt;- fixest::feols(
+  # 所得指数 ~ 偽処置群×放送後 | 自治体FE + 年FE を指定する
   income_index ~ fake_stage:post | municipality_id + year,
+  # 実際の舞台自治体を除き、偽群を作成済みのデータを使う
   data = anime_placebo_data,
+  # 自治体単位でcluster標準誤差を計算する
   cluster = ~municipality_id
 )
 
+# 実際には誰も処置されていない比較の結果を表示する
 anime_placebo_model</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>偽の処置群を推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">FAKE-TREATED PLACEBO</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
@@ -649,24 +881,38 @@ anime_placebo_model</textarea>
             <div class="lesson-card__heading"><span>セル A08</span><h3>同時期の再開発を加え、推定値が動くか確認する</h3></div>
             <p>駅前再開発は所得を上げうる。再開発を入れない式と入れた式を並べ、アニメの係数が大きく変わるかを見る。</p>
             <div class="r-cell r-cell--long" data-cell-id="A08" data-dataset="anime">
-              <textarea aria-label="セルA08のRコード" spellcheck="false">anime_basic_model &lt;- fixest::feols(
+              <textarea aria-label="セルA08のRコード" spellcheck="false"># 2010年以降を1とする放送後indicatorを作る
+anime$post &lt;- as.integer(anime$year &gt;= 2010)
+
+# 再開発を入れない基本のDiD modelを推定する
+anime_basic_model &lt;- fixest::feols(
+  # 所得指数 ~ 舞台群×放送後 | 自治体FE + 年FE を指定する
   income_index ~ anime_stage:post | municipality_id + year,
+  # 11年すべてのanimeデータを使う
   data = anime,
+  # 自治体単位でcluster標準誤差を計算する
   cluster = ~municipality_id
 )
 
+# 同じ式へ時間とともに変わる再開発indicatorを追加する
 anime_adjusted_model &lt;- fixest::feols(
+  # 舞台群×放送後に加え、同じ年の再開発も説明変数にする
   income_index ~ anime_stage:post + redevelopment |
     municipality_id + year,
+  # 基本modelと同じanimeデータを使う
   data = anime,
+  # 基本modelと同じ自治体clusterを使う
   cluster = ~municipality_id
 )
 
+# 二つのmodelを横に並べた回帰表を作る
 fixest::etable(
+  # model名を表の列見出しとして付ける
   list(
     "基本" = anime_basic_model,
     "再開発を追加" = anime_adjusted_model
   ),
+  # 係数名と固定効果名を日本語表示へ置き換える
   dict = c(
     "anime_stage:post" = "舞台 × 放送後",
     "redevelopment" = "駅前再開発",
@@ -764,6 +1010,31 @@ fixest::etable(
             </div>
           </article>
 
+          <article class="concept-slide concept-slide--purple">
+            <div class="slide-kicker">DATA DICTIONARY｜MTVデータ</div>
+            <h3>CSVに入っている9変数と、分析時に作る4変数</h3>
+            <div class="role-table-wrap">
+              <table class="role-table variable-dictionary">
+                <thead><tr><th>変数</th><th>区分</th><th>内容・単位</th></tr></thead>
+                <tbody>
+                  <tr><th><code>market_id</code></th><td>CSV</td><td>メディア市場を一意に識別するID。</td></tr>
+                  <tr><th><code>market_name</code></th><td>CSV</td><td>表示用の市場名。</td></tr>
+                  <tr><th><code>period</code></th><td>CSV</td><td><code>2007-Q1</code>のような四半期ラベル。時間固定効果に使う。</td></tr>
+                  <tr><th><code>period_index</code></th><td>CSV</td><td>2007年第1四半期を1とする連番。作図や条件指定に使う。</td></tr>
+                  <tr><th><code>year</code></th><td>CSV</td><td>観測年。2007年から2011年。</td></tr>
+                  <tr><th><code>quarter</code></th><td>CSV</td><td>年内の四半期。1から4。</td></tr>
+                  <tr><th><code>teen_birth_rate</code></th><td>CSV</td><td>15–19歳女性1,000人当たり出生数。主分析の結果変数。</td></tr>
+                  <tr><th><code>mtv_rating_pre</code></th><td>CSV</td><td>番組開始前のMTV視聴率。市場内では全期間同じ。</td></tr>
+                  <tr><th><code>unemployment_rate</code></th><td>CSV</td><td>市場・四半期別の失業率。</td></tr>
+                  <tr><th><code>high_mtv</code></th><td>作成</td><td>放送前MTV視聴率が中央値より高い市場なら1。</td></tr>
+                  <tr><th><code>post</code></th><td>作成</td><td><code>period_index &gt;= 11</code>を1にした番組放送後indicator。</td></tr>
+                  <tr><th><code>relative_quarter</code></th><td>作成</td><td><code>period_index - 11</code>。放送開始四半期を0とする。</td></tr>
+                  <tr><th><code>fake_post</code></th><td>作成</td><td>放送前だけのplacebo分析で置く偽の放送後indicator。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
           <article class="concept-slide concept-slide--compact">
             <div class="slide-kicker">SLIDE 20｜穴埋めの考え方</div>
             <h3>各空欄に対応する変数の役割と列名を確認する</h3>
@@ -780,20 +1051,30 @@ fixest::etable(
             <p><code>__</code>をRコードへ置き換える。放送前視聴率が中央値より高ければ1、それ以外は0にする。<code>as.integer()</code>は比較結果の<code>TRUE</code>を1、<code>FALSE</code>を0へ変換する。</p>
             <div class="r-cell r-cell--exercise" data-cell-id="M01" data-dataset="mtv" data-check-success="判定結果：中央値13.235に基づく各40市場の二群を作成。" data-check-failure="median()と比較演算子 &gt; を確認してください。">
               <script type="text/plain" class="r-check">exists("mtv_cutoff") && isTRUE(all.equal(mtv_cutoff, 13.235)) && exists("high_mtv") && identical(as.integer(table(mtv$high_mtv)), c(800L, 800L))</script>
-              <script type="text/plain" class="r-answer">mtv_cutoff <- median(mtv$mtv_rating_pre)
+              <script type="text/plain" class="r-answer"># 放送前MTV視聴率の中央値をcutoffとして保存する
+mtv_cutoff <- median(mtv$mtv_rating_pre)
+# cutoffより視聴率が高い行を1、その他を0にする
 mtv$high_mtv <- as.integer(mtv$mtv_rating_pre > mtv_cutoff)
+# 11期目以降を1とする番組放送後indicatorを作る
+mtv$post <- as.integer(mtv$period_index >= 11)
 
-# 市場IDと処置群だけを選び、unique()で市場ごとに1行へ縮める
+# 市場IDと処置群だけを選び、市場ごとに1行へ縮める
 high_mtv <- unique(mtv[c("market_id", "high_mtv")])$high_mtv
+# cutoffと二群の市場数を名前付きvectorで表示する
 print(c(cutoff = mtv_cutoff,
   low_markets = sum(high_mtv == 0),
   high_markets = sum(high_mtv == 1)),
   digits = 6)</script>
-              <textarea aria-label="セルM01のRコード" spellcheck="false">mtv_cutoff &lt;- __(mtv$mtv_rating_pre)
+              <textarea aria-label="セルM01のRコード" spellcheck="false"># 放送前MTV視聴率の中央値をcutoffとして保存する
+mtv_cutoff &lt;- __(mtv$mtv_rating_pre)
+# cutoffより視聴率が高い行を1、その他を0にする
 mtv$high_mtv &lt;- as.integer(mtv$mtv_rating_pre __ mtv_cutoff)
+# 11期目以降を1とする番組放送後indicatorを作る
+mtv$post &lt;- as.integer(mtv$period_index &gt;= 11)
 
-# 市場IDと処置群だけを選び、unique()で市場ごとに1行へ縮める
+# 市場IDと処置群だけを選び、市場ごとに1行へ縮める
 high_mtv &lt;- unique(mtv[c("market_id", "high_mtv")])$high_mtv
+# cutoffと二群の市場数を名前付きvectorで表示する
 print(c(cutoff = mtv_cutoff,
   low_markets = sum(high_mtv == 0),
   high_markets = sum(high_mtv == 1)),
@@ -808,23 +1089,35 @@ print(c(cutoff = mtv_cutoff,
             <p>放送前の行だけに絞り、出生率、MTV視聴率、失業率の平均を二群で比較する。</p>
             <div class="r-cell r-cell--exercise" data-cell-id="M02" data-dataset="mtv" data-depends-on="M01" data-check-success="判定結果：放送前の三変数を二群別に要約。" data-check-failure="subset()の条件とaggregate()の左側を確認してください。">
               <script type="text/plain" class="r-check">exists("mtv_pre_summary") && is.data.frame(mtv_pre_summary) && nrow(mtv_pre_summary) == 2 && all(c("teen_birth_rate", "mtv_rating_pre", "unemployment_rate") %in% names(mtv_pre_summary))</script>
-              <script type="text/plain" class="r-answer">mtv_pre <- subset(mtv, post == 0)
+              <script type="text/plain" class="r-answer"># postが0である番組放送前の行だけを残す
+mtv_pre <- subset(mtv, post == 0)
 
+# 高MTV群別の処置前平均表を作る
 mtv_pre_summary <- aggregate(
+  # 三つの変数を一度にまとめ、高MTV群で分ける
   cbind(teen_birth_rate, mtv_rating_pre, unemployment_rate) ~ high_mtv,
+  # 放送前だけに限定したデータを使う
   data = mtv_pre,
+  # 各群で平均を計算する
   FUN = mean
 )
 
+# 作成した二行の平均表を表示する
 mtv_pre_summary</script>
-              <textarea aria-label="セルM02のRコード" spellcheck="false">mtv_pre &lt;- subset(mtv, __ == 0)
+              <textarea aria-label="セルM02のRコード" spellcheck="false"># postが0である番組放送前の行だけを残す
+mtv_pre &lt;- subset(mtv, __ == 0)
 
+# 高MTV群別の処置前平均表を作る
 mtv_pre_summary &lt;- aggregate(
+  # 三つの変数を一度にまとめ、高MTV群で分ける
   cbind(__, __, __) ~ high_mtv,
+  # 放送前だけに限定したデータを使う
   data = mtv_pre,
+  # 各群で平均を計算する
   FUN = mean
 )
 
+# 作成した二行の平均表を表示する
 mtv_pre_summary</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>記述統計を作る</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">PRE-TREATMENT DESCRIPTIVES</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
@@ -835,38 +1128,72 @@ mtv_pre_summary</textarea>
           <article class="lesson-card lesson-card--exercise">
             <div class="lesson-card__heading"><span>セル M03</span><h3>二群の四半期平均を作図する</h3></div>
             <p>アニメのA01と同じ構造で、変数名だけが変わる。穴埋め後の図で放送前の傾きを見る。</p>
-            <div class="r-cell r-cell--exercise r-cell--long" data-cell-id="M03" data-dataset="mtv" data-depends-on="M01" data-requires-plot="true" data-check-success="判定結果：40個の群×四半期平均を作成し、図示。" data-check-failure="aggregate()の結果変数・群・時間と、plot_did_trends()の呼び出しを確認してください。">
+            <div class="r-cell r-cell--exercise r-cell--long" data-cell-id="M03" data-dataset="mtv" data-depends-on="M01" data-requires-plot="true" data-check-success="判定結果：40個の群×四半期平均を作成し、図示。" data-check-failure="aggregate()の結果変数・群・時間と、plot()・lines()による二群の作図を確認してください。">
               <script type="text/plain" class="r-check">exists("mtv_trend") && nrow(mtv_trend) == 40</script>
-              <script type="text/plain" class="r-answer">mtv_trend <- aggregate(
+              <script type="text/plain" class="r-answer"># 高MTV群×四半期の出生率平均を作る
+mtv_trend <- aggregate(
+  # 出生率を高MTV群と四半期連番で分ける
   teen_birth_rate ~ high_mtv + period_index,
+  # high_mtvを作成済みのmtvデータを使う
   data = mtv,
+  # 各組合せの平均を計算する
   FUN = mean
 )
 
-plot_did_trends(
-  data = mtv_trend,
-  time = "period_index", outcome = "teen_birth_rate", group = "high_mtv",
-  intervention = 11,
-  group_labels = c("Low MTV", "High MTV"),
-  event_label = "Broadcast",
+# 平均表を低MTV市場と高MTV市場に分ける
+mtv_low <- subset(mtv_trend, high_mtv == 0)
+mtv_high <- subset(mtv_trend, high_mtv == 1)
+# 二群に共通する縦軸範囲を作る
+birth_limits <- range(mtv_trend$teen_birth_rate)
+
+# 低MTV市場の四半期平均を点と線で描く
+plot(
+  mtv_low$period_index, mtv_low$teen_birth_rate,
+  type = "o", pch = 16, col = "#2A6F97", ylim = birth_limits,
   xlab = "Quarter index", ylab = "Teen birth rate",
   main = "Pre-broadcast MTV viewing and teen births"
-)</script>
-              <textarea aria-label="セルM03のRコード" spellcheck="false">mtv_trend &lt;- aggregate(
+)
+# 同じ図へ高MTV市場の四半期平均を重ねる
+lines(mtv_high$period_index, mtv_high$teen_birth_rate,
+  type = "o", pch = 17, col = "#EE6C4D")
+# 放送開始の11期目へ縦の破線を加える
+abline(v = 11, lty = 2, col = "#64748B")
+# 二群と放送開始線の凡例を加える
+legend("topleft", legend = c("Low MTV", "High MTV", "Broadcast"),
+  col = c("#2A6F97", "#EE6C4D", "#64748B"),
+  lty = c(1, 1, 2), pch = c(16, 17, NA), bty = "n")</script>
+              <textarea aria-label="セルM03のRコード" spellcheck="false"># 高MTV群×四半期の出生率平均を作る
+mtv_trend &lt;- aggregate(
+  # 出生率を高MTV群と四半期連番で分ける
   __ ~ __ + __,
+  # high_mtvを作成済みのmtvデータを使う
   data = mtv,
+  # 各組合せの平均を計算する
   FUN = mean
 )
 
-plot_did_trends(
-  data = mtv_trend,
-  time = "period_index", outcome = "teen_birth_rate", group = "high_mtv",
-  intervention = 11,
-  group_labels = c("Low MTV", "High MTV"),
-  event_label = "Broadcast",
+# 平均表を低MTV市場と高MTV市場に分ける
+mtv_low &lt;- subset(mtv_trend, high_mtv == 0)
+mtv_high &lt;- subset(mtv_trend, high_mtv == 1)
+# 二群に共通する縦軸範囲を作る
+birth_limits &lt;- range(mtv_trend$teen_birth_rate)
+
+# 低MTV市場の四半期平均を点と線で描く
+plot(
+  mtv_low$period_index, mtv_low$teen_birth_rate,
+  type = "o", pch = 16, col = "#2A6F97", ylim = birth_limits,
   xlab = "Quarter index", ylab = "Teen birth rate",
   main = "Pre-broadcast MTV viewing and teen births"
-)</textarea>
+)
+# 同じ図へ高MTV市場の四半期平均を重ねる
+lines(mtv_high$period_index, mtv_high$teen_birth_rate,
+  type = "o", pch = 17, col = "#EE6C4D")
+# 放送開始の11期目へ縦の破線を加える
+abline(v = 11, lty = 2, col = "#64748B")
+# 二群と放送開始線の凡例を加える
+legend("topleft", legend = c("Low MTV", "High MTV", "Broadcast"),
+  col = c("#2A6F97", "#EE6C4D", "#64748B"),
+  lty = c(1, 1, 2), pch = c(16, 17, NA), bty = "n")</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>穴埋めして作図</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">QUARTERLY TRENDS</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
             </div>
@@ -890,19 +1217,29 @@ plot_did_trends(
     -1.697087,
     tolerance = 0.003
   ))</script>
-              <script type="text/plain" class="r-answer">mtv_model <- fixest::feols(
+              <script type="text/plain" class="r-answer"># 全20四半期の固定効果DiDを推定する
+mtv_model <- fixest::feols(
+  # 出生率 ~ 高MTV群×放送後 | 市場FE + 四半期FE を指定する
   teen_birth_rate ~ high_mtv:post | market_id + period,
+  # high_mtvとpostを作成済みのmtvデータを使う
   data = mtv,
+  # 市場単位でcluster標準誤差を計算する
   cluster = ~market_id
 )
 
+# 高MTV市場の相対的な放送後変化を表示する
 mtv_model</script>
-              <textarea aria-label="セルM04のRコード" spellcheck="false">mtv_model &lt;- fixest::feols(
+              <textarea aria-label="セルM04のRコード" spellcheck="false"># 全20四半期の固定効果DiDを推定する
+mtv_model &lt;- fixest::feols(
+  # 結果 ~ 処置群×放送後 | 市場FE + 四半期FE を指定する
   __ ~ __:__ | __ + __,
+  # high_mtvとpostを作成済みのmtvデータを使う
   data = mtv,
+  # 市場単位でcluster標準誤差を計算する
   cluster = ~__
 )
 
+# 高MTV市場の相対的な放送後変化を表示する
 mtv_model</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>DiDを推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">MTV DID MODEL</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
@@ -912,33 +1249,55 @@ mtv_model</textarea>
 
           <article class="lesson-card lesson-card--exercise">
             <div class="lesson-card__heading"><span>セル M05</span><h3>四半期単位のイベントスタディを描く</h3></div>
-            <p><code>relative_quarter</code>を使い、放送直前の四半期−1を基準にする。</p>
+            <p><code>period_index - 11</code>で<code>relative_quarter</code>を作り、放送直前の四半期−1を基準にする。</p>
             <div class="r-cell r-cell--exercise" data-cell-id="M05" data-dataset="mtv" data-depends-on="M01" data-requires-plot="true" data-check-success="判定結果：四半期イベントスタディを推定し、図示。" data-check-failure="i()の相対時点、処置群、ref=-1と、iplot()の呼び出しを確認してください。">
               <script type="text/plain" class="r-check">exists("mtv_event_model") && inherits(mtv_event_model, "fixest") && length(coef(mtv_event_model)) == 19</script>
-              <script type="text/plain" class="r-answer">mtv_event_model <- fixest::feols(
+              <script type="text/plain" class="r-answer"># 四半期連番から放送開始期11を引き、相対四半期を作る
+mtv$relative_quarter <- mtv$period_index - 11
+
+# 相対四半期ごとの効果を推定するevent-study modelを作る
+mtv_event_model <- fixest::feols(
+  # 相対四半期×高MTV群を作り、放送直前期-1を基準にする
   teen_birth_rate ~ i(relative_quarter, high_mtv, ref = -1) |
     market_id + period,
+  # high_mtvと相対四半期を作成済みのmtvデータを使う
   data = mtv,
+  # 市場単位でcluster標準誤差を計算する
   cluster = ~market_id
 )
 
+# 相対四半期係数と95%信頼区間を図示する
 fixest::iplot(
+  # 直前に作ったevent-study modelを渡す
   mtv_event_model,
+  # 効果0を表す水平線を加える
   ref.line = 0,
+  # 図のタイトルと軸ラベルを指定する
   main = "Event study: 16 and Pregnant",
   xlab = "Quarters from broadcast",
   ylab = "Effect on teen birth rate"
 )</script>
-              <textarea aria-label="セルM05のRコード" spellcheck="false">mtv_event_model &lt;- fixest::feols(
+              <textarea aria-label="セルM05のRコード" spellcheck="false"># 四半期連番から放送開始期11を引き、相対四半期を作る
+mtv$relative_quarter &lt;- mtv$period_index - 11
+
+# 相対四半期ごとの効果を推定するevent-study modelを作る
+mtv_event_model &lt;- fixest::feols(
+  # 相対四半期×高MTV群を作り、放送直前期-1を基準にする
   teen_birth_rate ~ i(__, __, ref = __) |
     __ + __,
+  # high_mtvと相対四半期を作成済みのmtvデータを使う
   data = mtv,
+  # 市場単位でcluster標準誤差を計算する
   cluster = ~__
 )
 
+# 相対四半期係数と95%信頼区間を図示する
 fixest::iplot(
+  # 直前に作ったevent-study modelを渡す
   mtv_event_model,
+  # 効果0を表す水平線を加える
   ref.line = 0,
+  # 図のタイトルと軸ラベルを指定する
   main = "Event study: 16 and Pregnant",
   xlab = "Quarters from broadcast",
   ylab = "Effect on teen birth rate"
@@ -950,7 +1309,8 @@ fixest::iplot(
 
           <article class="lesson-card lesson-card--exercise">
             <div class="lesson-card__heading"><span>セル M06</span><h3>放送前だけで、偽の放送時期placeboを行う</h3></div>
-            <p>本当の放送より前の10四半期だけを使い、2008年第3四半期を偽の開始時点とする。効果がないはずの時期に同じ推定を行う。</p>
+            <p>本当の放送より前の10四半期だけを使い、7期目を偽の開始時点とする。本物の番組がまだ存在しない期間に同じDiDを行い、二群が放送前から別の変化をしていなかったかを調べる。</p>
+            <div class="placebo-contract"><article><span>偽にするもの</span><strong>放送前の7期目を偽の放送開始にする</strong></article><article><span>なぜ0を期待するか</span><strong>使用期間には番組がなく、番組への露出は起こり得ない</strong></article><article><span>効果が出た場合</span><strong>事前トレンド、季節変化、別の同時期ショックを疑う</strong></article></div>
             <div class="r-cell r-cell--exercise" data-cell-id="M06" data-dataset="mtv" data-depends-on="M01" data-check-success="判定結果：偽の放送時期の係数は0付近。" data-check-failure="period_index &lt;= 10で放送前へ限定し、period_index &gt;= 7をfake_postとして、市場clusterで推定してください。">
               <script type="text/plain" class="r-check">exists("mtv_before_broadcast") &&
   is.data.frame(mtv_before_broadcast) &&
@@ -974,29 +1334,43 @@ fixest::iplot(
     0.061183,
     tolerance = 0.003
   ))</script>
-              <script type="text/plain" class="r-answer">mtv_before_broadcast <- subset(mtv, period_index <= 10)
+              <script type="text/plain" class="r-answer"># 実際の番組放送前である1期目から10期目だけを残す
+mtv_before_broadcast <- subset(mtv, period_index <= 10)
+# 放送前データ内の7期目以降を、偽の放送後1にする
 mtv_before_broadcast$fake_post <- as.integer(
   mtv_before_broadcast$period_index >= 7
 )
 
+# 実際には番組がない時期に、主分析と同じ形のDiDを推定する
 mtv_time_placebo <- fixest::feols(
+  # 出生率 ~ 高MTV群×偽放送後 | 市場FE + 四半期FE を指定する
   teen_birth_rate ~ high_mtv:fake_post | market_id + period,
+  # 実際の放送前だけに限定したデータを使う
   data = mtv_before_broadcast,
+  # 市場単位でcluster標準誤差を計算する
   cluster = ~market_id
 )
 
+# 実際の処置が起こり得ない時期の係数を表示する
 mtv_time_placebo</script>
-              <textarea aria-label="セルM06のRコード" spellcheck="false">mtv_before_broadcast &lt;- subset(mtv, period_index __ 10)
+              <textarea aria-label="セルM06のRコード" spellcheck="false"># 実際の番組放送前である1期目から10期目だけを残す
+mtv_before_broadcast &lt;- subset(mtv, period_index __ 10)
+# 放送前データ内の7期目以降を、偽の放送後1にする
 mtv_before_broadcast$fake_post &lt;- as.integer(
   mtv_before_broadcast$period_index __ 7
 )
 
+# 実際には番組がない時期に、主分析と同じ形のDiDを推定する
 mtv_time_placebo &lt;- fixest::feols(
+  # 結果 ~ 処置群×偽放送後 | 市場FE + 四半期FE を指定する
   teen_birth_rate ~ __:__ | __ + __,
+  # 実際の放送前だけに限定したデータを使う
   data = mtv_before_broadcast,
+  # 市場単位でcluster標準誤差を計算する
   cluster = ~__
 )
 
+# 実際の処置が起こり得ない時期の係数を表示する
 mtv_time_placebo</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>時期placeboを推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">FAKE-TIME PLACEBO</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
@@ -1058,7 +1432,32 @@ mtv_time_placebo</textarea>
                   <tr><th>処置群</th><td><code>protected_facility</code></td><td>ユダヤ系施設がある街区</td></tr>
                   <tr><th>処置後</th><td><code>post</code></td><td>1994年8月以降</td></tr>
                   <tr><th>波及候補</th><td><code>adjacent_block</code></td><td>施設の隣接街区</td></tr>
-                  <tr><th>偽アウトカム</th><td><code>bicycle_thefts</code></td><td>自転車盗件数</td></tr>
+                  <tr><th>負の対照アウトカム</th><td><code>water_leak_reports</code></td><td>水道漏水報告件数</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="concept-slide concept-slide--green">
+            <div class="slide-kicker">DATA DICTIONARY｜警官配置データ</div>
+            <h3>CSVに入っている11変数と、分析時に作る2変数</h3>
+            <div class="role-table-wrap">
+              <table class="role-table variable-dictionary">
+                <thead><tr><th>変数</th><th>区分</th><th>内容・単位</th></tr></thead>
+                <tbody>
+                  <tr><th><code>block_id</code></th><td>CSV</td><td>街区を一意に識別するID。</td></tr>
+                  <tr><th><code>period</code></th><td>CSV</td><td><code>1994-01</code>のような年月ラベル。月固定効果に使う。</td></tr>
+                  <tr><th><code>month_index</code></th><td>CSV</td><td>1994年1月を1とする月の連番。</td></tr>
+                  <tr><th><code>year</code></th><td>CSV</td><td>観測年。1994年または1995年。</td></tr>
+                  <tr><th><code>month</code></th><td>CSV</td><td>暦月。1から12。</td></tr>
+                  <tr><th><code>car_thefts</code></th><td>CSV</td><td>街区当たり月間自動車盗件数。主分析の結果変数。</td></tr>
+                  <tr><th><code>water_leak_reports</code></th><td>CSV</td><td>街区当たり月間水道漏水報告件数。負の対照アウトカム。</td></tr>
+                  <tr><th><code>protected_facility</code></th><td>CSV</td><td>警官が配置されたユダヤ系施設のある街区なら1。</td></tr>
+                  <tr><th><code>adjacent_block</code></th><td>CSV</td><td>施設街区に隣接する街区なら1。</td></tr>
+                  <tr><th><code>distance_band</code></th><td>CSV</td><td>施設、隣接、その他を表す文字列。</td></tr>
+                  <tr><th><code>commercial_area</code></th><td>CSV</td><td>商業地域なら1。街区内では全期間同じ。</td></tr>
+                  <tr><th><code>post</code></th><td>作成</td><td><code>month_index &gt;= 8</code>を1にした警官配置後indicator。</td></tr>
+                  <tr><th><code>relative_month</code></th><td>作成</td><td><code>month_index - 8</code>。配置開始月を0とする相対月。</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1092,20 +1491,29 @@ mtv_time_placebo</textarea>
     )]),
     c(5400, 300, 18, 0)
   ))</script>
-              <script type="text/plain" class="r-answer">police_key <- paste(police$block_id, police$period)
+              <script type="text/plain" class="r-answer"># 街区IDと年月をつないで、一行を識別するkeyを作る
+police_key <- paste(police$block_id, police$period)
 
+# パネル構造を示す四つの数を名前付きvectorにまとめる
 police_structure <- c(
+  # データ全体の行数を数える
   rows = nrow(police),
+  # 重複を除いた街区IDの数を数える
   blocks = length(unique(police$block_id)),
+  # 重複を除いた年月の数を数える
   months = length(unique(police$period)),
+  # 以前と同じkeyが現れる行数を数える
   duplicated_keys = sum(duplicated(police_key))
 )
 
+# 300街区×18か月で重複がないか確認する
 police_structure</script>
               <textarea aria-label="セルP01のRコード" spellcheck="false"># 依頼
-# 1. block_idとperiodをつないだkeyを作る
-# 2. 行数、街区数、月数、重複key数を一つのvectorにする
-# 3. vectorへpolice_structureという名前を付けて表示する
+# 1. block_idとperiodをつないだkeyをpolice_keyへ保存する
+# 2. nrow()で全体の行数を数える
+# 3. unique()とlength()で街区数と月数を数える
+# 4. duplicated()とsum()で重複key数を数える
+# 5. 四つの数をpolice_structureへ保存して表示する
 
 # ヒント：nrow(), length(unique()), paste(), duplicated()</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>入力コードを実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
@@ -1119,18 +1527,27 @@ police_structure</script>
             <div class="r-cell r-cell--exercise" data-cell-id="P02" data-dataset="police" data-check-success="判定結果：施設街区×前後の四平均を作成。" data-check-failure="police_summaryにprotected_facility×postの四つのcar_thefts平均を保存してください。formula形式と非formula形式のaggregate()、2×2のtapply()を判定できます。">
               <script type="text/plain" class="r-check">exists("police_summary") &&
   valid_police_summary(police_summary, police)</script>
-              <script type="text/plain" class="r-answer">police_summary <- aggregate(
+              <script type="text/plain" class="r-answer"># 8期目以降を1とする警官配置後indicatorを作る
+police$post <- as.integer(police$month_index >= 8)
+
+# 施設街区×配置前後の自動車盗平均を作る
+police_summary <- aggregate(
+  # 自動車盗件数を施設街区と配置前後で分ける
   car_thefts ~ protected_facility + post,
+  # postを作成済みのpoliceデータを使う
   data = police,
+  # 四つの組合せで平均を計算する
   FUN = mean
 )
 
+# 作成した四行の平均表を表示する
 police_summary</script>
               <textarea aria-label="セルP02のRコード" spellcheck="false"># 依頼
-# car_theftsの平均をprotected_facilityとpostの組合せごとに計算する
-# 結果へpolice_summaryという名前を付けて表示する
+# 1. month_indexが8以上なら1となるpost列をpoliceへ作る
+# 2. car_theftsの平均をprotected_facilityとpostの組合せごとに計算する
+# 3. 結果へpolice_summaryという名前を付けて表示する
 
-# ヒント：aggregate(結果 ~ 群 + 前後, data = 表, FUN = mean)</textarea>
+# ヒント：postを作ってからaggregate(結果 ~ 群 + 前後, data = 表, FUN = mean)</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>記述統計を実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">FOUR MEANS</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
             </div>
@@ -1139,7 +1556,7 @@ police_summary</script>
           <article class="lesson-card lesson-card--scratch">
             <div class="lesson-card__heading"><span>セル P03</span><h3>月ごとの二群平均を折れ線にする</h3></div>
             <p><a class="cell-reference" href="#cell-A01">A01</a>と<a class="cell-reference" href="#cell-M03">M03</a>を参照し、<code>police_trend</code>を作って二本の線を描く。処置開始はmonth_index＝8。</p>
-            <div class="r-cell r-cell--exercise" data-cell-id="P03" data-dataset="police" data-requires-plot="true" data-check-success="判定結果：36個の群×月平均を作成し、処置開始線を含む図を表示。" data-check-failure="car_theftsの群×月平均を36行で作成し、plot_did_trends()へ渡して図を表示してください。">
+            <div class="r-cell r-cell--exercise" data-cell-id="P03" data-dataset="police" data-requires-plot="true" data-check-success="判定結果：36個の群×月平均を作成し、処置開始線を含む図を表示。" data-check-failure="car_theftsの群×月平均を36行で作り、plot()・lines()・abline()で二群と配置開始線を表示してください。">
               <script type="text/plain" class="r-check">exists("police_trend") &&
   is.data.frame(police_trend) &&
   nrow(police_trend) == 36 &&
@@ -1166,27 +1583,48 @@ police_summary</script>
       tolerance = 1e-8
     ))
   }</script>
-              <script type="text/plain" class="r-answer">police_trend <- aggregate(
+              <script type="text/plain" class="r-answer"># 施設街区×月の自動車盗平均を作る
+police_trend <- aggregate(
+  # 自動車盗件数を施設街区と月連番で分ける
   car_thefts ~ protected_facility + month_index,
+  # policeデータを使う
   data = police,
+  # 各組合せの平均を計算する
   FUN = mean
 )
 
-plot_did_trends(
-  data = police_trend,
-  time = "month_index", outcome = "car_thefts", group = "protected_facility",
-  intervention = 8,
-  group_labels = c("Comparison", "Protected facility"),
-  event_label = "Deployment",
+# 平均表を対照街区と施設街区に分ける
+police_comparison <- subset(police_trend, protected_facility == 0)
+police_facility <- subset(police_trend, protected_facility == 1)
+# 二群に共通する縦軸範囲を作る
+theft_limits <- range(police_trend$car_thefts)
+
+# 対照街区の月平均を点と線で描く
+plot(
+  police_comparison$month_index, police_comparison$car_thefts,
+  type = "o", pch = 16, col = "#2A6F97", ylim = theft_limits,
   xlab = "Month index", ylab = "Mean car thefts",
   main = "Police deployment and car theft"
-)</script>
+)
+# 同じ図へ施設街区の月平均を重ねる
+lines(police_facility$month_index, police_facility$car_thefts,
+  type = "o", pch = 17, col = "#EE6C4D")
+# 警官配置開始の8期目へ縦の破線を加える
+abline(v = 8, lty = 2, col = "#64748B")
+# 二群と配置開始線の凡例を加える
+legend("topleft",
+  legend = c("Comparison", "Protected facility", "Deployment"),
+  col = c("#2A6F97", "#EE6C4D", "#64748B"),
+  lty = c(1, 1, 2), pch = c(16, 17, NA), bty = "n")</script>
               <textarea aria-label="セルP03のRコード" spellcheck="false"># 依頼
 # 1. car_theftsをprotected_facility×month_indexで平均する
 # 2. 結果へpolice_trendという名前を付ける
-# 3. plot_did_trends()へ表、時間、結果、群、開始時点を渡す
+# 3. 平均表を対照街区と施設街区に分ける
+# 4. plot()で対照街区、lines()で施設街区を描く
+# 5. abline()でmonth_index 8に配置開始線を加える
+# 6. legend()で二群と配置開始線の凡例を加える
 
-# ヒント：A01またはM03と、役割に対応する変数名だけが違います</textarea>
+# ヒント：A01またはM03のaggregate()、subset()、plot()以降を参照します</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>平均の図を作る</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">MONTHLY TRENDS</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
             </div>
@@ -1210,20 +1648,29 @@ plot_did_trends(
     -0.962446,
     tolerance = 0.003
   ))</script>
-              <script type="text/plain" class="r-answer">police_model <- fixest::feols(
+              <script type="text/plain" class="r-answer"># 8期目以降を1とする警官配置後indicatorを作る
+police$post <- as.integer(police$month_index >= 8)
+
+# 街区・月固定効果を使う警官配置のDiDを推定する
+police_model <- fixest::feols(
+  # 自動車盗 ~ 施設街区×配置後 | 街区FE + 月FE を指定する
   car_thefts ~ protected_facility:post | block_id + period,
+  # postを作成済みのpoliceデータを使う
   data = police,
+  # 街区単位でcluster標準誤差を計算する
   cluster = ~block_id
 )
 
+# 施設街区の相対的な配置後変化を表示する
 police_model</script>
               <textarea aria-label="セルP04のRコード" spellcheck="false"># 依頼
-# fixest::feols()で警官配置のDiDを推定する
-# ・結果：月間自動車盗件数
-# ・処置：施設街区×配置後
-# ・固定効果：街区と月
-# ・標準誤差：街区でcluster
-# モデルへpolice_modelという名前を付けて表示する
+# 1. month_indexが8以上なら1となるpost列をpoliceへ作る
+# 2. fixest::feols()で警官配置のDiDを推定する
+# 3. 結果は月間自動車盗件数にする
+# 4. 処置は施設街区×配置後にする
+# 5. 街区固定効果と月固定効果を入れる
+# 6. 街区でcluster標準誤差を計算する
+# 7. modelをpolice_modelへ保存して表示する
 
 # ヒント：結果 ~ 処置群:処置後 | 単位ID + 時間</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>DiDモデルを実行</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
@@ -1234,29 +1681,41 @@ police_model</script>
 
           <article class="lesson-card lesson-card--scratch">
             <div class="lesson-card__heading"><span>セル P05</span><h3>月単位のイベントスタディを推定する</h3></div>
-            <p>配置直前月−1を基準にし、<code>relative_month</code>と<code>protected_facility</code>を<code>i()</code>へ渡す。</p>
+            <p><code>month_index - 8</code>で<code>relative_month</code>を作る。配置直前月−1を基準にし、相対月と<code>protected_facility</code>を<code>i()</code>へ渡す。</p>
             <div class="r-cell r-cell--exercise" data-cell-id="P05" data-dataset="police" data-requires-plot="true" data-check-success="判定結果：17個の相対月係数を持つイベントスタディを推定し、図示。" data-check-failure="i(relative_month, protected_facility, ref=-1)と、iplot()の呼び出しを確認してください。">
               <script type="text/plain" class="r-check">exists("police_event_model") && inherits(police_event_model, "fixest") && length(coef(police_event_model)) == 17</script>
-              <script type="text/plain" class="r-answer">police_event_model <- fixest::feols(
+              <script type="text/plain" class="r-answer"># 月連番から配置開始期8を引き、相対月を作る
+police$relative_month <- police$month_index - 8
+
+# 相対月ごとの効果を推定するevent-study modelを作る
+police_event_model <- fixest::feols(
+  # 相対月×施設街区を作り、配置直前月-1を基準にする
   car_thefts ~ i(relative_month, protected_facility, ref = -1) |
     block_id + period,
+  # 相対月を作成済みのpoliceデータを使う
   data = police,
+  # 街区単位でcluster標準誤差を計算する
   cluster = ~block_id
 )
 
+# 相対月係数と95%信頼区間を図示する
 fixest::iplot(
+  # 直前に作ったevent-study modelを渡す
   police_event_model,
+  # 効果0を表す水平線を加える
   ref.line = 0,
+  # 図のタイトルと軸ラベルを指定する
   main = "Event study: police deployment",
   xlab = "Months from deployment",
   ylab = "Effect on monthly car thefts"
 )</script>
               <textarea aria-label="セルP05のRコード" spellcheck="false"># 依頼
-# 1. relative_monthごとの効果をi()で推定する
-# 2. 配置直前月-1を基準にする
-# 3. 街区固定効果、月固定効果、街区clusterを使う
-# 4. police_event_modelへ保存する
-# 5. fixest::iplot()で図にする
+# 1. month_indexから配置開始期8を引き、relative_monthを作る
+# 2. relative_monthごとの効果をi()で推定する
+# 3. 配置直前月-1を基準にする
+# 4. 街区固定効果、月固定効果、街区clusterを使う
+# 5. police_event_modelへ保存する
+# 6. fixest::iplot()で図にする
 
 # ヒント：A06とM05のコード構造を参照できます</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>イベントスタディを書く</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
@@ -1266,61 +1725,73 @@ fixest::iplot(
 
           <article class="concept-slide concept-slide--compact concept-slide--green">
             <div class="slide-kicker">SLIDE 25｜二種類の反証テスト</div>
-            <h3>分析対象地域とアウトカムを変更したplacebo分析</h3>
+            <h3>波及検証と負の対照アウトカムは、異なる問題を調べる</h3>
             <div class="concept-grid concept-grid--2">
-              <article class="concept-card"><span>WHERE｜P06</span><strong>隣接街区への犯罪移転</strong><p>隣で自動車盗が増えれば、犯罪が消えずに場所だけ移った可能性がある。</p><small>調べる係数：<code>adjacent_block:post</code></small></article>
-              <article class="concept-card"><span>WHAT｜P07</span><strong>偽のアウトカム</strong><p>自転車盗にも効果が推定される場合、一般的な犯罪変化を捉えている可能性がある。</p><small>結果だけを<code>bicycle_thefts</code>へ変更</small></article>
+              <article class="concept-card"><span>SPILLOVER｜P06</span><strong>隣接街区への犯罪移転</strong><p>隣で自動車盗が増えれば、犯罪が消えずに場所だけ移った可能性がある。これは実在しうる波及経路の検証であり、純粋なplaceboではない。</p><small>調べる係数：<code>adjacent_block:post</code></small></article>
+              <article class="concept-card"><span>NEGATIVE CONTROL｜P07</span><strong>因果経路のない結果</strong><p>水道漏水報告にも効果が推定される場合、施設街区固有の別の変化を警官配置の効果と誤認している可能性がある。</p><small>結果を<code>water_leak_reports</code>へ変更</small></article>
             </div>
-            <div class="slide-takeaway">placeboの定義と0付近を期待する理由は、推定結果の確認前に設定する。</div>
+            <div class="slide-takeaway">「何を偽にするか」「処置から結果への因果経路がなぜないか」「効果が出たら何を疑うか」を推定前に定める。</div>
           </article>
 
           <article class="lesson-card lesson-card--scratch">
-            <div class="lesson-card__heading"><span>セル P06</span><h3>隣接街区への犯罪移転をplaceboで調べる</h3></div>
-            <p>施設街区を除き、隣接街区を処置群として同じDiDを行う。正の係数なら、犯罪が隣へ移った可能性がある。</p>
-            <div class="r-cell r-cell--exercise" data-cell-id="P06" data-dataset="police" data-check-success="判定結果：隣接街区placeboを推定。明確な犯罪移転は確認されない。" data-check-failure="施設街区を除いた4,320行で、adjacent_blockとpostの交互作用、街区・月固定効果、街区clusterを指定してください。">
-              <script type="text/plain" class="r-check">exists("spillover_placebo") &&
+            <div class="lesson-card__heading"><span>セル P06</span><h3>隣接街区への犯罪移転を波及検証で調べる</h3></div>
+            <p>施設街区を除き、隣接街区を処置群として同じDiDを行う。これは「起きないはずの偽処置」ではない。警官配置で自動車盗の場所が隣へ移るという実際の因果経路を調べる波及検証である。</p>
+            <div class="placebo-contract"><article><span>検証する仮定</span><strong>施設街区の処置が周辺へ波及しない</strong></article><article><span>期待する結果</span><strong>犯罪移転がなければ0付近</strong></article><article><span>0より大きい場合</span><strong>減少ではなく隣接街区への移転を疑う</strong></article></div>
+            <div class="r-cell r-cell--exercise" data-cell-id="P06" data-dataset="police" data-check-success="判定結果：隣接街区への波及を推定。明確な犯罪移転は確認されない。" data-check-failure="施設街区を除いた4,320行で、adjacent_blockとpostの交互作用、街区・月固定効果、街区clusterを指定し、spillover_modelへ保存してください。">
+              <script type="text/plain" class="r-check">exists("spillover_model") &&
   has_model_spec(
-    spillover_placebo,
+    spillover_model,
     "car_thefts",
     "block_id",
     c("period", "month_index"),
     "block_id"
   ) &&
-  nobs(spillover_placebo) == 4320 &&
+  nobs(spillover_model) == 4320 &&
   isTRUE(all.equal(
-    did_coefficient(spillover_placebo, "adjacent_block", "post"),
+    did_coefficient(spillover_model, "adjacent_block", "post"),
     -0.096825,
     tolerance = 0.003
   ))</script>
-              <script type="text/plain" class="r-answer">nonfacility_blocks <- subset(police, protected_facility == 0)
+              <script type="text/plain" class="r-answer"># 8期目以降を1とする警官配置後indicatorを作る
+police$post <- as.integer(police$month_index >= 8)
 
-spillover_placebo <- fixest::feols(
+# 直接処置された施設街区を除き、周辺とその他の街区だけを残す
+nonfacility_blocks <- subset(police, protected_facility == 0)
+
+# 隣接街区で配置後に自動車盗が増えたかを推定する
+spillover_model <- fixest::feols(
+  # 自動車盗 ~ 隣接街区×配置後 | 街区FE + 月FE を指定する
   car_thefts ~ adjacent_block:post | block_id + period,
+  # 施設街区を除いたデータを使う
   data = nonfacility_blocks,
+  # 街区単位でcluster標準誤差を計算する
   cluster = ~block_id
 )
 
-spillover_placebo</script>
+# 波及または犯罪移転を表す係数を表示する
+spillover_model</script>
               <textarea aria-label="セルP06のRコード" spellcheck="false"># 依頼
-# 1. protected_facility == 0の街区だけを取り出す
-# 2. adjacent_block×postのDiDを推定する
-# 3. 固定効果とclusterは主分析と同じにする
-# 4. spillover_placeboへ保存して表示する
+# 1. month_indexが8以上なら1となるpost列をpoliceへ作る
+# 2. protected_facility == 0の街区だけを取り出す
+# 3. adjacent_block×postのDiDを推定する
+# 4. 固定効果とclusterは主分析と同じにする
+# 5. spillover_modelへ保存して表示する
 
-# 解釈：隣接街区で自動車盗が増えているか</textarea>
-              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>波及placeboを書く</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
-              <div class="r-output" hidden><div class="r-output__label">SPILLOVER PLACEBO</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
+# 解釈：正の係数なら隣接街区への犯罪移転を疑う</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>波及モデルを書く</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+              <div class="r-output" hidden><div class="r-output__label">SPILLOVER CHECK</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
             </div>
           </article>
 
           <article class="lesson-card lesson-card--scratch">
             <div class="lesson-card__heading"><span>セル P07</span><h3>偽のアウトカムでも効果が出ないか調べる</h3></div>
-            <p>同じ式の結果だけを自転車盗へ変える。警官配置が自動車盗だけに影響する設定なら、自転車盗の係数は0付近になるはず。</p>
-            <div class="r-cell r-cell--exercise" data-cell-id="P07" data-dataset="police" data-check-success="判定結果：偽アウトカムの係数は0付近。" data-check-failure="P04の結果をbicycle_theftsへ変更し、街区・月固定効果と街区clusterを維持してください。交互作用項の順序は問いません。">
+            <p>同じ式の結果だけを水道漏水報告へ変える。警官配置から水道管の漏水発生への因果経路は想定しにくいため、これは負の対照アウトカムとして機能する。</p>
+            <div class="placebo-contract"><article><span>偽にするもの</span><strong>結果を水道漏水報告へ変更</strong></article><article><span>なぜ0を期待するか</span><strong>警官配置が漏水を変える経路がない</strong></article><article><span>効果が出た場合</span><strong>施設街区固有の同時変化やmodelの誤指定を疑う</strong></article></div>
+            <div class="r-cell r-cell--exercise" data-cell-id="P07" data-dataset="police" data-check-success="判定結果：負の対照アウトカムの係数は0付近。" data-check-failure="P04の結果をwater_leak_reportsへ変更し、post、街区・月固定効果、街区clusterを維持してください。交互作用項の順序は問いません。">
               <script type="text/plain" class="r-check">exists("outcome_placebo") &&
   has_model_spec(
     outcome_placebo,
-    "bicycle_thefts",
+    "water_leak_reports",
     "block_id",
     c("period", "month_index"),
     "block_id"
@@ -1331,19 +1802,28 @@ spillover_placebo</script>
     -0.041991,
     tolerance = 0.003
   ))</script>
-              <script type="text/plain" class="r-answer">outcome_placebo <- fixest::feols(
-  bicycle_thefts ~ protected_facility:post | block_id + period,
+              <script type="text/plain" class="r-answer"># 8期目以降を1とする警官配置後indicatorを作る
+police$post <- as.integer(police$month_index >= 8)
+
+# 主分析の結果だけを負の対照アウトカムへ変更する
+outcome_placebo <- fixest::feols(
+  # 漏水報告 ~ 施設街区×配置後 | 街区FE + 月FE を指定する
+  water_leak_reports ~ protected_facility:post | block_id + period,
+  # postを作成済みのpoliceデータを使う
   data = police,
+  # 街区単位でcluster標準誤差を計算する
   cluster = ~block_id
 )
 
+# 因果経路がないはずの結果に効果が出るか確認する
 outcome_placebo</script>
               <textarea aria-label="セルP07のRコード" spellcheck="false"># 依頼
-# P04と同じモデルを使い、結果変数だけをbicycle_theftsへ変える
-# outcome_placeboという名前を付けて表示する
+# 1. month_indexが8以上なら1となるpost列をpoliceへ作る
+# 2. P04と同じmodelを使い、結果だけをwater_leak_reportsへ変える
+# 3. outcome_placeboという名前を付けて表示する
 
-# 解釈：警官配置と無関係なはずの結果にも「効果」が出ていないか</textarea>
-              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>偽アウトカムを推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
+# 解釈：因果経路がないはずの結果にも「効果」が出ていないか</textarea>
+              <div class="r-cell__actions"><button class="button run-button" type="button" disabled>負の対照を推定</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">OUTCOME PLACEBO</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div><pre class="check-output" hidden></pre></div>
             </div>
           </article>
@@ -1360,7 +1840,7 @@ outcome_placebo</script>
             <blockquote>施設街区への警官配置後、自動車盗は対照街区に比べ、1街区・1か月当たり約0.96件余分に減少した。これは教育用合成データの結果であり、元論文の再現値ではない。</blockquote>
           </article>
 
-          <div class="level-complete level-complete--police" data-completion-section="police" hidden><span>LEVEL 3 · 7セル完了</span><strong>警官配置事例の分析項目を完了</strong><p>記述統計、DiD、イベントスタディ、隣接街区placebo、偽アウトカムplaceboを実行した。</p><a class="completion-link" href="#summary">まとめへ進む</a></div>
+          <div class="level-complete level-complete--police" data-completion-section="police" hidden><span>LEVEL 3 · 7セル完了</span><strong>警官配置事例の分析項目を完了</strong><p>記述統計、DiD、イベントスタディ、隣接街区への波及検証、負の対照アウトカムを実行した。</p><a class="completion-link" href="#summary">まとめへ進む</a></div>
         </section>
 
         <section class="content-section" id="summary" data-flow-section="summary">
@@ -1379,7 +1859,7 @@ outcome_placebo</script>
                   <tr><th>処置群</th><td>舞台自治体</td><td>高MTV市場</td><td>施設街区</td></tr>
                   <tr><th>固定効果</th><td>自治体＋年</td><td>市場＋四半期</td><td>街区＋月</td></tr>
                   <tr><th>主推定値</th><td>約＋4.98</td><td>約−1.70</td><td>約−0.96</td></tr>
-                  <tr><th>追加確認</th><td>偽群・再開発</td><td>偽時期</td><td>隣接・偽結果</td></tr>
+                  <tr><th>追加確認</th><td>偽群・再開発</td><td>偽時期</td><td>隣接への波及・負の対照結果</td></tr>
                   <tr><th>支援</th><td>完成コード</td><td>穴埋め</td><td>指示＋ヒント</td></tr>
                 </tbody>
               </table>
@@ -1393,17 +1873,21 @@ dim(data)
 head(data)
 table(data$unit_id)
 
-# 1. 群×時点の平均を図示
+# 1. 処置開始時点から分析用変数を作る
+data$post &lt;- as.integer(data$time &gt;= treatment_start)
+data$relative_time &lt;- data$time - treatment_start
+
+# 2. 群×時点の平均を図示
 trend &lt;- aggregate(outcome ~ treated + time, data, mean)
 
-# 2. 二方向固定効果で平均的なDiDを推定
+# 3. 二方向固定効果で平均的なDiDを推定
 did_model &lt;- fixest::feols(
   outcome ~ treated:post | unit_id + time,
   data = data,
   cluster = ~unit_id
 )
 
-# 3. イベントスタディ
+# 4. イベントスタディ
 event_model &lt;- fixest::feols(
   outcome ~ i(relative_time, treated, ref = -1) |
     unit_id + time,
@@ -1416,7 +1900,7 @@ fixest::iplot(event_model)</code></pre>
             <article><span>DATA</span><strong>単位×時間を確認したか</strong><p>key、欠損、balanced/unbalanced、処置開始を確認する。</p></article>
             <article><span>DESIGN</span><strong>対照群の理由を説明できるか</strong><p>似ているからではなく、反実仮想の動きを再現できる理由を語る。</p></article>
             <article><span>MODEL</span><strong>固定効果の役割を説明したか</strong><p>単位固有の水準差と共通時間変化を調整する。</p></article>
-            <article><span>CHECK</span><strong>0が出るべき場所を見たか</strong><p>処置前、偽時期、偽処置群、偽アウトカム、波及を点検する。</p></article>
+            <article><span>CHECK</span><strong>検証の予測を先に決めたか</strong><p>処置前、偽時期、偽処置群、負の対照結果、波及について、0を期待する理由を述べる。</p></article>
             <article><span>INTERPRET</span><strong>係数の単位を述べたか</strong><p>何が、何と比べて、いつ、どれだけ変わったかを書く。</p></article>
             <article><span>LIMIT</span><strong>残る仮定を明記したか</strong><p>統計的有意性に加えて、比較の設計と限界を報告する。</p></article>
           </div>

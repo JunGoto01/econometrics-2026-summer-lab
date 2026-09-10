@@ -2,7 +2,7 @@ const WEBR_VERSION = "v0.6.0";
 const WEBR_BASE_URL = `https://webr.r-wasm.org/${WEBR_VERSION}/`;
 const WEBR_MODULE_URL = `${WEBR_BASE_URL}webr.mjs`;
 const CHECK_MARKER = "__DID_EXERCISE_CHECK__";
-const STORAGE_KEY = "econometrics-did-browser-lab-v2";
+const STORAGE_KEY = "econometrics-did-browser-lab-v3";
 
 const SECTION_CELLS = {
   structure: ["D01", "D02", "D03", "D04", "D05"],
@@ -12,7 +12,7 @@ const SECTION_CELLS = {
 };
 
 const CELL_GUIDANCE = {
-  D01: "最初の「660 11」が行数と列数。先頭8行では、同じ自治体M01のyearだけが変わっていることを確認する。",
+  D01: "最初の「660 7」が行数と列数。先頭8行では、同じ自治体M01のyearだけが変わっていることを確認する。",
   D02: "自治体60 × 年11 ＝ 行660になっているか。パネルの行数を単位数と時点数へ分解する。",
   D03: "duplicated_keysが0で、すべての自治体が11行ずつなら、重複のないbalanced panel。",
   D04: "主要変数の欠損が0か、処置群と対照群が何自治体ずつか、処置開始年が2010年かを見る。",
@@ -36,8 +36,8 @@ const CELL_GUIDANCE = {
   P03: "配置前は二群の傾きが近く、month_index 8以降に施設街区の線が下へ離れるかを見る。",
   P04: "protected_facility:postのEstimateを見る。単位は1街区・1か月当たりの盗難件数で約−0.96。",
   P05: "配置前の係数が0付近か、配置後に負方向へ動くかを見る。−1か月が基準。",
-  P06: "adjacent_block:postが0付近かを見る。負でなければ、隣接街区への明確な移転は確認できない。",
-  P07: "偽アウトカムbicycle_theftsの係数が0付近かを確認し、アウトカム固有性を検討する。"
+  P06: "adjacent_block:postが0付近かを見る。正でなければ、隣接街区への明確な犯罪移転は確認できない。",
+  P07: "負の対照アウトカムwater_leak_reportsの係数が0付近かを確認する。警官配置から水道漏水への因果経路は想定していない。"
 };
 
 const CELL_PREDICTIONS = {
@@ -66,23 +66,23 @@ const CELL_PREDICTIONS = {
   P04: "警官配置の係数の予想符号は負。",
   P05: "配置前係数は0付近、配置後係数は負と想定する。",
   P06: "隣接街区への移転がなければ係数は0付近と想定する。",
-  P07: "警官配置が自転車盗に影響しない設定では係数は0付近と想定する。"
+  P07: "警官配置から水道漏水への因果経路がなければ係数は0付近と想定する。"
 };
 
 const EXERCISE_HINTS = {
   M01: ["cutoffの算出に使用する関数と、cutoffより高いことを表す比較演算子を確認する。", "中央値にはmedian()、より大きいことの判定には > を使用する。二つの__を置き換える。"],
   M02: ["最初にpostが0の行だけを残し、その表を群別集計へ渡す。", "subset(mtv, post == 0)の後、aggregate()の左側へ三つの結果変数をcbind()で並べる。"],
-  M03: ["aggregate()の式は「結果 ~ 群 + 時間」の順。作図部分は変更しない。", "teen_birth_rate ~ high_mtv + period_index を最初の式へ入れる。"],
+  M03: ["aggregate()の式は「結果 ~ 群 + 時間」の順。作図部分はA01と同じbase Rの関数を使う。", "teen_birth_rate ~ high_mtv + period_index を最初の式へ入れる。二群をsubset()で分け、plot()の後にlines()を重ねる。"],
   M04: ["SLIDE 19の対応表で、結果・処置群・単位FE・時間FEに該当する列を確認する。", "結果 ~ high_mtv:post | market_id + period、clusterもmarket_idにする。"],
-  M05: ["i()には相対時点、処置群、基準時点を渡す。固定効果はM04と同じ。", "i(relative_quarter, high_mtv, ref = -1) | market_id + period の形になる。"],
+  M05: ["最初にperiod_index - 11でrelative_quarterを作る。i()には相対時点、処置群、基準時点を渡す。", "mtv$relative_quarter <- mtv$period_index - 11の後、i(relative_quarter, high_mtv, ref = -1) | market_id + period の形にする。"],
   M06: ["本当の放送前だけを残し、その中で7期目以降を偽の処置後にする。", "period_index <= 10で限定し、fake_postはperiod_index >= 7。式はM04のpostだけをfake_postへ替える。"],
   P01: ["四つの数字を一度に作る前に、block_idとperiodをつないだkeyを作る。", "police_key <- paste(police$block_id, police$period)から始め、c(rows = nrow(...), blocks = length(unique(...)), months = ..., duplicated_keys = sum(duplicated(...)))を作る。"],
-  P02: ["A02のfour_meansと同じaggregate()を使う。結果・群・前後の列名だけを替える。", "police_summary <- aggregate(car_thefts ~ protected_facility + post, data = police, FUN = mean) とし、最後に表示する。"],
-  P03: ["まず「結果 ~ 群 + 時間」で36行の平均表を作り、教材用plot_did_trends()へ渡す。", "police_trend <- aggregate(car_thefts ~ protected_facility + month_index, data = police, FUN = mean) が前半。後半はtime、outcome、groupへ同じ三列を文字列で渡す。"],
-  P04: ["M04のfeols()と同じ式構造を使用し、五つの役割を警官配置データの列名へ対応させる。", "car_thefts ~ protected_facility:post | block_id + period、data = police、cluster = ~block_id。結果をpolice_modelへ保存する。"],
-  P05: ["M05と同じi(相対時点, 処置群, ref = -1)を使う。", "i(relative_month, protected_facility, ref = -1) | block_id + period。結果はpolice_event_modelへ保存しiplot()へ渡す。"],
-  P06: ["施設街区を除いてから、隣接街区を処置群とみなすplacebo。", "subset(police, protected_facility == 0)を作り、adjacent_block:post | block_id + periodを推定する。"],
-  P07: ["P04から変えるのは結果変数と保存名だけ。", "結果をbicycle_thefts、保存名をoutcome_placeboにする。処置・固定効果・clusterはP04と同じ。"]
+  P02: ["最初にmonth_index >= 8を1にしたpostを作り、A02と同じaggregate()を使う。", "police$post <- as.integer(police$month_index >= 8)の後、police_summary <- aggregate(car_thefts ~ protected_facility + post, data = police, FUN = mean) とする。"],
+  P03: ["まず「結果 ~ 群 + 時間」で36行の平均表を作り、二群をsubset()で分ける。", "police_trend <- aggregate(car_thefts ~ protected_facility + month_index, data = police, FUN = mean) の後、plot()、lines()、abline()、legend()をA01と同じ順に使う。"],
+  P04: ["最初にmonth_index >= 8を1にしたpostを作り、M04と同じ式構造を使う。", "police$post <- as.integer(police$month_index >= 8)の後、car_thefts ~ protected_facility:post | block_id + period、cluster = ~block_idとする。"],
+  P05: ["最初にmonth_index - 8でrelative_monthを作り、M05と同じi(相対時点, 処置群, ref = -1)を使う。", "police$relative_month <- police$month_index - 8の後、i(relative_month, protected_facility, ref = -1) | block_id + periodとする。"],
+  P06: ["施設街区を除いてから、隣接街区で犯罪が増えたかを調べる波及検証。", "postを作り、subset(police, protected_facility == 0)を作って、adjacent_block:post | block_id + periodを推定し、spillover_modelへ保存する。"],
+  P07: ["P04から変えるのは結果変数と保存名だけ。", "結果をwater_leak_reports、保存名をoutcome_placeboにする。postを作り、処置・固定効果・clusterはP04と同じにする。"]
 };
 
 const DATA_FILES = [
@@ -303,29 +303,6 @@ async function initializeWebR() {
         FALSE
       }
 
-      plot_did_trends <- function(
-        data, time, outcome, group, intervention,
-        group_labels = c("Comparison", "Treated"),
-        event_label = "Treatment", main = "",
-        xlab = time, ylab = outcome
-      ) {
-        comparison <- data[data[[group]] == 0, , drop = FALSE]
-        treated <- data[data[[group]] == 1, , drop = FALSE]
-        plot(
-          comparison[[time]], comparison[[outcome]],
-          type = "o", pch = 16, col = "#2A6F97",
-          ylim = range(data[[outcome]], na.rm = TRUE),
-          xlab = xlab, ylab = ylab, main = main
-        )
-        lines(treated[[time]], treated[[outcome]],
-          type = "o", pch = 17, col = "#EE6C4D")
-        abline(v = intervention, lty = 2, col = "#64748B")
-        legend(
-          "topleft", c(group_labels, event_label),
-          col = c("#2A6F97", "#EE6C4D", "#64748B"),
-          lty = c(1, 1, 2), pch = c(16, 17, NA), bty = "n"
-        )
-      }
     `);
 
     setRuntimeLoading("データを準備中", "3つの合成パネルデータをブラウザ内のRへ渡しています");
@@ -672,7 +649,7 @@ function friendlyError(error) {
   } else if (/need finite ['\"]xlim['\"] values|finite.*xlim/i.test(cleaned)) {
     recovery = "横軸には数値の時間変数を指定します。MTV事例ではperiod_index、警官配置事例ではmonth_indexを使用し、periodは使用しません。";
   } else if (/['\"]x['\"] and ['\"]y['\"] lengths differ|x.*y.*lengths differ/i.test(cleaned)) {
-    recovery = "横軸と縦軸の行数が一致していません。aggregate()で作成した平均表をplot_did_trends()へ渡し、time、outcome、groupがその表の列名か確認してください。時間変数はMTV事例ではperiod_index、警官配置事例ではmonth_indexです。";
+    recovery = "横軸と縦軸の行数が一致していません。subset()で分けた同じ群の時間列と結果列をplot()またはlines()へ渡したか確認してください。時間変数はMTV事例ではperiod_index、警官配置事例ではmonth_indexです。";
   } else if (/factor_var|ref.*not found|reference.*not found|value.*ref.*variable/i.test(cleaned)) {
     recovery = "i()の引数順を確認してください。第1引数は相対時点、第2引数は処置群、ref = -1は基準時点です。";
   }
@@ -1031,7 +1008,10 @@ function initializeCellFrame(cell) {
   const predictionText = document.createElement("span");
   predictionText.textContent = CELL_PREDICTIONS[cellId] || "確認する数値または符号を特定する。";
   prediction.append(predictionLabel, predictionText);
-  routine.append(meta, steps, prediction, dependency, state);
+  const commentKey = document.createElement("small");
+  commentKey.className = "editor-comment-key";
+  commentKey.textContent = "Editor内の明るい緑色の行（#）は、その直後のコードの説明です。Rは#以降を実行しません。";
+  routine.append(meta, steps, prediction, commentKey, dependency, state);
   cell.prepend(routine);
 
   const output = cell.querySelector(".r-output");
