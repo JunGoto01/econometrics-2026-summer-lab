@@ -1727,6 +1727,72 @@ a:focus-visible {
   margin: 14px 0 18px;
 }
 
+.cell-concept-explainer {
+  margin: 0 0 20px;
+  padding: 20px;
+  background: #f4f8fa;
+  border: 1px solid #d7e3e9;
+  border-radius: 12px;
+}
+
+.cell-concept-explainer h4 {
+  margin: 0 0 10px;
+  color: var(--navy);
+  font-size: 0.92rem;
+}
+
+.cell-concept-explainer .two-question {
+  margin: 0 0 20px;
+}
+
+.cell-concept-explainer .two-question article {
+  background: white;
+  border: 1px solid #dce6eb;
+}
+
+.object-table code {
+  white-space: nowrap;
+}
+
+.balance-logic {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.balance-logic article {
+  display: grid;
+  gap: 7px;
+  padding: 15px;
+  background: white;
+  border-left: 4px solid var(--green);
+  border-radius: 8px;
+}
+
+.balance-logic span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.balance-logic code {
+  color: var(--blue);
+  font-size: 0.8rem;
+}
+
+.balance-logic strong {
+  color: var(--navy);
+  font-size: 0.82rem;
+}
+
+.minmax-explanation {
+  margin: 15px 0 0;
+  color: #334e60;
+  font-size: 0.82rem;
+  line-height: 1.75;
+}
+
 .r-cell {
   overflow: hidden;
   background: #f1f5f7;
@@ -2786,6 +2852,7 @@ a:focus-visible {
   .case-brief,
   .final-checklist,
   .two-question,
+  .balance-logic,
   .placebo-contract,
   .assumption-grid,
   .evidence-stack,
@@ -2804,6 +2871,66 @@ a:focus-visible {
 
   .r-symbol-grid article {
     min-height: 0;
+  }
+
+  .object-table-wrap {
+    overflow: visible;
+    border: 0;
+  }
+
+  .object-table {
+    display: block;
+    min-width: 0;
+    background: transparent;
+  }
+
+  .object-table thead {
+    display: none;
+  }
+
+  .object-table tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  .object-table tr,
+  .object-table th,
+  .object-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .object-table tr {
+    overflow: hidden;
+    background: white;
+    border: 1px solid #dce6eb;
+    border-radius: 8px;
+  }
+
+  .object-table tbody th,
+  .object-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .object-table tbody td::before {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--muted);
+    font-size: 0.65rem;
+    font-weight: 800;
+  }
+
+  .object-table tbody td:nth-child(2)::before {
+    content: "中に入るもの";
+  }
+
+  .object-table tbody td:nth-child(3)::before {
+    content: "この後の用途";
+  }
+
+  .object-table tbody td:last-child {
+    border-bottom: 0;
   }
 
   .cell-anatomy {

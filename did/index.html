@@ -347,28 +347,66 @@ c(
 
           <article class="lesson-card">
             <div class="lesson-card__heading"><span>セル D03</span><h3>keyの重複とbalanced panelを確認する</h3></div>
-            <p><code>municipality_id</code>と<code>year</code>をつないだkeyに重複がないか、各自治体に11行ずつあるかを確認する。</p>
+            <p>このセルでは、同じ自治体・同じ年が二重に記録されていないか、60自治体のすべてに11年分の観測があるかを別々に確認する。</p>
+            <div class="cell-concept-explainer">
+              <h4>最初に、確認する二つの問題を区別する</h4>
+              <div class="two-question">
+                <article><span>問題1｜重複</span><strong>同じ自治体×年が2行以上ないか</strong><p>例えばM01・2005年が二重にあれば、一つの単位・時点を重複して数えることになる。</p></article>
+                <article><span>問題2｜観測の不足</span><strong>一部の自治体だけ年が欠けていないか</strong><p>今回は各自治体を2005–2015年の11年間観測する設計なので、各自治体に11行あることを確認する。</p></article>
+              </div>
+
+              <h4>コードが作るobjectと、その中身</h4>
+              <div class="role-table-wrap object-table-wrap">
+                <table class="role-table object-table">
+                  <thead><tr><th>object</th><th>中に入るもの</th><th>この後の用途</th></tr></thead>
+                  <tbody>
+                    <tr><th><code>panel_key</code></th><td><code>"M01 2005"</code>のような文字列が660個</td><td>同じ自治体×年が重複していないか調べる</td></tr>
+                    <tr><th><code>rows_per_municipality</code></th><td><code>M01 = 11, M02 = 11, …</code>という60自治体分の行数</td><td>自治体ごとの観測年数を比較する</td></tr>
+                    <tr><th><code>duplicated_keys</code></th><td>重複していたkeyの件数</td><td>0なら同じ自治体×年の重複なし</td></tr>
+                    <tr><th><code>minimum_rows</code></th><td>60自治体のうち、最も行数が少ない自治体の行数</td><td>年が欠けた自治体を検出する</td></tr>
+                    <tr><th><code>maximum_rows</code></th><td>60自治体のうち、最も行数が多い自治体の行数</td><td>最小行数との違いを調べる</td></tr>
+                    <tr><th><code>balanced</code></th><td><code>minimum_rows == maximum_rows</code>の判定結果</td><td><code>TRUE</code>なら全自治体の行数が同じ</td></tr>
+                    <tr><th><code>panel_check</code></th><td>上の確認値を名前付きでまとめたvector</td><td>必要な三つの数値を一度に表示する</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="balance-logic" aria-label="最小行数と最大行数によるbalanced panelの確認例">
+                <article><span>今回のデータ</span><code>11, 11, 11, …, 11</code><strong>最小11・最大11 → 全自治体が同じ</strong></article>
+                <article><span>一自治体で1年欠けた場合</span><code>11, 11, 10, …, 11</code><strong>最小10・最大11 → 自治体により異なる</strong></article>
+              </div>
+              <p class="minmax-explanation">60個の行数を目で一つずつ確認する代わりに、最も小さい値と最も大きい値だけを比較する。両方が11なら、途中に10や12は存在せず、全自治体が11行であると分かる。D02で年が11種類、D03で重複が0件であることも合わせて確認する。</p>
+            </div>
             <div class="r-cell" data-cell-id="D03" data-dataset="anime">
               <textarea aria-label="セルD03のRコード" spellcheck="false"># 自治体IDと年を空白でつなぎ、一行ごとのkeyを作る
 panel_key &lt;- paste(anime$municipality_id, anime$year)
+# 同じkeyが二度目に現れた回数を数える
+duplicated_keys &lt;- sum(duplicated(panel_key))
+
 # 自治体IDごとに何行あるかを数える
 rows_per_municipality &lt;- table(anime$municipality_id)
+# 60自治体の中で最も少ない行数を取り出す
+minimum_rows &lt;- min(rows_per_municipality)
+# 60自治体の中で最も多い行数を取り出す
+maximum_rows &lt;- max(rows_per_municipality)
 # 最小行数と最大行数が同じかをTRUE/FALSEで保存する
-balanced &lt;- min(rows_per_municipality) == max(rows_per_municipality)
+balanced &lt;- minimum_rows == maximum_rows
 
-# 重複key数、最小行数、最大行数を一つのvectorで表示する
-c(
-  duplicated_keys = sum(duplicated(panel_key)),
-  minimum_rows = min(rows_per_municipality),
-  maximum_rows = max(rows_per_municipality)
+# 三つの確認値を名前付きvectorにまとめる
+panel_check &lt;- c(
+  duplicated_keys = duplicated_keys,
+  minimum_rows = minimum_rows,
+  maximum_rows = maximum_rows
 )
 
+# 三つの確認値を表示する
+panel_check
 # 全自治体の観測数が同じかを表示する
 balanced</textarea>
               <div class="r-cell__actions"><button class="button run-button" type="button" disabled>panel keyを点検</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div>
               <div class="r-output" hidden><div class="r-output__label">KEY AND BALANCE</div><pre class="text-output" aria-live="polite"></pre><div class="plot-output"></div></div>
             </div>
-            <div class="definition-strip"><b>balanced panel</b><span>すべての単位が同じ時点数だけ観察されるパネル。最後の出力が<code>TRUE</code>ならこの条件を満たす。この教材の3データはすべてbalanced。</span></div>
+            <div class="definition-strip"><b>Outputの読み方</b><span><code>duplicated_keys = 0</code>、<code>minimum_rows = 11</code>、<code>maximum_rows = 11</code>、最後の<code>balanced = TRUE</code>を順に確認する。この教材の3データはすべてbalanced panelである。</span></div>
           </article>
 
           <article class="lesson-card">
