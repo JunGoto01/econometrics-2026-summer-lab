@@ -2,13 +2,16 @@ const WEBR_VERSION = "v0.6.0";
 const WEBR_BASE_URL = `https://webr.r-wasm.org/${WEBR_VERSION}/`;
 const WEBR_MODULE_URL = `${WEBR_BASE_URL}webr.mjs`;
 const CHECK_MARKER = "__RDD_EXERCISE_CHECK__";
-const STORAGE_KEY = "econometrics-rdd-browser-lab-v2";
+const STORAGE_KEY = "econometrics-rdd-browser-lab-v3";
 const SECTION_CELLS = {
   "yelp": [
     "Y01",
     "Y02",
     "Y03",
     "Y04",
+    "R01",
+    "R02",
+    "R03",
     "Y05",
     "Y06",
     "Y07",
@@ -18,8 +21,7 @@ const SECTION_CELLS = {
     "C01",
     "C02",
     "C03",
-    "C04",
-    "C05"
+    "C04"
   ],
   "politics": [
     "P01",
@@ -35,6 +37,9 @@ const CORE_CELLS = {
     "Y02",
     "Y03",
     "Y04",
+    "R01",
+    "R02",
+    "R03",
     "Y05",
     "Y06"
   ],
@@ -57,6 +62,9 @@ const SECTION_LABELS = {
   "politics": "LEVEL 3"
 };
 const CELL_GUIDANCE = {
+  "R01": "出力は2、4、6。各行の[1]の右側が計算結果。nは1、2、3の順に変わる。",
+  "R02": "answersに3、6、9が順に残っているか確認する。",
+  "R03": "n列が1、2、3、doubled列が2、4、6の3行の表を見る。",
   "Y01": "1600行・5列。最後の表は全範囲の二群平均で、境界での効果ではない。",
   "Y02": "境界の左右の線を、同じx=3.75で読む。点は店舗そのものではなく区間平均。",
   "Y03": "同じ±0.15・一様な重みではlmとrd_sameが約4.240で一致する。star4は境界での差、star4:xは左右の傾きの差。",
@@ -65,11 +73,10 @@ const CELL_GUIDANCE = {
   "Y06": "Robustの区間が0を含むかに加え、どれほどの差まで区間に含まれるか読む。",
   "Y07": "上段のRobustのP>|T|を見る。下段のBinomial testsは複数の範囲で左右の数を比べる補助検定。",
   "Y08": "偽のカットオフでの点推定と区間を読む。帰無仮説が真でも標本変動で0ぴったりにはならない。",
-  "C01": "全範囲の入学率差は約0.758、境界でのfirst stageは約0.578。得点に伴う滑らかな上昇と、境界のジャンプを区別する。",
+  "C01": "eligible=0の得点は80未満、eligible=1は80以上。資格別の人数と得点の範囲を確認する。",
   "C02": "二つの図を、賃金指数ポイントと試験得点という別々の単位で読む。",
   "C03": "賃金のジャンプと試験成績のジャンプ、それぞれのRobust区間を確認する。",
   "C04": "入学前の成績の点推定とRobust区間を読む。",
-  "C05": "first stageは境界での入学率のジャンプ。全体の賃金差を、資格によって入学が変わる割合で割って入学の効果を読む。",
   "P01": "1800行、wonの0/1と勝敗別の数を確認する。境界0なのでmarginがそのまま境界からの距離。",
   "P02": "横軸0で左右の線に隔たりがあるかを見る。",
   "P03": "点推定の単位は契約指数ポイント。Robust区間と、境界付近での効果という対象を合わせて読む。",
@@ -77,6 +84,9 @@ const CELL_GUIDANCE = {
   "P05": "符号だけでなく、幅を変えたときの推定値と不確実性の変化を読む。"
 };
 const CELL_PREDICTIONS = {
+  "R01": "1、2、3を順に2倍する。表示される三つの数を予想してから実行する。",
+  "R02": "空欄を埋め、1、2、3を3倍した結果をanswersへ保存する。",
+  "R03": "元の数と2倍の結果を1行にし、空の表へ順に追加する。",
   "Y01": "1行は独立した個人経営の飲食店。平均評価3.75を境に表示の星が変わる。",
   "Y02": "横軸は表示された星ではなく、丸める前の平均評価。左右の当てはめ線は境界をまたがせず、それぞれ境界から0.15以内の店に当てる。",
   "Y03": "境界から±0.15だけ残す。左右で傾きを変え、境界での高さの差を計算する。",
@@ -85,11 +95,10 @@ const CELL_PREDICTIONS = {
   "Y06": "同じ推定を、評価表示より前の売上指数に適用する。",
   "Y07": "ヒストグラムと密度の不連続検定を組み合わせる。",
   "Y08": "3.60を偽の境界にする。本当の3.75をまたぐと別の効果が混ざるので、星3.5側だけを使う。",
-  "C01": "__を埋めて合格資格と実際の入学を区別する。基準点は80点。",
+  "C01": "基準点80を埋めて合格資格を作り、資格別の人数と得点の範囲を確認する。",
   "C02": "二つの結果について、rdplot()のyを入れ替える。結果をwage_plot・exam_plotへ保存する。",
-  "C03": "yとcを埋めてモデルを保存する。最初は実際の入学ではなく、合格資格の効果を求める。",
+  "C03": "yとcを埋めてモデルを保存する。境界80点で、合格資格が賃金と試験成績に与える効果を求める。",
   "C04": "prior_scoreを結果にする。卒業時成績は処置後の結果なので、事前属性の代わりにはならない。",
-  "C05": "fuzzyに実際の入学indicatorを指定する。対象は、境界の資格変化によって入学する人。",
   "P01": "1行は一つの選挙で、事前に一人の候補へ献金した一社。marginは献金先候補と対立候補の得票率差（ポイント）。wonを作り、行数・欠損・勝敗別の数を表示する。境界は0なのでmarginがそのまま境界からの距離になる。",
   "P02": "contracts_afterを縦軸、marginを横軸、c=0、p=1でrdplot()を実行し、contract_plotへ保存する。軸名とタイトルも付ける。ビン数は自動選択のままでも、nbinsで指定してもよい。",
   "P03": "rdrobust()で選挙後の契約指数への効果を推定し、contract_rdに保存してsummary()を表示する。局所線形、境界0とする。",
@@ -97,9 +106,10 @@ const CELL_PREDICTIONS = {
   "P05": "得票率差±3、±5、±8ポイントで推定し、h・estimate・lower・upperの4列を持つ表contract_sensitivityを作る。b=1.5*hとし、Y05のfor文を参照。"
 };
 const EXERCISE_HINTS = {
+  "R02": ["nには1、2、3が順に入る。毎回同じ倍率を掛ける。", "空欄は3。n * 3の結果をanswersの末尾に追加する。"],
   "C01": [
-    "合格資格の境界は80点。入学率の結果変数はenrolled。",
-    "空欄は順に80、enrolled、80。"
+    "scoreが基準以上かどうかを判定し、as.integer()で0/1にする。",
+    "空欄は80。80点以上ならeligible=1、未満なら0になる。"
   ],
   "C02": [
     "変数辞書で賃金指数と卒業時試験の列名を確認する。",
@@ -112,10 +122,6 @@ const EXERCISE_HINTS = {
   "C04": [
     "処置より前に決まっている結果を選ぶ。",
     "空欄はprior_score。"
-  ],
-  "C05": [
-    "fuzzyは合格資格eligibleではなく、実際の入学。",
-    "空欄はenrolled。"
   ],
   "P01": [
     "Y01を参照し、3.75を0、rating_rawをmarginへ置き換える。",
@@ -690,7 +696,7 @@ function updateProgress({ save = true } = {}) {
 
 function updateNextStepButtonLabel() {
   if (activeCells().every(cell => completedCells.has(cell.dataset.cellId))) {
-    nextStepButton.textContent = courseMode === "all" ? "全18セル完了" : "標準14セル完了";
+    nextStepButton.textContent = courseMode === "all" ? `全${activeCells().length}セル完了` : `標準${activeCells().length}セル完了`;
     return;
   }
   const currentCellIncomplete = activeCells().some(cell => cell.dataset.cellId === currentVisibleCellId) && !completedCells.has(currentVisibleCellId);
@@ -960,7 +966,7 @@ function initializeCellFrame(cell) {
   dependency.className = "cell-dependency";
   dependency.textContent = dependencyIds.length
     ? `前提セル ${dependencyIds.join("・")} の正しい準備コードは、このセル内で自動実行されます。`
-    : "データはこのセル専用のR環境へ自動で準備されます。";
+    : cell.dataset.dataset === "practice" ? "この練習は数だけで実行できます。ほかのセルの実行は不要です。" : "データはこのセル専用のR環境へ自動で準備されます。";
   const state = document.createElement("span");
   state.className = "cell-state-label";
   state.setAttribute("aria-live", "polite");
