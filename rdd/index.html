@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="口コミ、大学、政治献金の3事例でRDDを学ぶ、説明とR実行が一体になったブラウザ教材" name="description"/>
+<title>第12回｜Rで回帰不連続デザイン</title>
+<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2316324f'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-size='34' font-family='sans-serif' font-weight='700' fill='white'%3ER%3C/text%3E%3C/svg%3E" rel="icon"/>
+<link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+<header class="hero">
+<div class="hero__inner">
+<p class="eyebrow">計量経済学の応用と実践 · 2026 Summer</p>
+<h1>Rで回帰不連続デザイン</h1>
+<p class="hero__lead">口コミ評価の表示、大学の合格資格、献金先候補の当選を事例として、RDDによる推定と仮定の点検を行う。理論の説明、Rコード、出力の解説をこのページに収録。</p>
+<div class="hero__meta">
+<span>第12回</span>
+<span>説明とR実習を一つのページで</span>
+<span>rdrobust()</span>
+<span>インストール不要</span>
+<span>ブラウザ教材</span>
+</div>
+<div aria-label="三つの実習段階" class="difficulty-map">
+<article><span>LEVEL 1</span><strong>口コミ</strong><small>完成コードを実行</small></article>
+<i aria-hidden="true">→</i>
+<article><span>LEVEL 2</span><strong>名門大学</strong><small>一部を穴埋め</small></article>
+<i aria-hidden="true">→</i>
+<article><span>LEVEL 3</span><strong>政治献金</strong><small>指示文からコードを作成</small></article>
+</div>
+<div aria-label="講義の開始位置" class="hero__start-actions">
+<a class="hero-start-link" href="#intro"><span>はじめに</span><strong>実習の概要と操作手順</strong></a>
+<a class="hero-start-link" href="#college"><span>LEVEL 2・3</span><strong>応用へ進む</strong></a>
+<button class="hero-start-link hero-start-link--resume" hidden="" id="hero-resume-button" type="button"><span>前回の記録</span><strong>続きから再開</strong></button>
+</div>
+</div>
+</header>
+<div class="runtime-bar" id="runtime-bar">
+<div class="runtime-bar__inner">
+<div aria-live="polite" class="runtime-status" role="status">
+<span aria-hidden="true" class="status-dot status-dot--loading" id="status-dot"></span>
+<div><strong id="status-title">Rを準備中</strong><span id="status-detail">初回は30秒から1分ほどかかります</span></div>
+</div>
+<div class="progress-block"><label class="course-mode-label" for="course-mode">学習コース <select id="course-mode"><option value="standard">標準14セル</option><option value="all">発展を含む18セル</option></select></label>
+<span><b id="completed-count">0</b> / <b id="total-count">0</b> セル完了</span>
+<strong class="current-step" id="current-step">導入を読んでいます</strong>
+<div aria-valuemin="0" aria-valuenow="0" class="progress-track" id="progress-track" role="progressbar"><i id="progress-fill"></i></div>
+</div>
+<div class="runtime-actions">
+<button class="button button--quiet" hidden="" id="resume-button" type="button">続きから</button>
+<button class="button button--quiet" id="previous-step-button" type="button">前のセル</button>
+<button class="button" id="next-step-button" type="button">次の未完了へ</button>
+<button class="button button--quiet" id="restart-button" type="button">全消去</button>
+</div>
+</div>
+</div>
+<main id="main">
+<div class="course-layout">
+<nav aria-label="この回の流れ" class="flow-rail">
+<p class="flow-rail__eyebrow">この回の流れ</p>
+<p class="flow-rail__mobile"><span>現在地</span><strong id="flow-mobile-current">導入</strong></p>
+<ol id="flow-list"><li data-flow-item="intro"><a href="#intro"><span>0</span><b class="flow-rail__text">導入</b></a></li><li data-flow-item="yelp"><a href="#yelp"><span>1</span><b class="flow-rail__text">口コミ</b></a></li><li data-flow-item="college"><a href="#college"><span>2</span><b class="flow-rail__text">名門大学</b></a></li><li data-flow-item="politics"><a href="#politics"><span>3</span><b class="flow-rail__text">政治献金</b></a></li><li data-flow-item="summary"><a href="#summary"><span>4</span><b class="flow-rail__text">まとめ</b></a></li></ol>
+</nav>
+<div class="course-main"><section class="content-section" data-flow-section="intro" id="intro"><p class="section-label">INTRODUCTION</p><h2>実習の概要</h2>
+<div class="notice notice--important"><strong>この教材の数値について</strong><p>三つの研究をもとにした教育用合成データを使う。図・表の†は教材用の数値を表し、原研究の結果は出典を付けて区別する。原研究から単純化した設定は、各事例の説明に記載している。</p></div>
+<article class="concept-slide concept-slide--compact"><div class="slide-kicker">CONCEPT</div><h3>標準コースと発展課題</h3><p>データ確認 → RD図 → 推定 → 仮定の点検 → 結果を文章化。</p><p>標準コースはY01〜Y06、C01〜C04、P01〜P04である。<strong>発展のY07・Y08・C05・P05は省略できる。</strong>上部の「次の未完了へ」は標準セルだけをたどり、14セルで完了する。発展も取り組むときは「発展を含む18セル」に切り替えてください。</p><p>必要な理論、Rの書き方、出力の読み方はこのページにまとめている。各段階の説明を読み、その下のRセルを実行してください。別のスライドや論文を開かずに、標準コースの報告課題まで進められる。</p><p>説明項目：<a href="#rdd-basics">RDDの定義と変数</a> ／ <a href="#rd-assumptions">識別仮定</a> ／ <a href="#r-basics">Rの基本</a> ／ <a href="#interval-guide">区間とp値</a> ／ <a href="#diagnostics-guide">仮定の点検</a> ／ <a href="#report-example">報告例</a></p></article>
+<article class="concept-slide concept-slide--compact" id="rdd-basics"><div class="slide-kicker">CONCEPT</div><h3>RDDの定義と変数</h3>
+<p><strong>RDD（Regression Discontinuity Design、回帰不連続デザイン）</strong>は、割当変数が制度上の基準を超えたときに処置が変わる仕組みを利用し、境界の左右の比較から因果効果を推定する方法である。</p>
+<p>飲食店の平均評価を半星単位に丸める例では、平均3.74は星3.5、3.76は星4と表示される。この教材では3.75以上を星4、未満を星3.5とする。<strong>平均評価3.75の直下と直上の売上を比較</strong>し、表示変更の効果を推定する。</p>
+<div class="role-table-wrap"><table class="role-table"><thead><tr><th>役割</th><th>記号</th><th>口コミの例</th></tr></thead><tbody><tr><td>結果変数（アウトカム）</td><td>Y</td><td>知りたい結果：売上指数</td></tr><tr><td>割当変数（running variable）</td><td>X</td><td>扱いを決める数値：丸める前の平均評価</td></tr><tr><td>カットオフ（境界）</td><td>c</td><td>扱いが変わる基準：3.75</td></tr><tr><td>処置</td><td>D</td><td>受ける扱い：星4の表示なら1、星3.5なら0</td></tr></tbody></table></div>
+<p>評価が大きく異なる店舗の比較には、料理や接客などの質の差が含まれる。RDDでは比較範囲を境界付近に限定し、評価に伴う連続的な売上の変化と、表示変更による不連続な変化を区別する。処置が境界で確実に切り替わる場合を<strong>Sharp RD</strong>と呼ぶ。</p>
+<details><summary>DiDとの比較</summary><p>DiDは、処置を受けた群の時間変化から、対照群の時間変化を引く方法である。RDDでは時間の前後に代えて、制度の境界の左右を比較する。分析者が単に中央値で二群に分けても、それによって処置が変わる制度がなければRDDにはならない。</p></details>
+</article>
+<article class="concept-slide" id="counterfactual-guide"><div class="slide-kicker">CONCEPT</div><h3>処置の割当と反実仮想</h3>
+<svg aria-labelledby="rd-figure-title rd-figure-desc" role="img" style="width:100%;height:auto" viewBox="0 0 820 310">
+<title id="rd-figure-title">評価3.75で星の表示が変わり、売上に差が生じるという模式図</title><desc id="rd-figure-desc">左は星3.5から星4への表示の切り替え。右は売上の条件付き平均の模式図で、境界に8指数ポイントの差。点線は星3.5のままならという反実仮想。†は教材用の数値。</desc>
+<g fill="#24313A" font-family="sans-serif" font-size="15"><text font-weight="bold" x="45" y="25">① 処置：表示された星</text><text font-weight="bold" x="430" y="25">② 結果：売上指数†</text>
+<path d="M65 60V250H355 M455 60V250H770" fill="none" stroke="#64748B"></path>
+<path d="M215 55V250 M610 55V250" stroke="#64748B" stroke-dasharray="5 5"></path>
+<path d="M80 205H215 M470 210L610 155" fill="none" stroke="#2A6F97" stroke-width="4"></path>
+<path d="M215 95H345 M610 105L765 50" fill="none" stroke="#EE6C4D" stroke-width="4"></path>
+<path d="M610 155L765 100" fill="none" stroke="#2A6F97" stroke-dasharray="6 5" stroke-width="2"></path>
+<text x="16" y="210">星3.5</text><text x="28" y="100">星4</text><text x="420" y="159">100</text><text x="420" y="109">108</text>
+<path d="M635 105V155" stroke="#2A9D8F" stroke-width="3"></path><text fill="#2A9D8F" x="645" y="143">差8</text>
+<text x="196" y="275">3.75</text><text x="590" y="275">3.75</text><text x="90" y="303">丸める前の評価</text><text x="535" y="303">丸める前の評価</text></g></svg>
+<div><p>同じ店が「星4の表示を受けた場合」と「星3.5の表示を受けた場合」に得る売上を、それぞれ<strong>潜在的結果</strong>と呼ぶ。この二つの差が表示の因果効果である。実際に観察できるのは片方なので、観察できないもう一方の結果（<strong>反実仮想</strong>）を比較相手から補う。</p><p>図の例†では、左から境界へ近づいた売上の平均が100、右から近づいた平均が108である。<strong>表示を星3.5に固定した売上の平均が境界で連続</strong>なら、境界の店が星3.5のままだった場合の平均を100で補える。星4での108との差8が、境界での表示の効果である。</p><p>同じ考えを両方の表示について置く。「条件付き平均が連続」とは、平均評価を境界へ近づけたとき、表示を固定した売上の平均が突然跳ばないことである。個々の店の売上が同じである必要はない。実習の推定値には標本による偶然のずれや近似の偏りがあり、図の8とは一致しないことがある。</p></div></article><article class="concept-slide concept-slide--compact" id="rd-assumptions"><div class="slide-kicker">CONCEPT</div><h3>RDDの識別仮定</h3><div class="role-table-wrap"><table class="role-table"><thead><tr><th>条件・確認事項</th><th>この事例で考えること</th></tr></thead><tbody><tr><td>中心の仮定：潜在的結果の平均が連続</td><td>それぞれの表示を固定すれば、境界の左右から近づく売上の平均はつながる。左右に境界へ十分近い観測があることも必要。</td></tr><tr><td>同時に変わる制度を確認</td><td>3.75で広告や割引も始まるなら、売上の差は表示だけの効果とは読めない。</td></tr><tr><td>境界の片側を選べる仕組みを確認</td><td>店が評価を精密に操作して3.75を超えられると、左右で経営能力などが異なる可能性がある。</td></tr><tr><td>処置の意味と波及を確認</td><td>ある店の星が上がって近隣店の客を奪う場合、店舗ごとの売上効果と市場全体の売上増加は異なる。</td></tr></tbody></table></div>
+<p>同じ境界で別の優遇も始まり、売上を4ポイント増やす場合を考える†。別の優遇を維持したまま星3.5の表示に戻した売上が104なら、表示変更の効果は108−104=4である。観察された差8をすべて表示の効果と解釈するには、他の制度が同時に変わらないことの確認が必要となる。</p>
+<p>RDDはランダム割付を行わず、潜在的結果の平均の連続性を仮定する。有限の比較範囲に残る平均評価と売上の関係は回帰で調整する。推定対象は<strong>評価3.75付近の店への局所的な平均効果</strong>であり、他の評価帯や店舗への一般化には追加の根拠が必要である。</p>
+<details><summary>確認問題：推定精度と同時に変わる制度</summary><p>標本を増やしても、表示と別の優遇の効果を分離できるとは限らない。観察された差8を精密に推定することと、そのうち表示の効果がいくつかを識別することは別の問題である。</p></details>
+</article>
+<article class="concept-slide concept-slide--compact" id="browser-start"><div class="slide-kicker">START</div><h3>ブラウザでの実行手順</h3><ol><li>上部が「RとRDDパッケージの準備完了」になるまで待つ。データは自動で準備される。学生のPCにRをインストールする操作や、CSVのアップロードはない。</li><li>「セル」は一度に実行するコードのまとまりである。LEVEL 1はそのまま実行し、LEVEL 2では空欄<code>__</code>を埋め、LEVEL 3では指示からコードを書く。</li><li>「実行する」を押し、OUTPUTの数値・図を、その下の解釈と照らし合わせる。<code>#</code>から行末は説明用のコメントである。</li><li>入力に迷った場合は「ヒントを見る」を使う。入力をやり直すときはセルの「元に戻す」を使う。「全消去」は全セルの入力と学習記録を消す。</li></ol><p>初回のRとパッケージの読み込みには通信が必要である。学習記録は現在のブラウザに保存され、結果の図と出力は再読み込み後に再実行する。</p></article><article class="concept-slide concept-slide--compact" id="r-basics"><div class="slide-kicker">R GUIDE</div><h3>Rの基本構文</h3><div class="role-table-wrap"><table class="role-table"><thead><tr><th>記号・指定</th><th>入力と処理</th><th>返ってくるもの／読む場所</th></tr></thead><tbody><tr><td><code>&lt;-</code> / <code>$</code></td><td>結果を名前に保存／表やモデルから要素を選ぶ</td><td><code>model$coef</code>で係数の表を取り出す</td></tr><tr><td><code>y=</code> / <code>x=</code> / <code>c=</code></td><td>結果の列／割当変数の列／境界の数値を渡す</td><td><code>c=</code>は引数名。ベクトルを作る<code>c()</code>とは別</td></tr><tr><td><code>p=1</code> / <code>nbins=c(15,15)</code></td><td>左右を直線で近似／左右を各15区間にまとめて図示</td><td>pは次数。検定のp値とは別。nbinsは図の設定</td></tr><tr><td><code>model$coef[1,1]</code></td><td>係数表の1行1列を取り出す</td><td>通常の点推定。<code>[2,1]</code>は補正後の点推定</td></tr><tr><td><code>model$ci[3,1]</code> / <code>[3,2]</code></td><td>区間表の3行目から1列・2列を取り出す</td><td>ロバストな95%区間の下限・上限。summary画面の3行目という意味ではない</td></tr><tr><td><code>subset(d, abs(x) &lt;= h)</code></td><td>表dから境界までの距離がh以下の行を選ぶ</td><td>範囲を限定した表</td></tr></tbody></table></div><details><summary>表・ベクトル・関数・式の基本を確認する</summary><p>データフレームは行と列を持つ表、ベクトルは値の並びである。<code>yelp</code>は店の表で、<code>yelp$rating_raw</code>はその中の評価の列を取り出す。計算結果を保存したものをobject（オブジェクト）と呼ぶ。</p><p>関数は<code>関数名(引数名 = 値)</code>で呼び出す。<code>rdrobust::rdplot()</code>の<code>::</code>は、rdrobustというパッケージに入っているrdplot関数を使う指定である。<code>"Revenue index"</code>のような引用符は文字列を表す。</p><div class="role-table-wrap"><table class="role-table"><thead><tr><th>書き方</th><th>意味</th></tr></thead><tbody><tr><td><code>c(0.08, 0.12, 0.18)</code></td><td>三つの数をベクトルにまとめる。</td></tr><tr><td><code>rating_raw &gt;= 3.75</code></td><td>以上かどうかをTRUE/FALSEで判定する。<code>as.integer()</code>でTRUEを1、FALSEを0に変える。0/1の列をindicator（指示変数）と呼ぶ。</td></tr><tr><td><code>abs(x)</code></td><td>絶対値。境界を0としたとき、符号を除いた距離になる。</td></tr><tr><td><code>y ~ x</code></td><td>yをxで説明する式。<code>+</code>は項の追加、<code>a:b</code>はaとbの積、<code>a*b</code>はa+b+a:b。</td></tr><tr><td><code>data = near</code></td><td>式の変数をnearという表から探す。</td></tr><tr><td><code>for (h in widths) { ... }</code></td><td>widthsの値を順番にhへ入れ、波括弧の中を繰り返す。</td></tr></tbody></table></div></details></article><article class="concept-slide concept-slide--compact"><div class="slide-kicker">R FUNCTION GUIDE</div><h3>使用するR関数</h3><div class="role-table-wrap"><table class="role-table"><thead><tr><th>関数</th><th>入力 → 処理</th><th>出力</th></tr></thead><tbody><tr><td><code>rdrobust::rdplot()</code></td><td>y、x、c → 区間平均と左右の線を描く</td><td>図と、その作図情報を持つobject</td></tr><tr><td><code>rdrobust::rdrobust()</code></td><td>y、x、c → 境界での差を局所的に推定</td><td>点推定、区間、バンド幅などを持つobject</td></tr><tr><td><code>summary(model)</code></td><td>推定object → 表示用に整理</td><td>画面に読みやすい結果表</td></tr><tr><td><code>hist()</code></td><td>数値の列と区間 → 分布を集計</td><td>ヒストグラム。probability=TRUEなら密度</td></tr><tr><td><code>rddensity::rddensity()</code></td><td><strong>X=</strong>割当変数、c=境界 → 密度の連続性を検定</td><td>検定結果。rdrobustの小文字<strong>x=</strong>と区別</td></tr><tr><td><code>fuzzy=college$enrolled</code></td><td>rdrobustに実際の処置（0/1）も渡す</td><td>入学率のジャンプを用いたFuzzy RDの推定</td></tr><tr><td><code>for (h in widths)</code></td><td>widthsの値を一つずつhへ入れる</td><td>同じ処理の繰り返し。Y05で1行ずつ説明する</td></tr><tr><td><code>rbind(table, row)</code></td><td>表と新しい1行 → 縦に結合</td><td>行を追加した表</td></tr></tbody></table></div><p>本教材の<code>rdrobust()</code>では、<code>kernel</code>と<code>bwselect</code>を省略すると、Y04と同じ<code>"triangular"</code>と<code>"mserd"</code>を使う。固定幅hを指定したセルでは自動選択を置き換える。</p><details><summary>データ確認と基本の回帰に使う関数</summary><div class="role-table-wrap"><table class="role-table"><thead><tr><th>関数・指定</th><th>入力 → 処理 → 出力</th></tr></thead><tbody><tr><td><code>dim(d)</code> / <code>head(d)</code></td><td>表d → 大きさ／先頭を確認 → 行数・列数／最初の6行。</td></tr><tr><td><code>colSums(is.na(d))</code></td><td>表d → 欠損をTRUEとし列ごとに足す → 各列の欠損数。</td></tr><tr><td><code>table(d$star4)</code></td><td>0/1の列 → 値ごとに数える → 各群の観測数。</td></tr><tr><td><code>aggregate(y ~ group, data=d, FUN=mean)</code></td><td>表d → group別にyを平均する → 二群の平均値の表。</td></tr><tr><td><code>lm(y ~ d*x, data=near)</code></td><td>選んだ範囲の表 → 回帰式を当てはめる → 回帰の結果object。</td></tr><tr><td><code>coef(model)</code></td><td>回帰object → 係数を取り出す → 名前付きの数値。<code>["star4"]</code>で該当する係数を選ぶ。</td></tr><tr><td><code>data.frame(h=..., estimate=...)</code></td><td>名前を付けた値 → 列にまとめる → 結果表。値が一つずつなら1行の表。</td></tr><tr><td><code>seq(3.5, 4, by=0.025)</code></td><td>始点・終点・刻み → 等間隔の値を作る → ヒストグラムの区切りに使うベクトル。</td></tr><tr><td><code>abline(v=3.75)</code></td><td>数値 → 現在の図に縦線を追加 → 境界を示す線。</td></tr></tbody></table></div></details></article>
+<article class="concept-slide concept-slide--compact"><div class="slide-kicker">CONCEPT</div><h3>入力・ヒント・保存</h3><p>各セルは専用のR環境で動く。別のセルで変えたコードは引き継がない。必要な準備は自動で再実行される。各セルのデータ名はyelp・college・politics。</p><p>穴埋めの <code>__</code> を置き換えて実行する。ヒント1 → ヒント2 → 解答例を利用できる。入力と完了記録はこのブラウザへ保存される。グラフと出力は再読込後に再実行する。</p></article>
+</section>
+<section class="content-section" data-flow-section="yelp" id="yelp"><p class="section-label">LEVEL 1｜完成コードを実行する</p><h2>口コミの星と売上</h2>
+<article class="concept-slide concept-slide--compact" id="yelp-question"><div class="slide-kicker">RESEARCH QUESTION</div><h3>口コミ評価の表示が売上に与える効果</h3><p>研究対象は、口コミ評価の表示が飲食店の売上に与える効果である。平均評価が高い店は料理や接客の質も高い可能性があるため、評価帯の異なる店の単純比較では表示の効果を識別できない。</p><p>Lucaは丸め前の評価と売上記録を使い、半星表示が切り替わる境界で売上を比較した。個人経営店では売上への正の効果を報告し、チェーン店では明瞭な効果を確認していない。<a href="https://www.hbs.edu/ris/Publication%20Files/12-016_a7e4a5a2-03f9-490d-b093-8f951238dba2.pdf">出典：Luca（2016年版）</a></p><p>実習では境界3.75に絞った1600店の合成データを使う。結果の単位は<strong>売上指数ポイント</strong>であり、円や%への換算は行わない。</p><p><a href="#rd-assumptions">表示の効果と読む条件を確認する</a></p></article><article class="concept-slide concept-slide--compact"><div class="slide-kicker">DATA DICTIONARY</div><h3>変数辞書</h3><div class="role-table-wrap"><table class="role-table"><thead><tr><th>列・名前</th><th>意味</th></tr></thead><tbody><tr><td><code>restaurant_id</code></td><td>店舗ID</td></tr><tr><td><code>rating_raw</code></td><td>丸める前の平均評価。3.50〜4.00、境界3.75</td></tr><tr><td><code>revenue_index</code></td><td>表示変更後の売上指数。左側の境界の平均を100とした架空尺度</td></tr><tr><td><code>revenue_pre</code></td><td>表示変更前の売上指数</td></tr><tr><td><code>seats</code></td><td>事前に決まっている席数</td></tr><tr><td><code>x / star4</code></td><td>セルで作成：境界からの距離 / 星4表示indicator</td></tr></tbody></table></div></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル Y01</span><h3>データの確認と処置変数の作成</h3></div><p>1行は独立した個人経営の飲食店。平均評価3.75を境に表示の星が変わる。</p>
+<p class="reading-link">このセルの説明：<a href="#yelp-question">口コミ研究の概要と変数</a></p><div class="r-cell r-cell--long" data-cell-id="Y01" data-check-failure="yelp$star4はrating_raw&gt;=3.75の0/1、yelp$xはrating_raw-3.75です。" data-check-success="1600店について星4表示と境界からの距離を作成しました。二群平均と境界の差を区別してください。" data-dataset="yelp" data-depends-on=""><textarea aria-label="セルY01のRコード" spellcheck="false"># 表の大きさ、先頭、欠損数を確認する
+ dim(yelp)
+ head(yelp)
+ colSums(is.na(yelp))
+# 境界からの距離と、星4表示のindicatorを作る
+ yelp$x &lt;- yelp$rating_raw - 3.75
+ yelp$star4 &lt;- as.integer(yelp$rating_raw &gt;= 3.75)
+ table(yelp$star4)
+# &gt;= は「以上」、as.integer()はTRUE/FALSEを1/0にする
+ aggregate(revenue_index ~ star4, data = yelp, FUN = mean)</textarea>
+<script class="r-check" type="text/plain">exists("yelp") && all(yelp$star4 == as.integer(yelp$rating_raw >= 3.75)) && isTRUE(all.equal(yelp$x, yelp$rating_raw - 3.75))</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>星4の店の売上が高くても、もともとの店の質の違いが含まれうる。</p></div></article>
+<article class="concept-slide concept-slide--compact"><div class="slide-kicker">CONCEPT</div><h3>RDDのグラフ</h3><p>横軸＝丸める前の平均評価、縦軸＝売上指数。星4の表示がなければ、売上の条件付き平均は3.75で滑らかにつながる、という仮定を置く。</p><p><code>rdplot()</code>は区間平均と当てはめ線を描く。<code>rdrobust()</code>は局所的な効果と不確実性を推定する。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル Y02</span><h3>平均評価と売上の図示</h3></div><p>横軸は表示された星ではなく、丸める前の平均評価。左右の当てはめ線は境界をまたがせず、それぞれ境界から0.15以内の店に当てる。</p>
+<div class="r-cell r-cell--long" data-cell-id="Y02" data-check-failure="y=yelp$revenue_index、x=yelp$rating_raw、c=3.75で図を実行してください。" data-check-success="RD図を描きました。境界3.75で左右の線の高さを読んでください。" data-dataset="yelp" data-depends-on="" data-requires-plot="true"><textarea aria-label="セルY02のRコード" spellcheck="false"># yは結果、xは割当変数、cは境界、p=1は左右の直線
+# 点は全範囲の区間平均。線は境界から±0.15で当てる（h=0.15）
+# 信頼区間を伴う効果の報告はY04で行う
+rdrobust::rdplot(
+  y = yelp$revenue_index, x = yelp$rating_raw,
+  c = 3.75, p = 1, h = 0.15, nbins = c(15, 15),
+  x.label = "Unrounded rating", y.label = "Revenue index",
+  title = "Synthetic independent restaurants"
+)</textarea>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>区間平均の点と左右の線を見比べ、同じ評価3.75での高さの差を読む。ビン数は平均をまとめる区間の数、h=0.15は線に使う範囲を決める。全範囲に一本ずつの直線を当てると、右側の曲がり方を拾って境界の差が小さく見えるため、ここでは線を近くに限定する。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="local-fit-guide"><div class="slide-kicker">CONCEPT</div><h3>局所線形回帰・バンド幅・カーネル</h3><p>左右それぞれに、境界の近くで直線を当てる方法が<strong>局所線形回帰</strong>である。境界での高さを左右の直線から求め、その差を読む。範囲を決める<strong>バンド幅h</strong>が0.15なら、評価3.60〜3.90の店を使う。</p><p>狭い範囲では曲線を直線で近似しやすい一方、観測数が減って推定値の偶然の散らばりが大きくなる。広げると観測は増えるが、曲がった関係を直線で表すずれが大きくなりうる。</p><p><strong>カーネル</strong>は範囲内の重みの規則である。Y03のlmは全観測を同じ重みにする。Y04の三角カーネルは境界に近いほど重く、範囲の端ほど軽くする。図の点をまとめる<strong>ビン</strong>の数は、推定の範囲や重みとは別の設定である。</p></article><article class="concept-slide concept-slide--compact" id="regression-guide"><div class="slide-kicker">CONCEPT</div><h3>交互作用項と回帰係数</h3><p>評価を境界からの距離に直し、<code>x = rating_raw − 3.75</code>、星4表示を<code>D = star4</code>とする。左右で別の直線を当てる回帰式は<code>Y = α + τD + βx + γDx + u</code>である。<code>u</code>は線だけで説明できない個々の売上のずれを表す。</p><p>Rの<code>star4 * x</code>は<code>star4 + x + star4:x</code>に展開される。<code>:</code>は積を表し、星4側だけにxの傾きを追加する。</p><div class="role-table-wrap"><table class="role-table"><thead><tr><th>側</th><th>Rの当てはめ</th><th>傾き</th></tr></thead><tbody><tr><td>星3.5：star4=0</td><td>α + βx</td><td>β</td></tr><tr><td>星4：star4=1</td><td>α + τ + (β+γ)x</td><td>β+γ</td></tr></tbody></table></div><p>xを評価−3.75としたので、境界ではx=0。左右の差はstar4の係数τである。以下で、同じ±0.15・同じ一様な重みにそろえると、lmとrdrobustの通常の点推定が一致することも確かめる。</p><div class="role-table-wrap"><table class="role-table"><thead><tr><th>Rの係数名</th><th>記号</th><th>意味</th></tr></thead><tbody><tr><td><code>(Intercept)</code></td><td>α</td><td>星3.5側の境界での高さ</td></tr><tr><td><code>star4</code></td><td>τ</td><td>境界での高さの差</td></tr><tr><td><code>x</code></td><td>β</td><td>星3.5側の傾き</td></tr><tr><td><code>star4:x</code></td><td>γ</td><td>星4側と星3.5側の傾きの差</td></tr></tbody></table></div></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル Y03</span><h3>lm()による局所線形回帰</h3></div><p>境界から±0.15だけ残す。左右で傾きを変え、境界での高さの差を計算する。</p>
+<p class="reading-link">このセルの説明：<a href="#local-fit-guide">局所線形と回帰式</a></p><div class="r-cell r-cell--long" data-cell-id="Y03" data-check-failure="±0.15のnearを使い、revenue_index ~ star4*xをlocal_fitへ保存してください。" data-check-success="局所線形回帰のstar4係数を確認しました。同じ範囲・重みの比較も見てください。" data-dataset="yelp" data-depends-on="Y01"><textarea aria-label="セルY03のRコード" spellcheck="false"># 前提Y01の準備コードは、このセル内でも自動実行される
+near &lt;- subset(yelp, abs(x) &lt;= 0.15)
+# star4 * x = star4 + x + star4:x（左右の傾きを別にする）
+local_fit &lt;- lm(revenue_index ~ star4 * x, data = near)
+coef(local_fit)
+# x=0での差はstar4の係数
+coef(local_fit)["star4"]
+# 範囲と重みをそろえると、二つの通常の点推定は一致する
+same_settings &lt;- rdrobust::rdrobust(
+  y = yelp$revenue_index, x = yelp$rating_raw, c = 3.75,
+  p = 1, h = 0.15, kernel = "uniform"
+)
+c(lm = coef(local_fit)["star4"], rd_same = same_settings$coef[1,1])</textarea>
+<script class="r-check" type="text/plain">inherits(local_fit,"lm") && abs(unname(coef(local_fit)["star4"]) - unname(coef(lm(revenue_index ~ star4*x, subset(yelp,abs(x)<=0.15)))["star4"])) < 1e-6</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>同じ範囲・重みなら二つの通常の点推定は一致する。続くY04では範囲と重みを変更し、近似の偏りを考慮した区間も求める。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="bias-guide"><div class="slide-kicker">CONCEPT</div><h3>セレクションバイアスと近似の偏り</h3><p>処置を受ける店と受けない店で、処置がなくても売上の見込みが異なることによるずれが<strong>セレクションバイアス</strong>である。これは比較から因果効果を求められるかという<strong>識別の問題</strong>にあたる。一方、曲線を直線で近似すると境界での高さがずれる。rdrobustのバイアス補正は、この<strong>近似の偏り</strong>を対象とする。評価の操作や同時に変わる制度による識別の問題は、補正後も残る。</p><p><code>bwselect="mserd"</code>は、RDの点推定の<strong>平均二乗誤差（Mean Squared Error, MSE）</strong>を小さくする基準で範囲を選ぶ指定である。MSEは繰り返し推定したときの誤差の二乗の平均で、偏りの二乗と分散に分かれる。</p></article><article class="concept-slide concept-slide--compact"><div class="slide-kicker">CONCEPT</div><h3>推定用バンド幅hと補正用バンド幅b</h3><p><strong>h</strong>の範囲で左右の直線を当て、通常の点推定を求める。別に<strong>b</strong>の範囲で曲がり方を二次式で調べ、直線近似の偏りを見積もる。この実習の出力ではbがhより広くなっている。b&gt;hは常に必要な条件ではない。</p><p><span><strong>頑健性の確認・感度分析</strong>は、幅などの設定を変えて結論を点検する作業である。<strong>ロバストな区間</strong>は、近似の偏りを補正したことによる不確実性も計算に含めた区間である。一つの推定から作る区間の計算法と、複数の設定の比較を区別する。</span></p></article>
+<article class="concept-slide concept-slide--compact" id="interval-guide"><div class="slide-kicker">OUTPUT GUIDE</div><h3>点推定・95%信頼区間・p値</h3><p><strong>点推定</strong>は、手元の標本から計算した効果の大きさである。別の標本を集めれば値は変わるので、<strong>信頼区間</strong>で推定の不確実性を示す。</p><p>95%信頼区間とは、前提が成り立つもとで標本を取り直して同じ方法で区間を作ると、約95%の区間が真の効果を含むという意味である。得られた一つの区間に真の効果が95%の確率で入るという意味ではない。</p><p><strong>p値</strong>は、効果が0という仮説と推論の前提のもとで、今回以上に極端な検定統計量が出る確率である。この教材では、対応する95%区間が0を含まなければ、両側5%の基準で「有意」と読む。0を含むときは「差ゼロと両立する」と述べ、区間に含まれる効果の大きさも確認する。</p><p>有意かどうかは因果効果と読む根拠や、効果の実質的な大きさとは別である。<a href="#rd-assumptions">連続性と制度の確認</a>を踏まえ、点推定・区間・単位を一緒に報告する。</p></article><article class="concept-slide concept-slide--compact" id="rd-output-guide"><div class="slide-kicker">OUTPUT GUIDE</div><h3>summary()の出力項目</h3><p>出力下部の<strong>RD Effectの1行</strong>では、左の<strong>Point Estimate</strong>が通常の点推定である。右の<strong>Robust Inference</strong>の下にz・p値・95%区間が並ぶ。Robust Inferenceの見出しの下にある値を確認する。</p><div class="role-table-wrap"><table class="role-table"><thead><tr><th>今回読む欄</th><th>意味</th></tr></thead><tbody><tr><td>Point Estimate</td><td>通常の点推定。まず単位と対象を確認する</td></tr><tr><td>Robust Inference / [95% C.I.]</td><td>補正後の値を中心にしたロバストな区間</td></tr><tr><td>P&gt;|z|</td><td>この区間に対応する両側検定のp値</td></tr><tr><td>Number of Obs.</td><td>左・右の全観測数</td></tr><tr><td>Eff. Number of Obs.</td><td>hの範囲内で点推定に使う左・右の数</td></tr><tr><td>BW est. (h) / BW bias (b)</td><td>点推定の範囲／偏りを見積もる範囲</td></tr></tbody></table></div><details><summary>今回は設定の確認だけでよい欄</summary><div class="role-table-wrap"><table class="role-table"><thead><tr><th>欄</th><th>読み方</th></tr></thead><tbody><tr><td>Order est. (p)</td><td>点推定の次数。1なら直線</td></tr><tr><td>Order bias (q)</td><td>偏りの推定に使う次数。ここでは2（二次式）</td></tr><tr><td>Kernel</td><td>範囲内の重み。Triangularは境界に近いほど重い</td></tr><tr><td>BW type</td><td>自動選択の基準。mserdはMSE基準</td></tr><tr><td>VCE method: NN</td><td>近い観測を使って分散を見積もる方法。計算の詳細は扱わない</td></tr><tr><td>rho (h/b)</td><td>二つの幅の比</td></tr><tr><td>Unique Obs.</td><td>左右それぞれの割当変数の異なる値の数</td></tr></tbody></table></div></details><p><code>$coef</code>と<code>$ci</code>はobject内の行列である。<code>$ci[3,]</code>という指定は、画面の3行目を指すものではない。</p></article><article class="lesson-card"><div class="lesson-card__heading"><span>セル Y04</span><h3>rdrobust()による推定と信頼区間</h3></div><p>点推定、ロバストな95%信頼区間、左右のバンド幅と使用数を確認する。</p>
+<p class="reading-link">このセルの説明：<a href="#bias-guide">偏りの補正・区間・出力の読み方</a></p><div class="r-cell r-cell--long" data-cell-id="Y04" data-check-failure="rd_yelpへrdrobustの推定結果を保存し、境界を3.75にしてください。" data-check-success="境界3.75のRDモデルを作成しました。点推定と区間の中心を区別してください。" data-dataset="yelp" data-depends-on=""><textarea aria-label="セルY04のRコード" spellcheck="false"># p=1：局所線形、kernel：境界近くに大きな重み
+# bwselect：点推定のMSEを基準にバンド幅を自動選択
+rd_yelp &lt;- rdrobust::rdrobust(
+  y = yelp$revenue_index, x = yelp$rating_raw, c = 3.75,
+  p = 1, kernel = "triangular", bwselect = "mserd"
+)
+summary(rd_yelp)
+# summary画面と、object内の行列は表示形式が異なる
+# 区間の中心はbias_corrected（近似の偏りを補正した推定値）
+c(estimate = rd_yelp$coef[1, 1],
+  bias_corrected = rd_yelp$coef[2, 1],
+  lower = rd_yelp$ci[3, 1], upper = rd_yelp$ci[3, 2])
+# hは点推定用、bは曲がり方から偏りを見積もるための幅
+rd_yelp$bws
+rd_yelp$N_h</textarea>
+<script class="r-check" type="text/plain">inherits(rd_yelp,"rdrobust") && rd_yelp$c == 3.75</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>対象は評価3.75付近で表示が半星変わる効果。通常の点推定と、補正後の値を中心にした95%区間を、売上指数ポイントで報告する。</p></div></article><article class="concept-slide concept-slide--compact"><div class="slide-kicker">OUTPUT GUIDE</div><h3>バイアス補正後の推定値と信頼区間</h3><p>通常の点推定から見積もった近似の偏りを差し引き、補正後の推定値を求める。ロバストな区間は<strong>補正後の推定値を中心</strong>とし、偏りを推定したことによる不確実性も幅に含める。</p><p>Y04の出力†では、通常の点推定は約5.102、補正後は約5.276、区間は約[1.003, 9.549]である。区間の中点は5.276になり、通常の点推定5.102とは少しずれる。</p><p>Y03は±0.15・一様な重みで約4.240、Y04は自動選択の約±0.077・三角形の重みで約5.102である。この差は、推定に使う範囲と重みの違いによる。Y03で係数の意味を学び、報告にはY04の推定と区間を使う。</p></article>
+<article class="concept-slide concept-slide--compact"><div class="slide-kicker">CONCEPT</div><h3>曲率とバンド幅による近似の偏り</h3><figure><img alt="標本のノイズを除いた平均の曲線に局所線形を当てる。幅0.08では差7.51、幅0.18では差5.54。真の境界差はいずれも8。" class="teaching-figure" src="figures/bandwidth_bias.svg"/><figcaption>†灰色は生成式の平均、青・橙は三角形の重みで当てた直線。ここでは標本の偶然による散らばりを除いている。</figcaption></figure><p>幅を広げると曲がり方の影響が大きくなり、境界での通常の点推定が8から離れる。実際の標本では、この偏りに加えて偶然のずれも生じる。</p><p>次の表†でも通常の点推定は約5.09→4.87→4.35と動く。区間が狭くなっても、通常の点推定の偏りが小さくなったとは限らない。実データでは真値を知らないので、事前に決めた幅で推定値と区間を両方報告する。</p></article><article class="concept-slide concept-slide--compact"><div class="slide-kicker">R FUNCTION GUIDE</div><h3>for文による反復計算</h3><p><code>for (h in widths)</code>は、幅のベクトルから一つずつhへ値を入れる。各回の結果を1行の表にして、<code>rbind()</code>で下へ追加する。</p><div class="role-table-wrap"><table class="role-table"><thead><tr><th>行</th><th>役割</th></tr></thead><tbody><tr><td><code>sensitivity &lt;- data.frame()</code></td><td>空の結果表を用意する</td></tr><tr><td><code>for (h in widths) { ... }</code></td><td>h=0.08、0.12、0.18で同じ処理を行う</td></tr><tr><td><code>row &lt;- data.frame(...)</code></td><td>今回の幅と結果を1行にまとめる</td></tr><tr><td><code>sensitivity &lt;- rbind(sensitivity, row)</code></td><td>結果表の末尾に今回の1行を加える</td></tr></tbody></table></div><p>ここでは偏りの推定用の幅を<code>b=1.5*h</code>として固定する。これは幅を変える練習のための設定である。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル Y05</span><h3>バンド幅の感度分析</h3></div><p>事前に定めたバンド幅0.08、0.12、0.18で推定値と信頼区間を比較する。</p>
+<div class="r-cell r-cell--long" data-cell-id="Y05" data-check-failure="widthsとfor文を確認し、各幅の行をsensitivityへ追加してください。" data-check-success="幅ごとの表を作成しました。点推定と区間を別々に読んでください。" data-dataset="yelp" data-depends-on=""><textarea aria-label="セルY05のRコード" spellcheck="false"># 比較する幅をあらかじめ決める
+widths &lt;- c(0.08, 0.12, 0.18)
+# 結果を順に入れる空の表
+sensitivity &lt;- data.frame()
+for (h in widths) {
+  fit &lt;- rdrobust::rdrobust(yelp$revenue_index, yelp$rating_raw,
+                           c = 3.75, p = 1, h = h, b = 1.5*h)
+  row &lt;- data.frame(h = h, estimate = fit$coef[1, 1],
+    lower = fit$ci[3, 1], upper = fit$ci[3, 2],
+    n_left = fit$N_h[1], n_right = fit$N_h[2])
+  sensitivity &lt;- rbind(sensitivity, row)
+}
+sensitivity</textarea>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>幅を変えた全結果を並べ、通常の点推定の動きと区間の幅を別々に説明する。区間が狭いことだけで幅を選ぶと、近似の偏りを見落としうる。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="diagnostics-guide"><div class="slide-kicker">CONCEPT</div><h3>事前属性・処置前アウトカムによる点検</h3><p>処置を受けなかった場合の結果は観察できないため、潜在的結果の連続性を直接検定することはできない。<strong>処置前の結果</strong>、事前に決まっている共変量（以下、<strong>事前属性</strong>）、割当変数の分布を用いて、境界での比較可能性を間接的に点検する。</p><p>このデータのrevenue_preは表示変更前の売上である。現実のデータでは、その時点の表示履歴も確認する。</p><div class="role-table-wrap"><table class="role-table"><thead><tr><th>点検</th><th>なぜ調べるか</th><th>セル</th></tr></thead><tbody><tr><td>処置前の売上・契約</td><td>これから受ける表示や当選が過去の結果を変えることはない。既に差があれば、別の要因を疑う。</td><td>Y06・P04</td></tr><tr><td>入学前の成績</td><td>事前属性が境界で跳ぶなら、もともと異なる学生を比べている可能性がある。</td><td>C04</td></tr><tr><td>割当変数の密度</td><td>境界直上への不自然な集中があれば、片側を選ぶ操作の手掛かりになる。</td><td>Y07（発展）</td></tr><tr><td>偽のカットオフ</td><td>処置が切り替わらない位置にも差が出るなら、関数の近似などを再点検する。</td><td>Y08（発展）</td></tr></tbody></table></div><p>検定が非有意でも、信頼区間が広ければ大きな事前差を排除できない。有意な結果にも偶然の可能性があるため、推定された差の大きさ、信頼区間、制度上の情報を合わせて判断する。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル Y06</span><h3>処置前売上の不連続性の検定</h3></div><p>同じ推定を、評価表示より前の売上指数に適用する。</p>
+<p class="reading-link">このセルの説明：<a href="#diagnostics-guide">事前の結果を調べる理由</a></p><div class="r-cell r-cell--long" data-cell-id="Y06" data-check-failure="結果にrevenue_pre、割当変数にrating_raw、境界に3.75を指定してください。" data-check-success="処置前売上の結果を表示しました。区間に含まれる差も確認してください。" data-dataset="yelp" data-depends-on=""><textarea aria-label="セルY06のRコード" spellcheck="false"># 処置後の結果だけを、処置前の結果へ置き換える
+rd_pre &lt;- rdrobust::rdrobust(
+  y = yelp$revenue_pre, x = yelp$rating_raw, c = 3.75, p = 1
+)
+summary(rd_pre)</textarea>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>区間に含まれる差の範囲を述べる。処置前から大きな差が跳んでいれば、現在の効果の解釈を再検討する。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="density-guide"><div class="slide-kicker">OUTPUT GUIDE</div><h3>密度検定の目的と出力</h3><p>密度は、横軸の各範囲に観測がどれほど集まるかを表す。密度ヒストグラムでは棒の面積がその区間の観測割合である。評価を精密に操作できる店が境界の直上へ移れば、分布に不連続が現れる可能性がある。レビュー数が少ないと平均評価は飛び飛びになるので、実データでは刻み幅や同値の多さも調べる。</p><p><code>summary(rating_density)</code>の上段にある<strong>RobustのP&gt;|T|</strong>が、密度の不連続について今回読むp値である。売上への処置効果を検定しているわけではない。</p><p>下に並ぶ<strong>Binomial tests</strong>の表は、複数の範囲で左右の観測数を比べる補助的な二項検定である。この実習では上段を主に読み、下段の10個のp値から都合のよいものを選ばない。</p></article><article class="lesson-card"><div class="lesson-card__heading"><span>セル Y07</span><h3>割当変数の分布と密度検定 <span class="optional-tag">発展</span></h3></div><p class="optional-note">発展：標準コースではこのセルを飛ばして進める。</p><p>ヒストグラムと密度の不連続検定を組み合わせる。</p>
+<p class="reading-link">このセルの説明：<a href="#density-guide">密度と検定の読み方</a></p><div class="r-cell r-cell--long" data-cell-id="Y07" data-check-failure="hist()の図とrddensity(X=yelp$rating_raw,c=3.75)の結果を確認してください。" data-check-success="密度の図と検定を表示しました。上段のRobust P&gt;|T|を読んでください。" data-dataset="yelp" data-depends-on="" data-optional="true" data-requires-plot="true"><textarea aria-label="セルY07のRコード" spellcheck="false"># 密度の図：棒の高さは人数ではなく確率密度
+hist(yelp$rating_raw, breaks = seq(3.5, 4, by = 0.025),
+     probability = TRUE, col = "#61A5C2", border = "white",
+     main = "Score density (synthetic)", xlab = "Unrounded rating")
+abline(v = 3.75, lty = 2, col = "#EE6C4D")
+# 密度検定はアウトカムyを使わない
+rating_density &lt;- rddensity::rddensity(X = yelp$rating_raw, c = 3.75)
+summary(rating_density)</textarea>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>上段のRobust P&gt;|T|とヒストグラムを使って、境界での集中を点検する。制度上の操作可能性や評価の刻み幅も合わせて検討する。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="placebo-guide"><div class="slide-kicker">CONCEPT</div><h3>偽のカットオフによる点検</h3><p>評価3.60では両側とも星3.5表示である。そこで推定する差は<strong>偽のカットオフでの効果（プラセボ）</strong>で、表示変更によるジャンプはないはずだと予想する。大きい差が出れば、曲がった関係の近似や他の要因を調べ直す。</p><p>本当の境界3.75が混ざらないように、3.75未満の店を使う。h=0.06なら3.54〜3.66、b=0.08なら3.52〜3.68であり、どちらも3.75に達しない。検定が有意にならない場所を探すのではなく、この位置と範囲を先に決めて比較する。</p></article><article class="lesson-card"><div class="lesson-card__heading"><span>セル Y08</span><h3>偽のカットオフでの推定 <span class="optional-tag">発展</span></h3></div><p class="optional-note">発展：標準コースではこのセルを飛ばして進める。</p><p>3.60を偽の境界にする。本当の3.75をまたぐと別の効果が混ざるので、星3.5側だけを使う。</p>
+<p class="reading-link">このセルの説明：<a href="#placebo-guide">偽の境界を使う理由</a></p><div class="r-cell r-cell--long" data-cell-id="Y08" data-check-failure="rating_raw&lt;3.75へ限定し、c=3.60、h=0.06、b=0.08を確認してください。" data-check-success="偽境界の結果を表示しました。範囲が本当の境界を含まないことを確認してください。" data-dataset="yelp" data-depends-on="" data-optional="true"><textarea aria-label="セルY08のRコード" spellcheck="false"># 本当の処置を受けない側だけに限定
+placebo_data &lt;- subset(yelp, rating_raw &lt; 3.75)
+# hとbの両方が本当の境界へ達しない設定
+rd_fake &lt;- rdrobust::rdrobust(
+  placebo_data$revenue_index, placebo_data$rating_raw,
+  c = 3.60, p = 1, h = 0.06, b = 0.08
+)
+summary(rd_fake)</textarea>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>先に定めた偽の境界での推定値と区間を報告する。本当の境界3.75が推定用hにも偏り推定用bにも入っていないことを確かめる。</p></div></article>
+<div class="notice" data-completion-section="yelp" hidden=""><strong>LEVEL 1の標準セルが完了しました</strong><p>境界、処置、結果の単位、仮定、一般化できる範囲を説明してから次へ進みましょう。</p></div></section>
+<section class="content-section" data-flow-section="college" id="college"><p class="section-label">LEVEL 2｜空欄を埋めて実行する</p><h2>名門大学と学力・賃金</h2>
+<article class="concept-slide concept-slide--compact"><div class="slide-kicker">DATA DICTIONARY</div><h3>変数辞書</h3><div class="role-table-wrap"><table class="role-table"><thead><tr><th>列・名前</th><th>意味</th></tr></thead><tbody><tr><td><code>applicant_id</code></td><td>申請者ID</td></tr><tr><td><code>score</code></td><td>入学判定用得点（小数を持つ架空スコア）。境界80</td></tr><tr><td><code>enrolled</code></td><td>実際の入学：1=入学、0=非入学</td></tr><tr><td><code>wage_index</code></td><td>卒業後の賃金指数（架空尺度）</td></tr><tr><td><code>exit_score</code></td><td>卒業時の共通試験得点。代替の進学先も含め全員を観測する設定</td></tr><tr><td><code>prior_score</code></td><td>入学前の別の試験成績</td></tr><tr><td><code>eligible</code></td><td>セルで作成：80点以上の合格資格</td></tr></tbody></table></div></article>
+<article class="concept-slide concept-slide--compact" id="college-question"><div class="slide-kicker">CONCEPT</div><h3>名門大学の合格資格と賃金・試験成績</h3><p>Sekhriはインドの大学の合格基準を利用し、基準付近の申請者について賃金と卒業時の共通試験成績を比較した。賃金の上昇を報告した一方、試験成績には明瞭な差を確認していない。この結果だけでは、大学名、人脈、試験で測られない能力などの経路を区別できない。<a href="https://doi.org/10.1257/app.20140105">出典：Sekhri（2020）</a></p><p>実習では、一つの大学、合格基準80点、全申請者を追跡できる架空の制度に単純化する。</p><p><strong>このデータの設定：</strong>通常枠は80点以上で資格を得るが、別枠による入学者と、資格があっても入学しない人がいる。実際の入学が賃金を変える。資格のジャンプから入学の効果へ進むには追加の仮定が必要。</p></article><article class="concept-slide concept-slide--compact" id="sharp-fuzzy-guide"><div class="slide-kicker">CONCEPT</div><h3>合格資格の効果と入学の効果</h3><p>得点79.9の人は通常枠の資格なし、80.1の人は資格がある。ただし、別枠で入学する人や、資格があっても進学しない人がいる。<strong>資格は確実に切り替わる一方、入学は確率が変わる。</strong></p><div class="role-table-wrap"><table class="role-table"><thead><tr><th>何を処置とするか</th><th>設計と対象</th><th>このページで行うこと</th></tr></thead><tbody><tr><td>通常枠の合格資格</td><td>Sharp RD：得点80で資格が0から1へ切り替わる。対象は合格基準付近の申請者。</td><td>標準C03で、資格による賃金・試験成績の差を推定する。</td></tr><tr><td>実際の入学</td><td>Fuzzy RD：境界で実際の処置を受ける確率が跳ぶ。追加の仮定で入学の効果へ進む。</td><td>発展C05で、入学率のジャンプを使う。</td></tr></tbody></table></div><p>標準コースの結果は「合格資格を得る効果」と報告する。比較の根拠は、入学がなかった場合の見込みなどが得点80で滑らかにつながり、他の資格や優遇が同時に跳ばないことである。<a href="#rd-assumptions">共通する仮定の説明</a>も参照できる。</p></article>
+<article class="concept-slide concept-slide--compact"><div class="slide-kicker">CONCEPT</div><h3>第一段階：境界での入学率の変化</h3><p>合格資格が実際の入学率をどれだけ変えるかを測る段階である。境界での入学率のジャンプを<strong>first stage（第1段階）</strong>と呼ぶ。</p><p>入学率は得点とともに滑らかにも上がる。全範囲の二群平均の差†は約0.758であるが、境界でのジャンプは約0.578である。RDDでは得点に伴う連続的な入学率の変化を調整し、境界での不連続な変化を推定する。</p></article><article class="lesson-card"><div class="lesson-card__heading"><span>セル C01</span><h3>合格資格と入学率の推定</h3></div><p>__を埋めて合格資格と実際の入学を区別する。基準点は80点。</p>
+<p class="reading-link">このセルの説明：<a href="#college-question">大学研究の概要・合格資格と入学</a></p><div class="r-cell r-cell--long r-cell--exercise" data-cell-id="C01" data-check-failure="eligibleはscore&gt;=80、first_stageのyはenrolled、xはscore、cは80です。" data-check-success="合格資格と入学率のジャンプを確認しました。全範囲の平均差と比べてください。" data-dataset="college" data-depends-on=""><textarea aria-label="セルC01のRコード" spellcheck="false"># 合格資格は基準点で決まる
+college$eligible &lt;- as.integer(college$score &gt;= __)
+# enrolledは実際の入学（0/1）。資格があっても入学しない人がいる
+aggregate(enrolled ~ eligible, data = college, FUN = mean)
+# 境界での入学率のジャンプを推定
+first_stage &lt;- rdrobust::rdrobust(
+  y = college$__, x = college$score, c = __, p = 1
+)
+summary(first_stage)</textarea>
+<script class="r-answer" type="text/plain">college$eligible <- as.integer(college$score >= 80)
+aggregate(enrolled ~ eligible, data = college, FUN = mean)
+first_stage <- rdrobust::rdrobust(
+  y = college$enrolled, x = college$score, c = 80, p = 1
+)
+summary(first_stage)</script>
+<script class="r-check" type="text/plain">all(college$eligible == as.integer(college$score >= 80)) && inherits(first_stage,"rdrobust") && first_stage$c == 80 && abs(first_stage$coef[1,1] - rdrobust::rdrobust(college$enrolled,college$score,c=80,p=1)$coef[1,1]) < 1e-6</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>境界を超えたら全員が入学する、とはなっていない。</p></div></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル C02</span><h3>賃金と卒業時成績の図示</h3></div><p>二つの結果について、rdplot()のyを入れ替える。結果をwage_plot・exam_plotへ保存する。</p>
+<div class="r-cell r-cell--long r-cell--exercise" data-cell-id="C02" data-check-failure="wage_plotとexam_plotへ二つの図を保存します。yはwage_indexとexit_score、x=score、c=80、p=1を確認してください。" data-check-success="賃金・試験成績の二つの図を確認しました。縦軸の単位を区別してください。" data-dataset="college" data-depends-on="" data-min-plots="2" data-requires-plot="true"><textarea aria-label="セルC02のRコード" spellcheck="false"># 一つ目は賃金指数
+wage_plot &lt;- rdrobust::rdplot(y = college$__, x = college$score,
+  c = 80, p = 1, nbins = c(15,15),
+  title = "Wage index", x.label = "Admission score", y.label = "Wage index")
+# 二つ目は卒業時の共通試験成績
+exam_plot &lt;- rdrobust::rdplot(y = college$__, x = college$score,
+  c = 80, p = 1, nbins = c(15,15),
+  title = "Exit test", x.label = "Admission score", y.label = "Exit score")</textarea>
+<script class="r-answer" type="text/plain">wage_plot <- rdrobust::rdplot(y = college$wage_index, x = college$score,
+  c = 80, p = 1, nbins = c(15,15),
+  title = "Wage index", x.label = "Admission score", y.label = "Wage index")
+exam_plot <- rdrobust::rdplot(y = college$exit_score, x = college$score,
+  c = 80, p = 1, nbins = c(15,15),
+  title = "Exit test", x.label = "Admission score", y.label = "Exit score")</script>
+<script class="r-check" type="text/plain">inherits(wage_plot,"rdplot") && wage_plot$c==80 && wage_plot$p==1 && isTRUE(all.equal(wage_plot$coef,rdrobust::rdplot(college$wage_index,college$score,c=80,p=1,hide=TRUE)$coef,tolerance=1e-7)) && inherits(exam_plot,"rdplot") && exam_plot$c==80 && exam_plot$p==1 && isTRUE(all.equal(exam_plot$coef,rdrobust::rdplot(college$exit_score,college$score,c=80,p=1,hide=TRUE)$coef,tolerance=1e-7))</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>賃金は指数ポイント、試験成績は得点として、それぞれのジャンプを読む。機序については複数の説明が残る。</p></div></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル C03</span><h3>合格資格の効果の推定</h3></div><p>yとcを埋めてモデルを保存する。最初は実際の入学ではなく、合格資格の効果を求める。</p>
+<div class="r-cell r-cell--long r-cell--exercise" data-cell-id="C03" data-check-failure="wage_rdのyはwage_index、exam_rdのyはexit_score。両方ともx=score、c=80、p=1です。" data-check-success="賃金と試験成績の二つのモデルを確認しました。各区間を読んでください。" data-dataset="college" data-depends-on=""><textarea aria-label="セルC03のRコード" spellcheck="false">wage_rd &lt;- rdrobust::rdrobust(
+  y = college$__, x = college$score, c = __, p = 1)
+exam_rd &lt;- rdrobust::rdrobust(
+  y = college$__, x = college$score, c = __, p = 1)
+summary(wage_rd)
+summary(exam_rd)</textarea>
+<script class="r-answer" type="text/plain">wage_rd <- rdrobust::rdrobust(
+  y = college$wage_index, x = college$score, c = 80, p = 1)
+exam_rd <- rdrobust::rdrobust(
+  y = college$exit_score, x = college$score, c = 80, p = 1)
+summary(wage_rd)
+summary(exam_rd)</script>
+<script class="r-check" type="text/plain">inherits(wage_rd,"rdrobust") && inherits(exam_rd,"rdrobust") && wage_rd$c == 80 && exam_rd$c == 80 && abs(wage_rd$coef[1,1]-rdrobust::rdrobust(college$wage_index,college$score,c=80,p=1)$coef[1,1]) < 1e-6 && abs(exam_rd$coef[1,1]-rdrobust::rdrobust(college$exit_score,college$score,c=80,p=1)$coef[1,1]) < 1e-6</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>試験成績で非有意でも「教育効果が厳密にゼロ」とは言えない。試験が測らない能力の変化もありうる。</p></div></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル C04</span><h3>入学前成績の不連続性の検定</h3></div><p>prior_scoreを結果にする。卒業時成績は処置後の結果なので、事前属性の代わりにはならない。</p>
+<div class="r-cell r-cell--long r-cell--exercise" data-cell-id="C04" data-check-failure="prior_rdへ保存します。y=prior_score、x=score、c=80、p=1です。" data-check-success="入学前成績を結果とするモデルを確認しました。事前属性の点検として解釈してください。" data-dataset="college" data-depends-on=""><textarea aria-label="セルC04のRコード" spellcheck="false">prior_rd &lt;- rdrobust::rdrobust(
+  y = college$__, x = college$score, c = 80, p = 1)
+summary(prior_rd)</textarea>
+<script class="r-answer" type="text/plain">prior_rd <- rdrobust::rdrobust(
+  y = college$prior_score, x = college$score, c = 80, p = 1)
+summary(prior_rd)</script>
+<script class="r-check" type="text/plain">inherits(prior_rd,"rdrobust") && prior_rd$c == 80 && abs(prior_rd$coef[1,1]-rdrobust::rdrobust(college$prior_score,college$score,c=80,p=1)$coef[1,1]) < 1e-6</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>異なる結果変数を試すことと、事前属性を点検することは目的が違う。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="fuzzy-guide"><div class="slide-kicker">CONCEPT</div><h3>Fuzzy RDの推定対象と識別仮定</h3><p>境界の左右に100人ずついると考える†。合格資格によって入学が変わる人が60人、残る40人は資格の有無で入学が変わらないとする。</p><p>資格が入学以外の経路で賃金を変えず、資格を得ると逆に入学をやめる人がいなければ、全体の賃金差6は入学が変わった60%の人から生じる。したがって<strong>0.6 × その人たちへの入学効果 = 6</strong>。入学効果は6÷0.6=10である。</p><p>境界での比較可能性に加え、first stageがゼロでないこと、除外制約、単調性が必要である。小さいfirst stageで割ると推定は不安定になる。</p><div class="role-table-wrap"><table class="role-table"><thead><tr><th>追加の条件</th><th>意味</th></tr></thead><tbody><tr><td>連続性</td><td>資格が切り替わる以外の、潜在的結果や入学の選択の仕組みが境界で滑らかにつながる。</td></tr><tr><td>関連性</td><td>資格によって入学率が実際に変わる（first stageがゼロでない）。</td></tr><tr><td>除外制約</td><td>合格資格は入学を通じてのみ結果を変える。資格だけで給付金を受けるなどの別経路があれば、この読み方は難しい。</td></tr><tr><td>単調性</td><td>資格を得ると逆に入学をやめる人がいない。</td></tr></tbody></table></div><p>資格によって入学するかどうかが変わる人を<strong>complier</strong>と呼び、この人たちについて境界で求める平均効果を<strong>LATE（局所的平均処置効果）</strong>と呼ぶ。全学生への平均効果とは対象が異なる。<code>fuzzy=college$enrolled</code>は、賃金のジャンプと入学率のジャンプを組み合わせ、比とその不確実性をまとめて推定する。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル C05</span><h3>Fuzzy RDによる入学効果の推定 <span class="optional-tag">発展</span></h3></div><p class="optional-note">発展：標準コースではこのセルを飛ばして進める。</p><p>fuzzyに実際の入学indicatorを指定する。対象は、境界の資格変化によって入学する人。</p>
+<p class="reading-link">このセルの説明：<a href="#fuzzy-guide">Fuzzy RDの比と追加の仮定</a></p><div class="r-cell r-cell--long r-cell--exercise" data-cell-id="C05" data-check-failure="fuzzy_wageのfuzzyにはeligibleでなくenrolledを指定します。y=wage_index、x=score、c=80です。" data-check-success="実際の入学を処置とするFuzzy RDを確認しました。効果の対象を説明してください。" data-dataset="college" data-depends-on="" data-optional="true"><textarea aria-label="セルC05のRコード" spellcheck="false"># fuzzyには実際に受けた処置（0/1）を渡す
+fuzzy_wage &lt;- rdrobust::rdrobust(
+  y = college$wage_index, x = college$score, c = 80,
+  fuzzy = college$__, p = 1
+)
+summary(fuzzy_wage)</textarea>
+<script class="r-answer" type="text/plain">fuzzy_wage <- rdrobust::rdrobust(
+  y = college$wage_index, x = college$score, c = 80,
+  fuzzy = college$enrolled, p = 1
+)
+summary(fuzzy_wage)</script>
+<script class="r-check" type="text/plain">inherits(fuzzy_wage,"rdrobust") && abs(fuzzy_wage$coef[1,1]-rdrobust::rdrobust(college$wage_index,college$score,c=80,fuzzy=college$enrolled,p=1)$coef[1,1]) < 1e-6</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>入学率のジャンプと賃金のジャンプを同じ分析の中で扱うためにfuzzy=を使う。推定対象は境界付近で資格により入学を変える人。</p></div></article>
+<div class="notice" data-completion-section="college" hidden=""><strong>LEVEL 2の標準セルが完了しました</strong><p>境界、処置、結果の単位、仮定、一般化できる範囲を説明してから次へ進みましょう。</p></div></section>
+<section class="content-section" data-flow-section="politics" id="politics"><p class="section-label">LEVEL 3｜指示文からコードを書く</p><h2>政治献金と政府契約</h2>
+<article class="concept-slide concept-slide--compact"><div class="slide-kicker">DATA DICTIONARY</div><h3>変数辞書</h3><div class="role-table-wrap"><table class="role-table"><thead><tr><th>列・名前</th><th>意味</th></tr></thead><tbody><tr><td><code>election_id / donor_id</code></td><td>選挙ID / 献金企業ID。それぞれ一度だけ登場</td></tr><tr><td><code>margin</code></td><td>献金先候補−対立候補の得票率差（パーセントポイント）。境界0</td></tr><tr><td><code>contracts_after</code></td><td>選挙後の政府契約額指数（架空尺度）</td></tr><tr><td><code>contracts_before</code></td><td>選挙前の政府契約額指数</td></tr><tr><td>won</td><td>セルで作成：当選indicator。marginが境界からの距離を兼ねる</td></tr></tbody></table></div></article>
+<article class="concept-slide concept-slide--compact" id="politics-question"><div class="slide-kicker">CONCEPT</div><h3>献金先候補の当選が政府契約に与える効果</h3><p>Boas・Hidalgo・Richardsonはブラジルの選挙で、献金先候補の当選が企業の政府契約に与える効果を分析した。政権与党PTの候補の当選により、公共事業を手がける献金企業の政府契約が増える結果を報告している。この結果だけで個々の契約の違法性は判定できない。<a href="https://doi.org/10.1017/S002238161300145X">出典：Boasほか（2014）</a></p><p>原研究はブラジルの連邦下院選挙と企業献金を扱う。実習は二候補・一議席の架空選挙へ単純化する。原研究の比例代表制に「得票率50%」を当てはめない。</p><p>同じ企業や選挙を複数行で繰り返さない合成データ。実データで複数企業が同じ候補へ献金している場合は、依存関係に応じた推論が必要。</p><div class="role-table-wrap"><table class="role-table"><thead><tr><th>要素</th><th>この実習での比較</th></tr></thead><tbody><tr><td>観測対象</td><td>選挙前に一人の候補へ献金した企業。各企業は一つの選挙だけに登場。</td></tr><tr><td>割当変数と境界</td><td>marginは献金先−対立候補の得票率差。−0.2は僅差の落選、+0.2は僅差の当選。境界は0。</td></tr><tr><td>処置と対照</td><td>献金先が当選した企業と、献金先が落選した企業。どちらも既に献金している。</td></tr><tr><td>結果と対象</td><td>選挙後の政府契約指数。接戦での「献金先の当選効果」を求める。</td></tr><tr><td>比較の根拠</td><td>接戦の境界で、当落以外による受注の見込みが滑らかにつながると仮定。精密な得票操作や当落に連動する他の変化を調べる。</td></tr></tbody></table></div><p>比較する両群はともに献金企業である。この設計の推定対象は献金先候補の当選効果であり、献金すること自体の効果ではない。</p></article>
+<article class="lesson-card lesson-card--scratch"><div class="lesson-card__heading"><span>セル P01</span><h3>観測単位の確認と当選変数の作成</h3></div><p>1行は一つの選挙で、事前に一人の候補へ献金した一社。marginは献金先候補と対立候補の得票率差（ポイント）。wonを作り、行数・欠損・勝敗別の数を表示する。境界は0なのでmarginがそのまま境界からの距離になる。</p>
+<p class="reading-link">このセルの説明：<a href="#politics-question">政治献金研究の概要と比較対象</a></p><div class="r-cell r-cell--long r-cell--exercise" data-cell-id="P01" data-check-failure="politics$wonをas.integer(politics$margin&gt;=0)で作成してください。" data-check-success="1800選挙の当選indicatorを確認しました。marginが境界からの距離です。" data-dataset="politics" data-depends-on=""><textarea aria-label="セルP01のRコード" spellcheck="false"># politicsの行数と欠損を確認する
+# margin &gt;= 0ならwon=1、それ以外は0
+# 勝敗別の数を表示する</textarea>
+<script class="r-answer" type="text/plain">dim(politics)
+colSums(is.na(politics))
+politics$won <- as.integer(politics$margin >= 0)
+table(politics$won)</script>
+<script class="r-check" type="text/plain">length(politics$won)==nrow(politics) && all(politics$won == as.integer(politics$margin>=0))</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>全企業が事前に献金済み。献金企業と非献金企業を比較しているのではない。</p></div></article>
+<article class="lesson-card lesson-card--scratch"><div class="lesson-card__heading"><span>セル P02</span><h3>得票率差と選挙後契約額の図示</h3></div><p>contracts_afterを縦軸、marginを横軸、c=0、p=1でrdplot()を実行し、contract_plotへ保存する。軸名とタイトルも付ける。ビン数は自動選択のままでも、nbinsで指定してもよい。</p>
+<div class="r-cell r-cell--long r-cell--exercise" data-cell-id="P02" data-check-failure="contract_plotへ図を保存します。y=contracts_after、x=margin、c=0、p=1を確認してください。ビン数は自由です。" data-check-success="選挙後契約額と得票率差の図を確認しました。ビン数の選び方は判定に影響しません。" data-dataset="politics" data-depends-on="" data-requires-plot="true"><textarea aria-label="セルP02のRコード" spellcheck="false"># Y02またはC02を参照してrdplot()を書く
+# 横軸はMargin (percentage points)、縦軸はContract index</textarea>
+<script class="r-answer" type="text/plain">contract_plot <- rdrobust::rdplot(
+  y = politics$contracts_after, x = politics$margin,
+  c = 0, p = 1, nbins = c(15,15),
+  x.label = "Margin (percentage points)", y.label = "Contract index",
+  title = "Synthetic donors and close elections"
+)</script>
+<script class="r-check" type="text/plain">inherits(contract_plot,"rdplot") && contract_plot$c==0 && contract_plot$p==1 && isTRUE(all.equal(contract_plot$coef,rdrobust::rdplot(politics$contracts_after,politics$margin,c=0,p=1,hide=TRUE)$coef,tolerance=1e-7))</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>大差の勝者と敗者では企業の属性も違うかもしれない。境界付近へ比較を絞る。</p></div></article>
+<article class="lesson-card lesson-card--scratch"><div class="lesson-card__heading"><span>セル P03</span><h3>献金先候補の当選効果の推定</h3></div><p>rdrobust()で選挙後の契約指数への効果を推定し、contract_rdに保存してsummary()を表示する。局所線形、境界0とする。</p>
+<div class="r-cell r-cell--long r-cell--exercise" data-cell-id="P03" data-check-failure="contract_rdへ保存します。y=contracts_after、x=margin、c=0、p=1です。" data-check-success="献金先の当選効果のモデルを確認しました。献金そのものの効果と区別してください。" data-dataset="politics" data-depends-on=""><textarea aria-label="セルP03のRコード" spellcheck="false"># contract_rdへ推定結果を保存する
+# summary()で結果を表示する</textarea>
+<script class="r-answer" type="text/plain">contract_rd <- rdrobust::rdrobust(
+  y = politics$contracts_after, x = politics$margin, c = 0, p = 1
+)
+summary(contract_rd)</script>
+<script class="r-check" type="text/plain">inherits(contract_rd,"rdrobust") && contract_rd$c==0 && abs(contract_rd$coef[1,1]-rdrobust::rdrobust(politics$contracts_after,politics$margin,c=0,p=1)$coef[1,1]) < 1e-6</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>当選効果があっても、それだけで個別の契約が違法だったとは判定できない。献金自体の効果でもない。</p></div></article>
+<article class="lesson-card lesson-card--scratch"><div class="lesson-card__heading"><span>セル P04</span><h3>選挙前契約額の不連続性の検定</h3></div><p>contracts_beforeを結果変数にして、before_rdへ保存しsummary()を表示する。</p>
+<div class="r-cell r-cell--long r-cell--exercise" data-cell-id="P04" data-check-failure="before_rdへ保存します。y=contracts_before、x=margin、c=0、p=1です。" data-check-success="選挙前契約額のモデルを確認しました。区間の広さも解釈してください。" data-dataset="politics" data-depends-on=""><textarea aria-label="セルP04のRコード" spellcheck="false"># 推定対象の境界・割当変数はP03と共通
+# 結果変数を選挙前の契約指数へ変更する</textarea>
+<script class="r-answer" type="text/plain">before_rd <- rdrobust::rdrobust(
+  y = politics$contracts_before, x = politics$margin, c = 0, p = 1
+)
+summary(before_rd)</script>
+<script class="r-check" type="text/plain">inherits(before_rd,"rdrobust") && before_rd$c==0 && abs(before_rd$coef[1,1]-rdrobust::rdrobust(politics$contracts_before,politics$margin,c=0,p=1)$coef[1,1]) < 1e-6</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>推定は約3.0、95%区間は約[-1.9, 8.0]†。「差ゼロと両立する一方、約8ポイントの事前差も排除できない」と読む。主効果約9.3と比べても無視できない幅であり、事前の比較可能性には不確実性が残る。</p></div></article>
+<article class="lesson-card lesson-card--scratch"><div class="lesson-card__heading"><span>セル P05</span><h3>当選効果のバンド幅感度分析 <span class="optional-tag">発展</span></h3></div><p class="optional-note">発展：標準コースではこのセルを飛ばして進める。</p><p>得票率差±3、±5、±8ポイントで推定し、h・estimate・lower・upperの4列を持つ表contract_sensitivityを作る。b=1.5*hとし、Y05のfor文を参照。</p>
+<div class="r-cell r-cell--long r-cell--exercise" data-cell-id="P05" data-check-failure="contract_sensitivityの3行にh=3,5,8を入れ、estimate・lower・upperを保存します。h=h、b=1.5*hを確認してください。" data-check-success="三つの幅の推定値と区間を確認しました。すべての結果を比較してください。" data-dataset="politics" data-depends-on="" data-optional="true"><textarea aria-label="セルP05のRコード" spellcheck="false"># 幅のベクトルc(3,5,8)と空のdata.frameを作る
+# for文でhを一つずつ渡す（h=h, b=1.5*h）
+# 今回の点推定と区間を1行にし、rbindで結果表へ追加する</textarea>
+<script class="r-answer" type="text/plain">widths <- c(3,5,8)
+contract_sensitivity <- data.frame()
+for (h in widths) {
+  fit <- rdrobust::rdrobust(politics$contracts_after, politics$margin,
+                           c = 0, p = 1, h = h, b = 1.5*h)
+  row <- data.frame(h = h, estimate = fit$coef[1,1],
+                   lower = fit$ci[3,1], upper = fit$ci[3,2])
+  contract_sensitivity <- rbind(contract_sensitivity, row)
+}
+contract_sensitivity</script>
+<script class="r-check" type="text/plain">(is.data.frame(contract_sensitivity) || is.matrix(contract_sensitivity)) && nrow(contract_sensitivity)==3 && all(c("h","estimate","lower","upper") %in% colnames(contract_sensitivity)) && isTRUE(all.equal(as.numeric(contract_sensitivity[,"h"]),c(3,5,8))) && all(vapply(1:3,function(i){z<-rdrobust::rdrobust(politics$contracts_after,politics$margin,c=0,p=1,h=c(3,5,8)[i],b=1.5*c(3,5,8)[i]); max(abs(as.numeric(contract_sensitivity[i,c("estimate","lower","upper")])-c(z$coef[1,1],z$ci[3,1],z$ci[3,2])))<1e-6},logical(1)))</script>
+<div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div>
+<div class="interpretation"><strong>結果の解釈</strong><p>事前に定めた三つの幅をすべて報告し、推定値が動くならその大きさも説明する。</p></div></article>
+<div class="notice" data-completion-section="politics" hidden=""><strong>LEVEL 3の標準セルが完了しました</strong><p>境界、処置、結果の単位、仮定、一般化できる範囲を説明してから次へ進みましょう。</p></div></section>
+<section class="content-section" data-flow-section="summary" id="summary"><p class="section-label">REPORT</p><h2>分析結果の報告</h2>
+<article class="concept-slide concept-slide--compact"><div class="slide-kicker">CONCEPT</div><h3>報告に含める項目</h3><p>「［割当変数］の［境界］付近で、［処置］が［結果］を［推定値・単位］変えると推定した。近似の偏りを補正した95%信頼区間は［下限、上限］。［点検結果］から［点検の結論］。ただし［区間に残る差や制度上の懸念］には不確実性が残る。」</p><p>政治献金では「献金先候補の当選」、大学の基本推定では「通常枠の合格資格」、口コミでは「半星の表示変更」と書く。</p></article><article class="concept-slide concept-slide--compact" id="report-example"><div class="slide-kicker">REPORT EXAMPLE</div><h3>報告例：口コミ評価の表示と売上</h3><p>「平均評価3.75付近の店について、星3.5から星4への表示変更が売上指数を約5.10ポイント増やすと推定した†。近似の偏りを補正した95%信頼区間は約[1.00, 9.55]で、0を含まない。表示変更前の売上では約−0.49、区間は約[−5.59, 4.54]だった。事前の差ゼロと両立するが、数ポイントの差は排除できない。表示以外の制度変更や評価の精密な操作がないかを確認し、潜在的結果の平均が境界で連続という仮定のもとで解釈する。対象はこの境界付近の店舗である。」</p><p>大学については合格資格の効果、政治献金については献金先候補の当選効果を報告する。推定対象、点推定と単位、信頼区間、仮定の点検結果、解釈の限界を記載する。</p></article>
+<article class="concept-slide concept-slide--compact"><div class="slide-kicker">CONCEPT</div><h3>提出課題</h3><ol><li>口コミ：単純な二群平均とRDDの推定値は、なぜ違うのか。</li><li>名門大学：賃金と試験成績の結果から言えること、言えないことを各一つ書く。</li><li>政治献金：P03の結果を上の型で報告し、献金自体の効果ではない理由を説明する。</li><li>共通：非有意な事前属性検定は、識別の仮定を証明するか。</li></ol></article>
+<h2>原研究と参考資料</h2><ul><li><a href="https://www.hbs.edu/ris/Publication%20Files/12-016_a7e4a5a2-03f9-490d-b093-8f951238dba2.pdf">Luca, Reviews, Reputation, and Revenue: The Case of Yelp.com（2016年版 working paper）</a></li><li><a href="https://doi.org/10.1257/app.20140105">Sekhri (2020), Prestige Matters, AEJ: Applied Economics</a></li><li><a href="https://doi.org/10.1017/S002238161300145X">Boas, Hidalgo, and Richardson (2014), The Spoils of Victory, Journal of Politics</a></li><li><a href="https://arxiv.org/abs/1911.09511">Cattaneo, Idrobo, and Titiunik (2020), A Practical Introduction to RD Designs: Foundations</a></li><li><a href="https://rdpackages.github.io/">RD Packages：推定・図示・密度検定の公式資料</a></li><li><a href="https://docs.r-wasm.org/webr/latest/">webR：ブラウザ内で動くR</a></li></ul><p>三つの原研究の研究目的と結果は、各事例の導入に記載している。以下に原論文と公式資料を示す。</p></section></div></div></main><footer class="site-footer">計量経済学の応用と実践 · 第12回 · RDD browser lab</footer><script src="app.js" type="module"></script></body></html>
