@@ -15,6 +15,10 @@
 
 予習時に案内した旧18セル版はルートに、以前の講義版 v2は`v2/`に残し、講義版 v3とは別ページとして維持します。
 
+## 最終レポート
+
+- [Guide・Template（閲覧パスワードが必要）](https://jungoto01.github.io/econometrics-2026-summer-lab/term-paper/)
+
 ## 参考資料
 
 - [第11回：回帰不連続デザイン 理論編（PDF）](https://jungoto01.github.io/econometrics-2026-summer-lab/rdd/references/11_regression_discontinuity_theory.pdf)
