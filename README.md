@@ -4,6 +4,8 @@
 
 ## 実習ページ
 
+- 第14回（回帰分析と未観察の交絡・Osterの方法）：https://jungoto01.github.io/econometrics-2026-summer-lab/oster/
+
 - 第12回（回帰不連続デザイン）：https://jungoto01.github.io/econometrics-2026-summer-lab/rdd/
 
 - 第9・10回（パネルデータと差分の差分法）：https://jungoto01.github.io/econometrics-2026-summer-lab/did/
@@ -21,6 +23,8 @@
 
 ## 参考資料
 
+- [第13回：回帰分析と未観察の交絡 理論編（PDF）](https://jungoto01.github.io/econometrics-2026-summer-lab/oster/references/13_coefficient_stability_theory.pdf)
+
 - [第11回：回帰不連続デザイン 理論編（PDF）](https://jungoto01.github.io/econometrics-2026-summer-lab/rdd/references/11_regression_discontinuity_theory.pdf)
 
 ## 公開ファイル
@@ -30,6 +34,7 @@
 - `app.js`：webRの初期化とコード実行
 - `v2/`：講義版 v2（完成した見本→穴埋め→自然言語から自力で作成）
 - `v3/`：講義版 v3（文法の補足、独立実行、解答表示、データ作成と因果推論の段階的実習）
+- `oster/`：第14回（パターンA、robomitの実装、Rmaxの比較と結果の報告、全8セル）
 - `rdd/`：第12回（RDDの説明、for文の練習、標準17セル・発展3セル、ブラウザ内のRで推定と点検）
 - `did/`：第9・10回（データ構造、固定効果DiD、event study、placebo分析）
 

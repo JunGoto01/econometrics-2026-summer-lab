@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="Osterの係数安定性アプローチを、図・Rコード・報告文で学ぶブラウザ実習。" name="description"/>
+<title>第14回｜Rで回帰分析と未観察の交絡</title>
+<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2316324f'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-size='34' font-family='sans-serif' font-weight='700' fill='white'%3ER%3C/text%3E%3C/svg%3E" rel="icon"/>
+<link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+<header class="hero">
+<div class="hero__inner">
+<p class="eyebrow">計量経済学の応用と実践 · 2026 Summer</p>
+<h1>Rで回帰分析と未観察の交絡</h1>
+<p class="hero__lead">職業訓練のデータを使い、robomitパッケージでOsterの方法を実行する。二つの回帰を確認し、補正後の係数とゼロに対応するδを計算して、仮定とともに報告する。</p>
+<div class="hero__meta"><span>第14回</span><span>Osterのcoefficient stability approach</span><span>インストール不要</span></div>
+<div aria-label="実習の流れ" class="difficulty-map"><article><span>1</span><strong>回帰の確認</strong><small>データ・係数・R²</small></article><i aria-hidden="true">→</i><article><span>2</span><strong>Osterの実装</strong><small>o_beta()・o_delta()</small></article><i aria-hidden="true">→</i><article><span>3</span><strong>設定の比較と報告</strong><small>数値を変更して実行</small></article></div>
+<div aria-label="講義の開始位置" class="hero__start-actions">
+<a class="hero-start-link" href="#intro"><span>はじめに</span><strong>分析目的とデータ</strong></a>
+<a class="hero-start-link" href="#oster"><span>パッケージ</span><strong>Osterの実装へ</strong></a>
+<a class="hero-start-link" href="https://jungoto01.github.io/econometrics-2026-summer-lab/oster/references/13_coefficient_stability_theory.pdf"><span>第13回・理論編</span><strong>講義スライド（PDF）</strong></a><button class="hero-start-link hero-start-link--resume" hidden="" id="hero-resume-button" type="button"><span>前回の記録</span><strong>続きから再開</strong></button>
+</div>
+</div>
+</header>
+<div class="runtime-bar" id="runtime-bar">
+<div class="runtime-bar__inner">
+<div aria-live="polite" class="runtime-status" role="status">
+<span aria-hidden="true" class="status-dot status-dot--loading" id="status-dot"></span>
+<div><strong id="status-title">Rを準備中</strong><span id="status-detail">初回は30秒から1分ほどかかります</span></div>
+</div>
+<div class="progress-block">
+<span><b id="completed-count">0</b> / <b id="total-count">0</b> セル完了</span>
+<strong class="current-step" id="current-step">導入を読んでいます</strong>
+<div aria-valuemin="0" aria-valuenow="0" class="progress-track" id="progress-track" role="progressbar"><i id="progress-fill"></i></div>
+</div>
+<div class="runtime-actions">
+<button class="button button--quiet" hidden="" id="resume-button" type="button">続きから</button>
+<button class="button button--quiet" id="previous-step-button" type="button">前のセル</button>
+<button class="button" id="next-step-button" type="button">次の未完了へ</button>
+<button class="button button--quiet" id="restart-button" type="button">全消去</button>
+</div>
+</div>
+</div>
+<main id="main">
+<div class="course-layout">
+<nav aria-label="この回の流れ" class="flow-rail">
+<p class="flow-rail__eyebrow">この回の流れ</p>
+<p class="flow-rail__mobile"><span>現在地</span><strong id="flow-mobile-current">導入</strong></p>
+<ol id="flow-list"><li data-flow-item="intro"><a href="#intro"><span>0</span><b class="flow-rail__text">データと目的</b></a></li><li data-flow-item="regression"><a href="#regression"><span>1</span><b class="flow-rail__text">二つの回帰</b></a></li><li data-flow-item="oster"><a href="#oster"><span>2</span><b class="flow-rail__text">Osterの実装</b></a></li><li data-flow-item="sensitivity"><a href="#sensitivity"><span>3</span><b class="flow-rail__text">設定の比較</b></a></li><li data-flow-item="summary"><a href="#summary"><span>4</span><b class="flow-rail__text">報告</b></a></li></ol>
+</nav>
+<div class="course-main"><section class="content-section" data-flow-section="intro" id="intro"><h2>実習の目的とデータ</h2>
+<article class="concept-slide concept-slide--compact" id="report-goals"><div class="slide-kicker">R GUIDE</div><h3>二つの関数で、二つの結果を報告する</h3><div class="role-table-wrap"><table class="role-table"><thead><tr><th>関数</th><th>指定する仮定・目標</th><th>読む出力</th></tr></thead><tbody><tr><td>o_beta()</td><td>δとRmax</td><td>beta*：補正後の係数</td></tr><tr><td>o_delta()</td><td>目標の係数（ここでは0）とRmax</td><td>delta*：その係数に対応するδ</td></tr></tbody></table></div><p>第13回のパターンAだけを使う。完成コードを実行し、引数と出力の対応を確認してから、Rmaxの値を書き換える。最後に<a href="#report-example">報告例</a>を参考に、仮定と数値を文章にまとめる。</p></article>
+<article class="concept-slide concept-slide--compact" id="data-guide"><div class="slide-kicker">R GUIDE</div><h3>職業訓練への参加と月収</h3><p>架空の2,000人について、職業訓練への参加と参加後の月収との関係を調べる。参加前の月収と職歴を統制する。</p><div class="role-table-wrap"><table class="role-table"><thead><tr><th>列名</th><th>内容</th></tr></thead><tbody><tr><td>id</td><td>個人番号</td></tr><tr><td>income</td><td>参加後の月収（万円）</td></tr><tr><td>participate</td><td>訓練に参加＝1、不参加＝0</td></tr><tr><td>prior_income</td><td>参加前の月収（万円）</td></tr><tr><td>experience</td><td>参加前の職歴（年）</td></tr></tbody></table></div><p><a download="" href="data/pattern_a.csv">パターンAのCSVをダウンロード</a>。第13回の係数とR²を再現するよう作成した教育用合成データであり、実際の政策の評価結果ではない。</p><p>ブラウザではCSVを<code>raw</code>に読み込んである。通常のRでは、ダウンロードしたCSVを作業フォルダに置き、次を実行する。</p><pre class="setup-code"><code># 作業フォルダのCSVを読み込み、rawという名前で保存する。
+raw &lt;- read.csv("pattern_a.csv")</code></pre></article>
+</section>
+<section class="content-section" data-flow-section="regression" id="regression"><h2>二つの回帰と第13回の確認</h2>
+<article class="concept-slide concept-slide--compact" id="sample-guide"><div class="slide-kicker">R GUIDE</div><h3>二つの回帰で使う人をそろえる</h3><p>統制変数を増やしたときに欠損によって標本が減ると、係数の変化に「変数の追加」と「人の入れ替わり」が混ざる。最初に、両方の回帰に必要な列がそろった人だけを残す。</p><p><code>c()</code>で列名をまとめ、<code>raw[, vars]</code>で列を選ぶ。<code>complete.cases()</code>は欠損がない行をTRUEにする。<code>raw[行の条件, ]</code>でその行だけを選ぶ。今回のデータに欠損はないが、同じ手順で標本をそろえる。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル A01</span><h3>分析標本を確認する</h3></div><p>行数、参加の0／1、月収と職歴の単位を確認する。</p><p class="reading-link">このセルの説明：<a href="#sample-guide">説明とコードの読み方</a></p><div class="r-cell r-cell--long" data-cell-id="A01" data-check-failure="指定したobject・設定値・図を確認してください。上の説明と各行のコメントも参照できます。" data-check-success="2,000人の標本を使う。incomeとprior_incomeは万円、experienceは年である。" data-dataset="pattern_a" data-depends-on=""><textarea aria-label="セルA01のRコード" spellcheck="false"># 回帰で使う4列の名前をc()でまとめ、varsに保存する。
+vars &lt;- c("income", "participate", "prior_income", "experience")
+# 必要な4列に欠損がない行だけを残し、共通の分析標本sample_dataを作る。
+sample_data &lt;- raw[complete.cases(raw[, vars]), ]
+# nrow()で分析標本の行数、つまり人数を表示する。
+nrow(sample_data)
+# head()で分析標本の先頭6人を表示し、各列の内容を確認する。
+head(sample_data)
+# 回帰で使う4列について、最小値・中央値・平均値などを表示する。
+summary(sample_data[, vars])</textarea>
+<script class="r-check" type="text/plain">nrow(sample_data) == 2000 && !anyNA(sample_data[, vars]) && identical(sample_data$id, raw$id)</script><div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div><div class="interpretation"><strong>結果の解釈</strong><p>2,000人の標本を使う。incomeとprior_incomeは万円、experienceは年である。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="lm-guide"><div class="slide-kicker">R GUIDE</div><h3>lm()でシンプルな回帰と調整した回帰を作る</h3><p><code>lm(income ~ participate, data = sample_data)</code>は、月収を参加の有無で説明する回帰である。<code>~</code>の左は結果変数、右は説明変数。切片は自動的に含まれる。</p><p>右辺に<code>+ prior_income + experience</code>を加え、参加前の属性を統制する。<code>&lt;-</code>で推定結果に名前を付け、<code>summary()</code>で内容を表示する。処置後の変数を機械的に統制すると別の問題が生じるので、ここでは参加前の属性を使う。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル A02</span><h3>同じ標本で二つの回帰を推定する</h3></div><p>二つの出力でparticipateの係数とMultiple R-squaredを見比べる。</p><p class="reading-link">このセルの説明：<a href="#lm-guide">説明とコードの読み方</a></p><div class="r-cell r-cell--long" data-cell-id="A02" data-check-failure="指定したobject・設定値・図を確認してください。上の説明と各行のコメントも参照できます。" data-check-success="参加の係数は6.0から5.4万円へ動く。どちらも2,000人で推定している。" data-dataset="pattern_a" data-depends-on="A01"><textarea aria-label="セルA02のRコード" spellcheck="false"># 月収を参加の有無だけに回帰し、推定結果をsimpleに保存する。
+simple &lt;- lm(income ~ participate, data = sample_data)
+# 参加前の月収と職歴を加えた回帰を作り、controlledに保存する。
+controlled &lt;- lm(income ~ participate + prior_income + experience,
+  # 前の行で指定した回帰に、共通の分析標本sample_dataを使う。
+                 data = sample_data)
+# シンプルな回帰の係数・標準誤差・R²などを表示する。
+summary(simple)
+# 調整した回帰の係数・標準誤差・R²などを表示する。
+summary(controlled)
+# 二つの回帰で使った人数をnobs()で取り出し、名前を付けて並べて表示する。
+c(simple_n = nobs(simple), controlled_n = nobs(controlled))</textarea>
+<script class="r-check" type="text/plain">inherits(simple, "lm") && inherits(controlled, "lm") && nobs(simple) == 2000 && identical(rownames(model.frame(simple)), rownames(model.frame(controlled))) && identical(names(coef(simple)), c("(Intercept)", "participate")) && setequal(names(coef(controlled)), c("(Intercept)", "participate", "prior_income", "experience"))</script><div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div><div class="interpretation"><strong>結果の解釈</strong><p>参加の係数は6.0から5.4万円へ動く。どちらも2,000人で推定している。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="extract-guide"><div class="slide-kicker">R GUIDE</div><h3>係数とR²を取り出す</h3><p><code>coef(simple)["participate"]</code>は係数の一覧から参加の係数を取り出す。<code>unname()</code>で付随する名前を外す。<code>summary(simple)$r.squared</code>はR²を取り出す。<strong>自由度調整済みのR²（Adjusted R-squared）とは区別する。</strong></p><p><code>data.frame()</code>で列をまとめて表を作り、<code>round(表, 3)</code>で表示を小数第3位に丸める。計算には丸める前の値を使う。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル A03</span><h3>四つの数値を保存する</h3></div><p>bは係数、rはR²を表す名前として使う。表を報告の基礎にする。</p><p class="reading-link">このセルの説明：<a href="#extract-guide">説明とコードの読み方</a></p><div class="r-cell r-cell--long" data-cell-id="A03" data-check-failure="指定したobject・設定値・図を確認してください。上の説明と各行のコメントも参照できます。" data-check-success="係数は6.0と5.4、R²は0.10と0.30。R²は0.20（20ポイント）増えている。" data-dataset="pattern_a" data-depends-on="A02"><textarea aria-label="セルA03のRコード" spellcheck="false"># simpleから参加の係数を取り出し、unname()で名前を外してb_simpleに保存する。
+b_simple &lt;- unname(coef(simple)["participate"])
+# controlledから参加の係数を取り出し、名前を外してb_controlに保存する。
+b_control &lt;- unname(coef(controlled)["participate"])
+# simpleの通常のR²を取り出し、r_simpleに保存する。
+r_simple &lt;- summary(simple)$r.squared
+# controlledの通常のR²を取り出し、r_controlに保存する。
+r_control &lt;- summary(controlled)$r.squared
+# 二つの係数と二つのR²を、inputsという1行4列の表にまとめる。
+inputs &lt;- data.frame(b_simple, b_control, r_simple, r_control)
+# inputsの表示を小数第3位までに丸める。保存済みの値は変更しない。
+round(inputs, 3)</textarea>
+<script class="r-check" type="text/plain">isTRUE(all.equal(as.numeric(inputs[1, ]), c(6, 5.4, .10, 0.3), tolerance = 1e-7))</script><div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div><div class="interpretation"><strong>結果の解釈</strong><p>係数は6.0と5.4、R²は0.10と0.30。R²は0.20（20ポイント）増えている。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="plot-guide"><div class="slide-kicker">R GUIDE</div><h3>横軸をR²、縦軸を参加の係数にする</h3><p>二つの回帰を、<strong>（R², 参加の係数）</strong>という座標で表示する。個人の所得の散布図とは違い、この図の点は回帰の推定結果である。</p><p><code>plot(x, y)</code>で点を描く。<code>type="b"</code>は点と線、<code>pch=19</code>は塗りつぶしの丸、<code>xlim</code>・<code>ylim</code>は軸の範囲。<code>text()</code>でラベルを加える。図中の英語は、Simple＝シンプルな回帰、Controlled＝調整した回帰、Coefficient＝参加の係数（万円）である。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル A04</span><h3>係数とR²の変化を図にする</h3></div><p>右に0.20進んだとき、係数が0.6下がることを図で確認する。</p><p class="reading-link">このセルの説明：<a href="#plot-guide">説明とコードの読み方</a></p><div class="r-cell r-cell--long" data-cell-id="A04" data-check-failure="指定したobject・設定値・図を確認してください。上の説明と各行のコメントも参照できます。" data-check-success="二つの青い点は観察された回帰結果。線は変化を見やすくするために引いている。" data-dataset="pattern_a" data-depends-on="A03" data-requires-plot="true"><textarea aria-label="セルA04のRコード" spellcheck="false"># 横軸に使う二つのR²を、シンプルな回帰・調整した回帰の順に並べる。
+observed_r &lt;- c(r_simple, r_control)
+# 縦軸に使う二つの参加係数を、R²と同じ順に並べる。
+observed_b &lt;- c(b_simple, b_control)
+# 横軸をR²、縦軸を係数とし、点と線（b）・塗りつぶしの丸（19）・線幅2で描く。
+plot(observed_r, observed_b, type = "b", pch = 19, lwd = 2,
+  # 青色を指定し、横軸の範囲を0〜1、縦軸の範囲を0〜7にする。
+     col = "#2a6f97", xlim = c(0, 1), ylim = c(0, 7),
+  # 横軸にR²、縦軸に参加の係数と単位（万円）のラベルを付ける。
+     xlab = "R-squared", ylab = "Coefficient (10,000 yen)")
+# 二つの点の右側（pos=4）に、シンプルな回帰・調整した回帰のラベルを付ける。
+text(observed_r, observed_b, labels = c("Simple", "Controlled"), pos = 4)</textarea>
+<script class="r-check" type="text/plain">isTRUE(all.equal(observed_r, c(.10, .30))) && isTRUE(all.equal(observed_b, c(6, 5.4)))</script><div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div><div class="interpretation"><strong>結果の解釈</strong><p>二つの青い点は観察された回帰結果。線は変化を見やすくするために引いている。</p></div></article>
+</section>
+<section class="content-section" data-flow-section="oster" id="oster"><h2>robomitでOsterの方法を実行する</h2>
+<article class="concept-slide concept-slide--compact" id="package-guide"><div class="slide-kicker">R GUIDE</div><h3>通常のRでの準備と、ブラウザでの実行</h3><p><code>robomit</code>はOsterの方法を実装したRパッケージである。通常のRでは、初回にインストールする。</p><pre class="setup-code"><code># 初回のみ、robomitと必要な依存パッケージをインストールする。
+install.packages("robomit")</code></pre><p><code>robomit::o_beta()</code>の<code>::</code>は「robomitに入っている関数を使う」という指定。この書き方なら<code>library(robomit)</code>による読み込みは不要。</p><p>このブラウザでは、Osterのセルを初めて実行するときにパッケージを自動で準備する。初回は数分かかる場合がある。各セルで必要な前提コードも自動実行するため、前のセルの設定変更は引き継がれない。比較したい設定は実行するセル内で指定する。</p></article>
+<article class="concept-slide concept-slide--compact" id="arguments-guide"><div class="slide-kicker">R GUIDE</div><h3>列名と仮定を引数で指定する</h3><div class="role-table-wrap"><table class="role-table"><thead><tr><th>引数</th><th>指定する内容</th><th>今回の値</th></tr></thead><tbody><tr><td>y</td><td>結果変数の列名</td><td>"income"</td></tr><tr><td>x</td><td>処置変数の列名</td><td>"participate"</td></tr><tr><td>con</td><td>追加する統制変数の列名を＋でつなぐ</td><td>"prior_income + experience"</td></tr><tr><td>type</td><td>回帰の種類</td><td>"lm"</td></tr><tr><td>data</td><td>同じ完全ケース標本</td><td>sample_data</td></tr><tr><td>R2max</td><td>関連する未観察要因も含む仮想的な回帰のR²</td><td>0.70</td></tr><tr><td>delta：o_beta()で使う</td><td>未観察側の選択の強さを観察側と比べる</td><td>1：同じ強さ</td></tr><tr><td>beta：o_delta()で使う</td><td>補正後の係数の目標値</td><td>0：係数をゼロにする</td></tr></tbody></table></div><p>列名は引用符で囲み、データ名は囲まない。<code>R2max</code>の大文字・小文字にも注意する。二つの回帰は関数の内部で推定されるので、先ほどの<code>lm()</code>の結果を引数に渡す必要はない。</p><p>δ＝1とRmax＝0.70は比較のために置く仮定である。δは変数の個数の比ではなく、それぞれの所得への寄与の分散で尺度をそろえた、参加との関連の比。Rmaxは調整したR²以上、1以下で指定する。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル O01</span><h3>o_beta()で補正後の係数を計算する</h3></div><p>δ＝1、Rmax＝0.70を指定して実行する。beta*の行を読み、元の係数とR²もA03と一致するか確認する。</p><p class="reading-link">このセルの説明：<a href="#arguments-guide">説明とコードの読み方</a></p><div class="r-cell r-cell--long" data-cell-id="O01" data-check-failure="設定値と関数の引数、保存する結果の名前を確認してください。" data-check-success="計算結果を確認しました。指定した設定値と出力の対応を読んでください。" data-dataset="pattern_a" data-depends-on="A01" data-package="robomit"><textarea aria-label="セルO01のRコード" spellcheck="false"># 一般的なOsterの計算を行い、結果をresult_betaに保存する。
+result_beta &lt;- robomit::o_beta(
+# 結果変数の列名を、参加後の月収incomeに指定する。
+  y = "income",
+# 処置変数の列名を、訓練への参加participateに指定する。
+  x = "participate",
+# 参加前の月収と職歴を統制変数として指定する。
+  con = "prior_income + experience",
+# 未観察側と観察側の選択を同じ強さにする。
+  delta = 1,
+# 仮想的な回帰のR²に、今回のRmaxを指定する。
+  R2max = .70,
+# 線形回帰を使うことを指定する。
+  type = "lm",
+# 二つの回帰に同じ分析標本を使い、計算を実行する。
+  data = sample_data)
+# すべての行を通常の表として表示し、beta*と設定値を確認する。
+as.data.frame(result_beta)
+# 再現のため、使用したパッケージのバージョンを表示する。
+packageVersion("robomit")</textarea>
+<script class="r-check" type="text/plain">abs(result_beta$Value[result_beta$Name == "beta*"] - 4.189970) < 1e-5 && result_beta$Value[result_beta$Name == "delta"] == 1 && result_beta$Value[result_beta$Name == "Max R-square"] == .70</script><div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div><div class="interpretation"><strong>結果の解釈</strong><p>beta*は約4.190万円。Uncontrolled／Controlled Coefficientは6.0／5.4、R-squareは0.10／0.30である。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="beta-output"><div class="slide-kicker">R GUIDE</div><h3>o_beta()の出力の読み方</h3><div class="role-table-wrap"><table class="role-table"><thead><tr><th>行名</th><th>読み方</th></tr></thead><tbody><tr><td>beta*</td><td>今回報告する補正後の係数：約4.190万円</td></tr><tr><td>Uncontrolled / Controlled Coefficient</td><td>シンプルな回帰／調整した回帰の係数</td></tr><tr><td>Uncontrolled / Controlled R-square</td><td>二つの回帰のR²</td></tr><tr><td>Max R-square / delta</td><td>自分が指定した仮定が反映されているか確認</td></tr><tr><td>Alternative Solution 1</td><td>方程式の別の解。区間の端点ではない</td></tr></tbody></table></div><p>この例では別解は約125.335となる。robomitは調整した係数からの距離や変化の方向を使って解を選ぶ。報告には関数と版も記録し、<code>beta*</code>と別解を取り違えない。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル O02</span><h3>o_delta()で係数ゼロに対応するδを計算する</h3></div><p>Rmax＝0.70を固定し、beta＝0を指定する。今度はdeltaを入力せず、出力として読む。</p><p class="reading-link">このセルの説明：<a href="#arguments-guide">説明とコードの読み方</a></p><div class="r-cell r-cell--long" data-cell-id="O02" data-check-failure="設定値と関数の引数、保存する結果の名前を確認してください。" data-check-success="計算結果を確認しました。指定した設定値と出力の対応を読んでください。" data-dataset="pattern_a" data-depends-on="A01" data-package="robomit"><textarea aria-label="セルO02のRコード" spellcheck="false"># 一般的なOsterの計算を行い、結果をresult_deltaに保存する。
+result_delta &lt;- robomit::o_delta(
+# 結果変数の列名を、参加後の月収incomeに指定する。
+  y = "income",
+# 処置変数の列名を、訓練への参加participateに指定する。
+  x = "participate",
+# 参加前の月収と職歴を統制変数として指定する。
+  con = "prior_income + experience",
+# 補正後の係数の目標をゼロにする。
+  beta = 0,
+# 仮想的な回帰のR²に、今回のRmaxを指定する。
+  R2max = .70,
+# 線形回帰を使うことを指定する。
+  type = "lm",
+# 二つの回帰に同じ分析標本を使い、計算を実行する。
+  data = sample_data)
+# すべての行を通常の表として表示し、delta*と設定値を確認する。
+as.data.frame(result_delta)</textarea>
+<script class="r-check" type="text/plain">abs(result_delta$Value[result_delta$Name == "delta*"] - 3.816657) < 1e-5 && result_delta$Value[result_delta$Name == "beta hat"] == 0 && result_delta$Value[result_delta$Name == "Max R-square"] == .70</script><div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div><div class="interpretation"><strong>結果の解釈</strong><p>delta*は約3.817。Rmax＝0.70、目標の係数をゼロとした場合の値である。beta hatの行が0であることも確認する。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="theory-connection"><div class="slide-kicker">R GUIDE</div><h3>第13回の近似計算との対応</h3><div class="role-table-wrap"><table class="role-table"><thead><tr><th>パターンA・Rmax＝0.70</th><th>第13回の直線による近似</th><th>robomitによる今回の計算</th></tr></thead><tbody><tr><td>δ＝1での補正後の係数</td><td>4.2万円</td><td>約4.190万円</td></tr><tr><td>係数ゼロに対応するδ</td><td>4.50</td><td>約3.817</td></tr></tbody></table></div><p>一般的な計算は、四つの数値に加えて処置変数の分散なども使うため、近似と完全には一致しない。以後の表・図・報告はすべてパッケージの計算結果を使う。</p></article>
+</section>
+<section class="content-section" data-flow-section="sensitivity" id="sensitivity"><h2>Rmaxを変更して結果を比較する</h2>
+<article class="concept-slide concept-slide--compact" id="change-guide"><div class="slide-kicker">R GUIDE</div><h3>変更する引数と、出力から値を取り出す方法</h3><p>Osterが提示した基準の一つは、調整したR²の1.3倍をRmaxに置くことである（上限は1）。今回は0.30×1.3＝0.39。これを唯一の正解とせず、0.50、0.70、1.00も比較する。δ＝1、目標係数＝0は固定する。</p><p>次のセルの<code>r_max &lt;- .39</code>だけを0.50、0.70、1.00へ順に書き換えて再実行する。二つの関数の<code>R2max</code>には、同じ<code>r_max</code>を渡す。</p><p>結果は<code>Name</code>列と<code>Value</code>列を持つ表である。<code>result$Value[result$Name == "beta*"]</code>は、Nameがbeta*の行だけを選び、そのValueを取り出す。<code>==</code>は一致するかの比較、<code>[ ]</code>は該当する要素の選択に使う。delta*も同じ方法で取り出す。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル S01</span><h3>Rmaxを書き換えて再実行する</h3></div><p>r_maxの1行を変更する。出力のRmaxと、二つの結果が一緒に変わることを確認する。</p><p class="reading-link">このセルの説明：<a href="#change-guide">説明とコードの読み方</a></p><div class="r-cell r-cell--long" data-cell-id="S01" data-check-failure="設定値と関数の引数、保存する結果の名前を確認してください。" data-check-success="計算結果を確認しました。指定した設定値と出力の対応を読んでください。" data-dataset="pattern_a" data-depends-on="A03" data-package="robomit"><textarea aria-label="セルS01のRコード" spellcheck="false"># ここを.50、.70、1.00へ変更して再実行する。まずは.39を使う。
+r_max &lt;- .39
+# Rmaxが調整したR²より大きく、1以下かを確認し、範囲外なら停止する。
+stopifnot(r_max &gt; r_control, r_max &lt;= 1)
+# 一般的なOsterの計算を行い、結果をchanged_betaに保存する。
+changed_beta &lt;- robomit::o_beta(
+# 結果変数の列名を、参加後の月収incomeに指定する。
+  y = "income",
+# 処置変数の列名を、訓練への参加participateに指定する。
+  x = "participate",
+# 参加前の月収と職歴を統制変数として指定する。
+  con = "prior_income + experience",
+# 未観察側と観察側の選択を同じ強さにする。
+  delta = 1,
+# 仮想的な回帰のR²に、今回のRmaxを指定する。
+  R2max = r_max,
+# 線形回帰を使うことを指定する。
+  type = "lm",
+# 二つの回帰に同じ分析標本を使い、計算を実行する。
+  data = sample_data)
+# 一般的なOsterの計算を行い、結果をchanged_deltaに保存する。
+changed_delta &lt;- robomit::o_delta(
+# 結果変数の列名を、参加後の月収incomeに指定する。
+  y = "income",
+# 処置変数の列名を、訓練への参加participateに指定する。
+  x = "participate",
+# 参加前の月収と職歴を統制変数として指定する。
+  con = "prior_income + experience",
+# 補正後の係数の目標をゼロにする。
+  beta = 0,
+# 仮想的な回帰のR²に、今回のRmaxを指定する。
+  R2max = r_max,
+# 線形回帰を使うことを指定する。
+  type = "lm",
+# 二つの回帰に同じ分析標本を使い、計算を実行する。
+  data = sample_data)
+# 二つの計算結果とRmaxを、1行の表にまとめる。
+comparison &lt;- data.frame(Rmax = r_max,
+  # Nameがbeta*の行のValueを選び、補正後の係数の列にする。
+  adjusted = changed_beta$Value[changed_beta$Name == "beta*"],
+  # Nameがdelta*の行のValueを選び、係数ゼロに対応するδの列にする。
+  delta_zero = changed_delta$Value[changed_delta$Name == "delta*"])
+# 今回の設定と結果を小数第3位まで表示する。
+round(comparison, 3)</textarea>
+<script class="r-check" type="text/plain">nrow(comparison) == 1 && r_max > r_control && r_max <= 1 && comparison$Rmax == r_max && changed_beta$Value[changed_beta$Name == "Max R-square"] == r_max && changed_delta$Value[changed_delta$Name == "Max R-square"] == r_max && changed_beta$Value[changed_beta$Name == "delta"] == 1 && changed_delta$Value[changed_delta$Name == "beta hat"] == 0 && isTRUE(all.equal(comparison$adjusted, changed_beta$Value[changed_beta$Name == "beta*"])) && isTRUE(all.equal(comparison$delta_zero, changed_delta$Value[changed_delta$Name == "delta*"]))</script><div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div><div class="interpretation"><strong>結果の解釈</strong><p>初期値0.39では補正後の係数が約5.129万円、ゼロに対応するδが約10.761となる。他のRmaxに変更したら、実際の出力値を読む。</p></div></article>
+<article class="concept-slide concept-slide--compact" id="repeat-guide"><div class="slide-kicker">R GUIDE</div><h3>複数の設定を表と図にまとめる</h3><p>次の完成コードは、Rmaxの4通りを順に二つの関数へ渡す。<code>for (r in r_max_values)</code>は、候補を一つずつrへ入れて同じ処理を繰り返す。<code>rbind()</code>で結果の行を表の下に追加する。</p><p>図は横軸をRmaxにそろえ、補正後の係数とゼロに対応するδを別々に描く。点はパッケージの計算結果で、点を結ぶ線は変化を読みやすくするためのもの。新しいコードを書く必要はなく、まず4通りの結果を読み比べる。</p></article>
+<article class="lesson-card"><div class="lesson-card__heading"><span>セル S02</span><h3>四つのRmaxで計算し、表と図を作る</h3></div><p>コードをそのまま実行する。2枚の図で、Rmaxを大きくしたときにそれぞれの結果がどう変わるか確認する。</p><p class="reading-link">このセルの説明：<a href="#repeat-guide">説明とコードの読み方</a></p><div class="r-cell r-cell--long" data-cell-id="S02" data-check-failure="設定値と関数の引数、保存する結果の名前を確認してください。" data-check-success="計算結果を確認しました。指定した設定値と出力の対応を読んでください。" data-dataset="pattern_a" data-depends-on="A01" data-min-plots="2" data-package="robomit" data-requires-plot="true"><textarea aria-label="セルS02のRコード" spellcheck="false"># 比較するRmaxを四つ並べる。
+r_max_values &lt;- c(.39, .50, .70, 1.00)
+# 結果の行を追加していく空の表を用意する。
+results &lt;- data.frame()
+# Rmaxを一つずつrに入れ、二つの関数で計算する。
+for (r in r_max_values) {
+  # 一般的なOsterの計算を行い、結果をfit_betaに保存する。
+  fit_beta &lt;- robomit::o_beta(
+  # 結果変数の列名を、参加後の月収incomeに指定する。
+    y = "income",
+  # 処置変数の列名を、訓練への参加participateに指定する。
+    x = "participate",
+  # 参加前の月収と職歴を統制変数として指定する。
+    con = "prior_income + experience",
+  # 未観察側と観察側の選択を同じ強さにする。
+    delta = 1,
+  # 仮想的な回帰のR²に、今回のRmaxを指定する。
+    R2max = r,
+  # 線形回帰を使うことを指定する。
+    type = "lm",
+  # 二つの回帰に同じ分析標本を使い、計算を実行する。
+    data = sample_data)
+  # 一般的なOsterの計算を行い、結果をfit_deltaに保存する。
+  fit_delta &lt;- robomit::o_delta(
+  # 結果変数の列名を、参加後の月収incomeに指定する。
+    y = "income",
+  # 処置変数の列名を、訓練への参加participateに指定する。
+    x = "participate",
+  # 参加前の月収と職歴を統制変数として指定する。
+    con = "prior_income + experience",
+  # 補正後の係数の目標をゼロにする。
+    beta = 0,
+  # 仮想的な回帰のR²に、今回のRmaxを指定する。
+    R2max = r,
+  # 線形回帰を使うことを指定する。
+    type = "lm",
+  # 二つの回帰に同じ分析標本を使い、計算を実行する。
+    data = sample_data)
+  # 今回のRmaxと二つの結果を、1行の表にする。
+  result_row &lt;- data.frame(Rmax = r,
+    # beta*の行から、補正後の係数を取り出す。
+    adjusted = fit_beta$Value[fit_beta$Name == "beta*"],
+    # delta*の行から、係数ゼロに対応するδを取り出す。
+    delta_zero = fit_delta$Value[fit_delta$Name == "delta*"])
+  # 今回の1行を、これまでの結果の表に追加する。
+  results &lt;- rbind(results, result_row)
+# このRmaxでの処理を終え、次の値があれば繰り返す。
+}
+# 四つの設定と結果を小数第3位まで表示する。
+round(results, 3)
+# 横軸をRmax、縦軸を補正後の係数として、青い点と線で描く。
+plot(results$Rmax, results$adjusted, type = "b", pch = 19, col = "#2a6f97",
+  # 横軸と縦軸に名前を付け、係数の単位が万円であることを示す。
+  xlab = "Rmax", ylab = "Adjusted coefficient (10,000 yen)",
+  # 係数ゼロも表示範囲に含める。
+  ylim = c(0, 6))
+# 係数ゼロの位置に灰色の破線を引く。
+abline(h = 0, lty = 2, col = "gray50")
+# 別の図で、横軸をRmax、縦軸をゼロに対応するδにする。
+plot(results$Rmax, results$delta_zero, type = "b", pch = 19, col = "#ee6c4d",
+  # 軸名を付け、δの表示範囲に0を含める。
+  xlab = "Rmax", ylab = "delta for beta = 0", ylim = c(0, 12))
+# 選択の強さの比較基準となるδ=1の位置に、灰色の破線を引く。
+abline(h = 1, lty = 2, col = "gray50")</textarea>
+<script class="r-check" type="text/plain">nrow(results) == 4 && max(abs(results$Rmax - c(.39,.50,.70,1))) < 1e-8 && max(abs(results$adjusted - c(5.128905,4.796649,4.189970,3.273760))) < 1e-5 && max(abs(results$delta_zero - c(10.761241,6.539223,3.816657,2.349412))) < 1e-5</script><div class="r-cell__actions"><button class="button run-button" disabled="" type="button">実行する</button><button class="button button--quiet restore-button" type="button">元に戻す</button></div><div class="r-output" hidden=""><div class="r-output__label">OUTPUT</div><pre class="check-output" hidden=""></pre><pre aria-live="polite" class="text-output"></pre><div class="plot-output"></div></div></div><div class="interpretation"><strong>結果の解釈</strong><p>Rmaxを0.39から1.00へ変えると、補正後の係数は約5.129から3.274万円、ゼロに対応するδは約10.761から2.349へ変わる。いずれも指定したモデルと仮定のもとでの結果である。</p></div></article>
+</section>
+<section class="content-section" data-flow-section="summary" id="summary"><h2>計算方法・仮定・結果を報告する</h2>
+<article class="concept-slide concept-slide--compact" id="report-example"><div class="slide-kicker">R GUIDE</div><h3>パターンAの報告例</h3><blockquote class="report-example">教育用の職業訓練データ2,000人について、参加後の月収（万円）を参加の有無に回帰した。同じ標本で参加前の月収と職歴を追加すると、参加の係数は6.0から5.4へ、R²は0.10から0.30へ変化した。<br/><br/>robomit 1.0.7のo_beta()を用い、δ＝1、Rmax＝0.70と設定した補正後の係数は約4.190万円だった。同じδでRmaxを0.39、0.50、0.70、1.00とすると、約5.129、4.797、4.190、3.274万円となった。<br/><br/>o_delta()で目標係数を0、Rmaxを0.70と指定すると、対応するδは約3.817だった。<br/><br/>δ＝1は比較の基準として、Rmaxは複数の想定で比較した。これらはデータで確認された事実ではない。参加前の所得と職歴だけで意欲などを十分に捉えられるかは検討が必要であり、指定した仮定のもとでの感度分析として解釈する。</blockquote><p>実証研究では、観察属性の情報量や結果の測定について、設定の根拠を説明する。パッケージの版は自分が使ったものを記録する。一般的な計算では、係数をゼロにするδと符号が保たれる範囲は同じ問いとは限らないため、δが1より大きいことだけで因果効果の符号を断定しない。</p></article>
+<article class="concept-slide concept-slide--compact" id="report-task"><div class="slide-kicker">WRITING</div><h3>変更した設定と結果を報告する</h3><p>S01で自分が指定したRmaxを一つ選び、使用したデータ・回帰・関数・δ・Rmaxと、補正後の係数、係数ゼロに対応するδを文章で報告する。S02の他の設定との比較を加える。</p><p>Rmaxは練習用の設定であること、その値を置く根拠として実際の研究なら何を確認する必要があるかも記す。文章は自動採点しない。</p><label for="report-notes"><strong>報告メモ（このブラウザに自動保存）</strong></label><textarea class="report-notes" id="report-notes" placeholder="対象と回帰：
+四つの数値：
+補正後の係数と仮定：
+ゼロになるδと固定したRmax：
+設定の根拠・限界：" rows="12"></textarea><div class="report-actions"><button class="button" id="download-report" type="button">メモをテキストで保存</button><span aria-live="polite" id="report-save-status" role="status"></span></div><p>メモは送信されない。端末を変更する前にテキストで保存する。</p></article>
+<article class="concept-slide concept-slide--compact" id="references"><div class="slide-kicker">SOURCES</div><h3>参考資料</h3><ul><li><a href="https://jungoto01.github.io/econometrics-2026-summer-lab/oster/references/13_coefficient_stability_theory.pdf">第13回：回帰分析と未観察の交絡 理論編（PDF）</a></li><li><a href="https://doi.org/10.1080/07350015.2016.1227711">Oster (2019), Unobservable Selection and Coefficient Stability: Theory and Evidence</a>（<a href="https://emilyoster.net/wp-content/uploads/UnobservableSelectionandCoefficientStabilityTheoryandEvidence.pdf">著者公開版</a>）</li><li><a href="https://cran.r-universe.dev/robomit/doc/manual.html">robomitの公式マニュアル</a>：o_beta、o_delta</li><li><a href="https://github.com/cran/robomit/blob/master/R/robomit_functions.R">robomitの公開ソース</a>：計算と解の選択</li><li><a href="https://arxiv.org/abs/2208.00552">Masten and Poirier, The Effect of Omitted Variables on the Sign of Regression Coefficients</a></li><li><a href="https://docs.r-wasm.org/webr/latest/">webR公式資料</a></li></ul><p>教材データの生成方法と実行検証の手順は、作成者用READMEに記録している。</p></article>
+</section></div></div></main><footer class="site-footer">計量経済学の応用と実践 · 第14回 · Coefficient stability browser lab</footer><script src="app.js" type="module"></script></body></html>
+
